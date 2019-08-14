@@ -1,0 +1,163 @@
+<style lang="less">
+.container {
+  .bg {
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-size: 100% 100%;
+    z-index: -1;
+  }
+
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    padding: 80rpx 40rpx 80rpx 40rpx;
+  }
+
+  .login-panel{
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      box-sizing: border-box;
+      align-items: center;
+      justify-content: center;
+
+      .input-line{
+          display: flex;
+          flex-direction: row;
+          width: 100%;
+          box-sizing: border-box;
+          text-align: center;
+          align-items: center;
+          justify-content: center;
+        
+          .left{
+            background:rgba(255,255,255,1);
+            opacity:0.8;
+            border-radius:20rpx 0px 0px 20rpx;
+            padding: 20rpx;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .input{
+            border: 2rpx solid rgba(255, 255, 255, 0.8);
+            padding: 20rpx;
+            border-radius:0 20rpx 20rpx 0;
+            width: 70%;
+            margin-left: 2rpx;
+          }
+      }
+
+      .login-btn{
+          width: 80%;
+          text-align: center;
+          font-size: 40rpx;
+          background-color: #FFFFFF;
+          color: #FCD719;
+          font-weight: bold;
+          border-radius:34rpx;
+          padding: 10rpx;
+      }
+
+      .login-btn:active{
+          background-color: rgba(255, 255, 255, 0.8);
+      }
+  }
+}
+</style>
+<template>
+    <view class="container">
+        <image src="../../../images/login_bg.png" class="bg" mode="asceptFit" />
+        <view class="main-content" style="margin-top:{{top}}px">
+            <text style="color:#1A1A1A;font-size:36rpx;">兰州大学智能物业信息系统</text>
+            <text style="color:#1A1A1A;font-size:48rpx;margin-top:20rpx;">巡检系统</text>
+            <view style="position:relative;margin-top:20rpx;">
+                <image src="../../../images/logo.png" mode="widthFix" class="icon-150" style="position: absolute;left:10rpx;top:10rpx"/>
+                <image src="../../../images/logobg.png" mode="widthFix" class="icon-170" />
+            </view>
+            <text style="color:#1A1A1A;font-size:42rpx;margin-top:20rpx;">{{userType}}</text>
+            <view class="login-panel" style="margin-top:80rpx;">
+                <view class="input-line">
+                    <view class="left">
+                        <image src="../../../images/ic_account.png" class="icon-48" mode="asceptFit"/>
+                    </view>
+                    <input class="input" placeholder="请输入用户名" placeholder-style="color:#1A1A1A"/>
+                </view>
+                <view class="input-line" style="margin-top:40rpx;">
+                    <view class="left">
+                        <image src="../../../images/ic_pwd.png" class="icon-48" mode="asceptFit"/>
+                    </view>
+                    <input class="input" placeholder="请输入密码" password="true" placeholder-style="color:#1A1A1A"/>
+                </view>
+                <view style="text-align:end;padding-right:40rpx;margin-top:20rpx;color:#FF1D1D;width:100%;">
+                    <text>忘记密码?</text>
+                </view>
+
+                <view class="login-btn" style="margin-top:80rpx;">
+                    <text>登 录</text>
+                </view>
+            </view>
+        </view>
+    </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class Index extends wepy.page {
+  config = {
+    navigationBarTitleText: '用户报修系统',
+    navigationBarBackgroundColor: '#f5f7f9',
+    navigationBarTextStyle: 'black',
+    navigationStyle: 'custom',
+    disableScroll: true,
+    usingComponents: {
+      'i-icon': '../iview/icon/index',
+      'i-input': '../iview/input/index',
+      'i-button': '../iview/button/index'
+    }
+  };
+
+  data = {
+    top: 0,
+    userType:''
+  };
+
+  computed = {};
+
+  methods = {};
+  watch = {};
+
+  events = {};
+
+  onLoad(query) {
+    switch(query.userType){
+        case "weixiuren":
+          this.userType  ="维修工";
+          break;
+        case "xunjianren":
+          this.userType  ="巡检员";
+          break;
+        case "fuzeren":
+          this.userType  ="区域负责人";
+          break;
+    }
+    
+    //适配自定义navigationBar的页面
+    wx.getSystemInfo({
+      success: res => {
+        // console.log(res);
+        this.top = res.statusBarHeight + 44;
+      }
+    });
+  }
+}
+</script>

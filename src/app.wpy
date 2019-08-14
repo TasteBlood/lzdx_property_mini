@@ -1,0 +1,89 @@
+<style lang="less">
+@font-face {
+  name:"myFont";
+  font-family: "MicrosoftYaHei";
+  src: url("MicrosoftYaHei");
+}
+page{
+  font-family: myFont;
+
+  .icon-52{
+    width: 52rpx;
+    height: 52rpx;
+  }
+
+  .icon-48{
+    width: 48rpx;
+    height: 48rpx;
+  }
+
+  .icon-64{
+    width: 64rpx;
+    height: 64rpx;;
+  }
+
+  .icon-150{
+    width:150rpx;
+    height:150rpx;
+  }
+
+  .icon-170{
+    width: 170rpx;
+    height: 170rpx;
+  }
+}
+
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  color: transparent;
+}
+</style>
+
+<script>
+import wepy from 'wepy'
+import 'wepy-async-function'
+
+export default class extends wepy.app {
+  config = {
+    pages: [
+      'pages/index',
+      'pages/common_user_main',
+      'pages/admin_login',
+      'pages/main'
+    ],
+    window: {
+      backgroundTextStyle: 'dark',
+      navigationBarBackgroundColor: '#2d8cf0',
+      navigationBarTitleText: '兰大巡检',
+      navigationBarTextStyle: 'white'
+    }
+  }
+
+  globalData = {
+
+  }
+
+  constructor () {
+    super()
+  }
+
+  onLaunch() {
+
+  }
+
+  getUserInfo(cb) {
+    const that = this
+    if (this.globalData.userInfo) {
+      return this.globalData.userInfo
+    }
+    wepy.getUserInfo({
+      success (res) {
+        that.globalData.userInfo = res.userInfo
+        cb && cb(res.userInfo)
+      }
+    })
+  }
+}
+</script>

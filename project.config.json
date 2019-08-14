@@ -1,0 +1,17 @@
+{
+	"description": "A WePY project",
+	"setting": {
+		"urlCheck": true,
+		"es6": false,
+		"postcss": false,
+		"minified": false,
+		"newFeature": true,
+		"autoAudits": false
+	},
+	"compileType": "miniprogram",
+	"appid": "wxd4f62fd06bdcb09c",
+	"projectname": "wepy-iview",
+	"miniprogramRoot": "dist/",
+	"libVersion": "2.4.1",
+	"condition": {}
+}
