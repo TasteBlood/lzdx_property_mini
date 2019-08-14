@@ -1,0 +1,254 @@
+<style lang="less">
+.container {
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f7f9;
+
+  .tabs {
+    background-color: white;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+
+    .tab {
+      padding: 20rpx;
+      font-size: 28rpx;
+      color: #919191;
+      text-align: center;
+      width: 20%;
+    }
+    .tab:active {
+      background-color: #f5f7f9;
+    }
+    .tab.active {
+      border-bottom: 4rpx solid #ffde30;
+      color: #515151;
+    }
+  }
+
+  .list{
+      display: flex;
+      flex-direction: column;
+      padding: 10rpx;
+
+      .list-item{
+        padding: 15rpx;
+        display: flex;
+        flex-direction: row;
+        background-color: white;
+        border-radius: 2rpx;
+        justify-content: space-between;
+        box-sizing: border-box;
+        box-shadow: 0px 0px 8rpx 0px rgba(209,209,209,1);
+        align-items: center;
+        margin-top: 15rpx;
+
+        .pic{
+          width: 200rpx;
+          height: 150rpx;
+        }
+
+        .pic.border{
+          border: 4rpx solid #ffde30;
+        }
+
+        .content{
+          width: 51%;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 10rpx;
+          box-sizing: border-box;
+
+          .title{
+            color: #414141;
+            font-size: 30rpx;
+          }
+
+          .no{
+            color: #717171;
+            font-size: 28rpx;
+          }
+
+          .desc{
+            color: #515151;
+            font-size: 28rpx;
+          }
+
+          .people{
+            font-size: 26rpx;
+            margin-top: 2rpx;
+            color: #717171;
+          }
+        }
+        .btn-info{
+          padding: 10rpx;
+          border-radius: 8rpx;
+          background-color: #ffde30;
+          font-size: 28rpx;
+          height: 32rpx;
+          color: #414141;
+          text-align: center;
+          line-height: 32rpx;
+          box-shadow: 0px 4rpx 8rpx 0px rgba(198,210,222,1);
+        }
+
+        .btn-info:active{
+          background-color: #ffde30;
+          opacity: 0.8;
+        }
+      }
+
+      .list-item:first-child{
+        margin-top: 0;
+      }
+  }
+}
+</style>
+<template>
+    <view class="container">
+        <view class="tabs">
+            <view class="tab {{currentIndex===0?'active':''}}" bindtap="onTabClick" data-index="0">
+                巡检日志
+            </view>
+            <view class="tab {{currentIndex===1?'active':''}}" bindtap="onTabClick" data-index="1">
+                待处理
+            </view>
+            <view class="tab {{currentIndex===2?'active':''}}" bindtap="onTabClick" data-index="2">
+                被投诉
+            </view>
+        </view>
+        <swiper style="margin-top:2px;height:{{height}}px" current="{{currentIndex}}" bindchange="onSwiperChange">
+            <swiper-item>
+                <scroll-view scroll-y scroll-with-animation style="height:{{height}}px" @scroll="onScroll">
+                    <view class="list">
+                        <view class="list-item" wx:for="{{testNum}}" wx:key="{{index}}">
+                            <image src="{{items[0].src}}" class="pic" lazy-load/>
+                            <view class="content">
+                              <text class="title single-line">城关西区垃圾场冯绍路巡检报告</text>
+                              <text class="no single-line">xj0001</text>
+                              <text class="desc single-line">2018年12月30日哈哈哈6767676767</text>
+                              <view class="people">
+                                <text>巡检员:</text>
+                                <text>许婧姝</text>
+                              </view>
+                            </view>
+                            <view class="btn-info">查看详情</view>
+                        </view>
+                    </view>
+                </scroll-view>
+            </swiper-item>
+            <swiper-item>
+                <scroll-view scroll-y scroll-with-animation style="height:{{height}}px">
+                    <view class="list">
+                        <view class="list-item" wx:for="{{testNum}}" wx:key="{{index}}">
+                            <image src="{{items[0].src}}" class="pic" lazy-load/>
+                            <view class="content">
+                              <text class="title single-line">城关西区垃圾场冯绍路巡检报告</text>
+                              <text class="no single-line">xj0001</text>
+                              <text class="desc single-line">2018年12月30日哈哈哈6767676767</text>
+                              <view class="people">
+                                <text>巡检员:</text>
+                                <text>许婧姝</text>
+                              </view>
+                            </view>
+                            <view class="btn-info" style="width:100rpx;">申诉</view>
+                        </view>
+                    </view>
+                </scroll-view>
+            </swiper-item>
+            <swiper-item>
+                <scroll-view scroll-y scroll-with-animation style="height:{{height}}px">
+                    <view class="list">
+                        <view class="list-item" wx:for="{{testNum}}" wx:key="{{index}}">
+                            <image src="{{items[0].src}}" class="pic border" lazy-load/>
+                            <view class="content">
+                              <text class="title single-line">城关西区垃圾场冯绍路巡检报告</text>
+                              <text class="no single-line" style="margin-top:5rpx">xj0001</text>
+                              <text class="desc single-line" style="margin-top:5rpx">2018年12月30日哈哈哈6767676767</text>
+                            </view>
+                            <view class="btn-info">查看详情</view>
+                        </view>
+                    </view>
+                </scroll-view>
+            </swiper-item>
+        </swiper>
+    </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class Home extends wepy.page {
+  config = {
+    navigationBarTitleText: '巡检系统',
+    navigationBarBackgroundColor: '#FFDE30',
+    navigationBarTextStyle: 'black',
+    disableScroll: true,
+    usingComponents: {}
+  };
+
+  data = {
+    currentIndex: 0,
+    height:0,
+    testNum:20,
+    items: [
+      {
+        src:
+          'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1565782412669&di=61c110f88ed087364532e4c218bbbe0b&imgtype=0&src=http%3A%2F%2Fimg.sccnn.com%2Fbimg%2F326%2F203.jpg'
+      },
+      {
+        src:
+          'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1565782733187&di=c2c89f99a22059f824ede044700a6ad2&imgtype=0&src=http%3A%2F%2Fww2.sinaimg.cn%2Flarge%2F005EpPx2gw1ewc7f0moggj30m80etacm.jpg'
+      },
+      {
+        src:
+          'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1565782733186&di=03ebe6525c64c1fd0a549754010670b4&imgtype=0&src=http%3A%2F%2Fpic36.nipic.com%2F20131213%2F8098773_011216750151_2.jpg'
+      }
+    ]
+  };
+
+  computed = {};
+
+  methods = {
+    // on tab click event
+    onTabClick(e) {
+      //console.log(e)
+      this.currentIndex = Number.parseInt(e.currentTarget.dataset.index);
+    },
+    // on swiper change
+    onSwiperChange(e) {
+      this.currentIndex = e.detail.current;
+    },
+    // on scroll
+    onScroll(e) {
+      console.log(e);
+    },
+  };
+  watch = {};
+
+  events = {};
+
+  initScrollViewHeight(){
+        var that=this;
+        //console.log(that)
+        wx.getSystemInfo({
+            success: function (res) {
+            wx.createSelectorQuery().select('.tabs').boundingClientRect(function (rect) {
+                // console.log(res);
+                // console.log(rect);
+                const height = res.windowHeight - rect.height;
+                that.height = height;
+                // set data in async method needs to invoke apply() method
+                that.$apply();
+                //console.log(that.height)
+                }).exec();
+            }
+        });
+  };
+
+  async onLoad() {
+      this.initScrollViewHeight();
+      
+  }
+}
+</script>

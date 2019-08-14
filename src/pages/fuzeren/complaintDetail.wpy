@@ -1,0 +1,64 @@
+<style lang="less" scoped>
+    .container{
+        display: flex;
+        flex-direction: column;
+
+        .area{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 15rpx;
+            background-color: white;
+            font-size: 30rpx;
+
+            .title{
+                width: 200rpx;
+                color: #717171;
+            }
+
+            .content{
+                
+            }
+        }
+    }
+</style>
+
+<template>
+    <view class="container">
+        <view class="area">
+            <text class="title">投诉区域:</text>
+            <text>城关区垃圾场焚烧炉无人看管你妹的</text>
+        </view>
+        <view class="area" style="margin-top:20rpx;">
+            <text class="title">投诉内容:</text>
+        </view>
+        <view style="padding:15rpx;background-color:white;font-size:30rpx;">
+            城关区垃圾场焚烧炉无人看管城关区垃圾场焚烧炉无人看管城关区垃圾场焚烧炉无人看管
+        </view>
+        <text style="font-size:30rpx;color:#F46924;margin:15rpx;">附图:</text>
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class ComplaintDetail extends wepy.page{
+    config = {
+        navigationBarTitleText: '投诉详情',
+        navigationBarBackgroundColor: '#FFDE30',
+        navigationBarTextStyle: 'black',
+        disableScroll: false,
+        usingComponents: {
+        }
+    };
+
+    data = {};
+
+    methods = {};
+
+    computed = {};
+
+    onLoad(){
+
+    }
+}
+</script>
+
