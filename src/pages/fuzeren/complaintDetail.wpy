@@ -36,10 +36,15 @@
             城关区垃圾场焚烧炉无人看管城关区垃圾场焚烧炉无人看管城关区垃圾场焚烧炉无人看管
         </view>
         <text style="font-size:30rpx;color:#F46924;margin:15rpx;">附图:</text>
+        <gridImage :resources="resources" deleteMode="true" @onItemClick.user="onItemClick"></gridImage>
+        <bigImage :url.sync="url" :show.sync="showBig" @onClose.user="onClose"></bigImage>
+        <!-- <imagePicker @onItemClick.user="onItemClick" @onImageChoose.user="onImageChoose"></imagePicker> -->
     </view>
 </template>
 <script>
-import wepy from 'wepy';
+import wepy from 'wepy'
+import GridImage from '../../components/gridImage'
+import BigImage from '../../components/bigImage'
 export default class ComplaintDetail extends wepy.page{
     config = {
         navigationBarTitleText: '投诉详情',
@@ -49,15 +54,40 @@ export default class ComplaintDetail extends wepy.page{
         usingComponents: {
         }
     };
+    components={
+        gridImage:GridImage,
+        bigImage:BigImage
+    };
 
-    data = {};
+    data = {
+        resources:[
+        ],
+        deleteMode:true,
+        showBig:false,
+        url:''
+    };
 
-    methods = {};
+    methods = {
+        onItemClick(e){
+            console.log(e);
+            this.showBig = true;
+            this.url = e;
+        },
+        onClose(){
+            this.showBig = false;
+            this.url = "";
+        },
+        onImageChoose(res){
+            console.log(res)
+        }
+    };
+
+    events = {
+    };
 
     computed = {};
-
     onLoad(){
-
+        //console.log(GridImage);
     }
 }
 </script>

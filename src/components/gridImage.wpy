@@ -1,0 +1,75 @@
+<style lang="less">
+    .gridview{
+        display: flex;
+        flex-direction: row;
+        padding: 0 20rpx 0 20rpx;
+        width: 100%;
+        box-sizing: border-box;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+
+        .item{
+            width: 30%;
+            height: 220rpx;
+            margin: 10rpx;
+            position: relative;
+
+            .image{
+                width: 100%;
+                height: 100%;
+            }
+
+            .delete{
+                position: absolute;
+                z-index: 1;
+                right: -10rpx;
+                top:-10rpx;
+                width: 40rpx;
+                height: 40rpx;
+                color: white;
+                background-color: red;
+                text-align: center;
+                line-height: 40rpx;
+                border-radius: 50%;
+                opacity: 0.8;
+            }
+        }
+    }
+</style>
+<template>
+    <view class="gridview">
+        <block wx:for="{{resources}}" wx:key="{{index}}">
+            <view class="item">
+                <image class="image" lazy-mode src="{{item}}" mode="aspectFill" @tap="onItemClick" data-src="{{item}}"/>
+                <text class="delete" wx:if="{{deleteMode}}">&#215;</text>
+            </view>
+        </block>
+    </view>
+</template>
+<script>
+import wepy from 'wepy'
+export default class GridImage extends wepy.component{
+    props = {
+        resources:{
+            default:null,
+            type:Array
+        },
+        deleteMode:{
+            default:false,
+            type:Boolean
+        }
+    };
+    data={
+    };
+    methods = {
+        onItemClick(e){
+            this.$emit('onItemClick',e.currentTarget.dataset.src);
+        }
+    };
+    onLoad(){
+        // console.log(this.deleteMode)
+        // console.log(this.resources)
+    }
+}
+</script>
