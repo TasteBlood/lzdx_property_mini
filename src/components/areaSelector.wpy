@@ -1,0 +1,178 @@
+<style lang="less" scoped>
+    .container{
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        z-index: 100;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+
+        .bg{
+            position: absolute;
+            left:0;
+            top:0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .selector{
+            width: 100%;
+            height: 40%;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background-color: #f1f1f1;
+
+            .content{
+                display: flex;
+                flex-direction: row;
+                height: 100%;
+                justify-content: space-between;
+
+                .list{
+                    width: 33%;
+                    overflow-y: scroll;
+
+                    .list-item{
+                        color:#919191;
+                        background-color: white;
+                        font-size: 30rpx;
+                        padding: 20rpx;
+                        border-bottom: 2rpx solid #f1f1f1;
+                        text-align: center;
+                    }
+
+                    .list-item:active{
+                        background-color: #f2f2f2;
+                    }
+
+                    .list-item.active{
+                        color: rgb(151, 221, 248);
+                    }
+                }
+            }
+        }
+    }
+
+    .container.hide{
+        display: none;
+    }
+</style>
+
+<template>
+    <view class="container {{show?'':'hide'}}">
+        <view class="bg"></view>
+        <view class="selector">
+            <view class="content">
+                <view class="list">
+                    <view wx:for="{{oneItems}}" @tap="onFirstItemClick" data-id="{{item.id}}" data-index="{{index}}" class="list-item {{index===firstIndex?'active':''}}"  wx:key="{{index}}">
+                        {{item.name}}
+                    </view>
+                </view>
+                <view class="list">
+                    <view wx:for="{{twoItems}}" @tap="onSecondItemClick" data-id="{{item.id}}" data-index="{{index}}" class="list-item {{index===secondIndex?'active':''}}"  wx:key="{{index}}">
+                        {{item.name}}
+                    </view>
+                </view>
+                <view class="list">
+                    <view wx:for="{{threeItems}}" @tap="onThirdItemClick" data-id="{{item.id}}" data-index="{{index}}" class="list-item {{index===thirdIndex?'active':''}}"  wx:key="{{index}}">
+                        {{item.title}}
+                    </view>
+                </view>
+            </view>
+            <view style="width:100%;border-bottom:2rpx solid #f1f1f1;"></view>
+            <view style="display:flex;background-color:white;padding:20rpx;flex-direction:row;justify-content:space-between;font-size:32rpx;">
+                <text style="color:#717171" @tap="onCancel">取消</text>
+                <text style="color:#2FBDF5" @tap="onOk">确定</text>
+            </view>
+        </view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy'
+import {getFirstArea,getSecondArea,getThirdArea} from '../utils/api'
+export default class AreaSelector extends wepy.component{
+    props = {
+        show:{
+            type:Boolean,
+            default:false
+        }
+    };
+    data = {
+        firstIndex:null,
+        secondIndex:null,
+        thirdIndex:null,
+        oneItems :[],
+        twoItems :[],
+        threeItems :[],
+
+        // business variable
+        ontItem:null,
+        twoItem:null,
+        threeItem:null
+    };
+    methods = {
+        onCancel(){
+            this.$emit('on-close')
+        },
+        onOk(){
+            this.$emit('onAreaChoose',this.ontItem,this.twoItem,this.threeItem)
+            this.$emit('on-close')
+        },
+        async onFirstItemClick(e){
+            let id = e.currentTarget.dataset.id
+            let index = e.currentTarget.dataset.index
+            if(this.firstIndex === index)
+                return;
+            this.twoItems = []
+            this.twoItem = null
+            this.threeItems = []
+            this.threeItem = null
+            this.secondIndex = null
+            this.thirdIndex = null
+            this.$apply()
+            this.firstIndex = index
+            this.ontItem = this.oneItems[index]
+            let res = await getSecondArea(id)
+            this.twoItems = res.info
+
+            this.$apply()
+        },
+        async onSecondItemClick(e){
+            let id = e.currentTarget.dataset.id
+            let index = e.currentTarget.dataset.index
+            if(this.secondIndex === index)
+                return;
+            this.threeItems = []
+            this.threeItem = null
+            this.thirdIndex = null
+            this.$apply()
+            this.secondIndex = index
+            this.twoItem = this.twoItems[index]
+            let res = await getThirdArea(id)
+            this.threeItems = res.info
+
+            this.$apply()
+        },
+        onThirdItemClick(e){
+            let id = e.currentTarget.dataset.id
+            let index = e.currentTarget.dataset.index
+            if(this.thirdIndex === index)
+                return;
+            this.thirdIndex = index
+            this.threeItem = this.threeItems[index]
+            this.$apply()
+        }
+    };
+    watch = {
+    };
+    async onLoad(){
+        let res = await getFirstArea()
+        this.oneItems = res.info
+        this.$apply()
+    }
+}
+</script>

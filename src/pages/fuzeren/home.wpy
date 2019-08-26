@@ -103,10 +103,23 @@
         margin-top: 0;
       }
   }
+  .header-info{
+    color: #515151;
+    margin: 20rpx;
+    font-size: 30rpx;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
 }
 </style>
 <template>
     <view class="container">
+        <view class="header-info">
+          <text>欢迎您，{{name}}</text>
+          <text @tap="logout">退出></text>
+        </view>
         <view class="tabs">
             <view class="tab {{currentIndex===0?'active':''}}" bindtap="onTabClick" data-index="0">
                 巡检日志
@@ -114,16 +127,16 @@
             <view class="tab {{currentIndex===1?'active':''}}" bindtap="onTabClick" data-index="1">
                 待处理
             </view>
-            <view class="tab {{currentIndex===2?'active':''}}" bindtap="onTabClick" data-index="2">
+            <!-- <view class="tab {{currentIndex===2?'active':''}}" bindtap="onTabClick" data-index="2">
                 被投诉
-            </view>
+            </view> -->
         </view>
         <swiper style="margin-top:2px;height:{{height}}px" current="{{currentIndex}}" bindchange="onSwiperChange">
             <swiper-item>
                 <scroll-view scroll-y scroll-with-animation style="height:{{height}}px" @scroll="onScroll">
                     <view class="list">
                         <view class="list-item" wx:for="{{testNum}}" wx:key="{{index}}">
-                            <image src="{{items[0].src}}" class="pic" lazy-load/>
+                            <image src="{{items[0].src}}" class="pic" lazy-load mode="asceptFill"/>
                             <view class="content">
                               <text class="title single-line">城关西区垃圾场冯绍路巡检报告</text>
                               <text class="no single-line">xj0001</text>
@@ -142,7 +155,7 @@
                 <scroll-view scroll-y scroll-with-animation style="height:{{height}}px">
                     <view class="list">
                         <view class="list-item" wx:for="{{testNum}}" wx:key="{{index}}">
-                            <image src="{{items[0].src}}" class="pic" lazy-load/>
+                            <image src="{{items[0].src}}" class="pic" lazy-load mode="asceptFill"/>
                             <view class="content">
                               <text class="title single-line">城关西区垃圾场冯绍路巡检报告</text>
                               <text class="no single-line">xj0001</text>
@@ -157,7 +170,7 @@
                     </view>
                 </scroll-view>
             </swiper-item>
-            <swiper-item>
+            <!-- <swiper-item>
                 <scroll-view scroll-y scroll-with-animation style="height:{{height}}px">
                     <view class="list">
                         <view class="list-item" wx:for="{{testNum}}" wx:key="{{index}}">
@@ -171,7 +184,7 @@
                         </view>
                     </view>
                 </scroll-view>
-            </swiper-item>
+            </swiper-item> -->
         </swiper>
     </view>
 </template>
@@ -204,7 +217,8 @@ export default class Home extends wepy.page {
         src:
           'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1565782733186&di=03ebe6525c64c1fd0a549754010670b4&imgtype=0&src=http%3A%2F%2Fpic36.nipic.com%2F20131213%2F8098773_011216750151_2.jpg'
       }
-    ]
+    ],
+    name:'',
   };
 
   computed = {};
@@ -219,10 +233,21 @@ export default class Home extends wepy.page {
     onSwiperChange(e) {
       this.currentIndex = e.detail.current;
     },
-    // on scroll
-    onScroll(e) {
-      console.log(e);
-    },
+    logout(){
+      wx.showModal({
+            title: '提示',
+            content: '确定退出吗？',
+            success:(e)=>{
+                if(e.confirm){
+                  wx.removeStorageSync('login_user_info')
+                  wx.removeStorageSync('login_code')
+                    wx.redirectTo({
+                        url: '../index'
+                    })
+                }
+            }
+        })
+    }
   };
   watch = {};
 
@@ -248,7 +273,8 @@ export default class Home extends wepy.page {
 
   async onLoad() {
       this.initScrollViewHeight();
-      
+      let user = wx.getStorageSync('login_user_info')
+      this.name = user.name;
   }
 }
 </script>

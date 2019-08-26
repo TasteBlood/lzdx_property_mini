@@ -12,12 +12,8 @@
             font-size: 30rpx;
 
             .title{
-                width: 200rpx;
+                width: 150rpx;
                 color: #717171;
-            }
-
-            .content{
-                
             }
         }
     }
@@ -45,6 +41,7 @@
 import wepy from 'wepy'
 import GridImage from '../../components/gridImage'
 import BigImage from '../../components/bigImage'
+
 export default class ComplaintDetail extends wepy.page{
     config = {
         navigationBarTitleText: '投诉详情',

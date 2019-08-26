@@ -118,9 +118,6 @@ export default class Index extends wepy.page {
     navigationBarTextStyle: 'black',
     disableScroll: true,
     usingComponents: {
-      'i-icon': '../iview/icon/index',
-      'i-input': '../iview/input/index',
-      'i-button': '../iview/button/index'
     }
   };
 
@@ -129,29 +126,14 @@ export default class Index extends wepy.page {
   computed = {};
 
   methods = {
-    getUserInfo(e) {
-      console.log(e);
-      if ('getUserInfo:ok' === e.detail.errMsg) {
-        wx.showToast({
-          icon: 'none',
-          title: '去登录了'
-        });
-        wx.navigateTo({
-          url: 'main'
-        });
-      } else {
-        wx.showToast({
-          icon: 'none',
-          title: '你已拒绝授权'
-        });
-      }
-    },
     logout(){
         wx.showModal({
             title: '提示',
             content: '确定退出吗？',
             success:(e)=>{
                 if(e.confirm){
+                  wx.removeStorageSync('login_user_info')
+                  wx.removeStorageSync('login_code')
                     wx.redirectTo({
                         url: 'index'
                     })

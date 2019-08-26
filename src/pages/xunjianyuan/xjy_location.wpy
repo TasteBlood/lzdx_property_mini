@@ -1,0 +1,220 @@
+<style lang="less" scoped>
+.container {
+  display: flex;
+  flex-direction: column;
+
+  .location-info {
+    font-size: 30rpx;
+    color: #414141;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .input{
+      width: 80%;
+  }
+
+  .textarea{
+      width: 90%;
+      background-color: white;
+      border: 2rpx solid #f1f1f1;
+      margin-left: 20rpx;
+      margin-right: 20rpx;
+      padding: 10rpx;
+      color:#515151;
+      font-size: 30rpx;
+  }
+
+  .btn-submit{
+      width: 60%;
+      background-color: #FFDE30;
+      margin-top: 20rpx;
+      margin-bottom: 20rpx;
+      font-size: 32rpx;
+      color:#414141;
+  }
+
+  .line{
+      border: 1rpx solid #f1f1f1;
+      margin-left: 20rpx;
+  }
+
+  .btn-submit:active{
+      background-color: rgb(253, 232, 124);
+  }
+
+  .btn-submit:after{
+      border:none;
+  }
+}
+</style>
+<template>
+    <view class="container">
+        <view style="padding:20rpx;background-color: white;">
+            <view class="location-info">
+                <text style="color:#717171;width:150rpx;">当前区域:</text>
+                <text wx:if="{{currentArea}}">{{one.name}}/{{two.name}}/{{currentArea.title}}</text>
+            </view>
+            <view class="location-info" style="margin-top:10rpx;">
+                <text style="color:#717171;width:150rpx;">区块编号:</text>
+                <text>{{currentArea.num}}</text>
+            </view>
+            <view class="location-info" style="margin-top:10rpx;">
+                <text style="color:#717171;width:120rpx;">负责人:</text>
+                <text>
+                    <block wx:for="{{currentPerson}}" wx:key="{{index}}">{{item.name}}、</block>
+                </text>
+            </view>
+        </view>
+        <view style="font-size:30rpx;color:#2FBDF5;text-align:right;padding:10rpx 20rpx 10rpx 20rpx;" @tap="onAreaChooseOpen">选择区域?</view>
+        
+        <view style="background-color:white;padding:20rpx 20rpx 20rpx 20rpx;display:flex;flex-direction:row;align-items:center;font-size:30rpx;">
+            <text style="color:#717171;width:150rpx;">巡检标题:</text>
+            <input class="input" placeholder="请输入标题" placeholder-style="color:#919191"/>
+        </view>
+        <view class="line"></view>
+        <view style="background-color:white;padding:20rpx 20rpx 20rpx 20rpx;display:flex;flex-direction:row;align-items:center;font-size:30rpx;">
+            <text style="color:#717171;width:150rpx;">巡检类型:</text>
+            <picker style="color:#515151;font-size:30rpx;width:80%" bindchange="onPickerChange" value="{{index}}" range-key="name" range="{{checkType}}">
+                <view style="" wx:if="{{checkIndex}}">{{checkType[checkIndex].name}}</view>
+                <view style="" wx:else>请选择巡检类型</view>
+            </picker>
+            <image src="../../images/next.png" class="icon-48"></image>
+        </view>
+
+        <view style="font-size:30rpx;color:#414141;text-align:left;padding:20rpx;">图片信息</view>
+        <imagePicker @onItemClick.user="onPicItemClick" @onImageChoose.user="onPicChoose"></imagePicker>
+
+        <view style="font-size:30rpx;color:#414141;text-align:left;padding:20rpx;">问题描述</view>
+        <textarea class="textarea" placeholder="请详述问题/状况" style="height:200rpx;">
+
+        </textarea>
+
+        <view style="font-size:30rpx;color:#414141;text-align:left;padding:20rpx;">处罚建议</view>
+        <textarea class="textarea" placeholder="请输入处罚建议" style="height:100rpx;">
+
+        </textarea>
+
+        <areaSelector :show.sync="showAreaPicker" @on-close.user="onAreaClose" @onAreaChoose.user="onAreaChoose"></areaSelector>
+
+        <button class="btn-submit" @tap="onSave">提交</button>
+        
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+import {UploadMulti} from '../../utils/uploader';
+import {getReportType,getLocationArea,getAreaLeader} from '../../utils/api';
+import ImagePicker from '../../components/imagePicker';
+import AreaSelector from '../../components/areaSelector';
+export default class XJYLocation extends wepy.page {
+  config = {
+    navigationBarTitleText: '定位巡检',
+    navigationBarBackgroundColor: '#FFDE30',
+    navigationBarTextStyle: 'black',
+    disableScroll: false,
+    usingComponents: {}
+  };
+
+  data = {
+      showAreaPicker:false,
+      one:null,
+      two:null,
+      currentArea:null,
+      currentPerson:[],
+      checkType:[],
+      checkIndex:null,
+      images:[],
+      //business variable
+      showBig:false,
+      currenUrl:null
+  };
+
+  components = {
+      imagePicker:ImagePicker,
+      areaSelector:AreaSelector
+  };
+
+  methods = {
+      onAreaClose(){
+          this.showAreaPicker = false;
+      },
+      async onAreaChoose(one,two,three){
+          //console.log(one,two,three)
+          this.one = one
+          this.two = two
+          this.currentArea = three
+          if(!three){
+              this.currentPerson = []
+              wx.showToast({
+                  title: '请选择三级区域',
+                  icon: 'none'
+              })
+              return;
+          }
+
+          // load area leader info
+          let res = await getAreaLeader(three.id)
+          this.currentPerson = res.info.chaUser
+          this.$apply()
+          //console.log(res)
+      },
+      onAreaChooseOpen(e){
+          this.showAreaPicker = true;
+      },
+      onPickerChange(e){
+          //console.log(e)
+          this.checkIndex = e.detail.value;
+          this.$apply();
+      },
+      onPicItemClick(e){
+
+      },
+      onPicChoose(e){
+          console.log(e)
+          this.images = e
+      },
+      onSave(){
+          console.log('onsave...')
+          UploadMulti(this.images,
+          (res)=>{
+              console.log(res)
+          },
+          (e)=>{
+              console.log(e)
+          })
+      }
+  };
+
+  async onLoad() {
+      //start location
+      wx.getLocation({
+          type: 'wgs84',
+          success: async function(res) {
+              var latitude = res.latitude
+              var longitude = res.longitude
+              console.log(res);
+              res = await getLocationArea(latitude,longitude)
+              if(!res.id){
+                  //未定位区域
+                  wx.showToast({
+                      title: '暂无法定位到区域信息，请手动选择',
+                      icon: 'none'
+                  })
+              }else{
+                  //定位到区域
+              }
+              console.log(res)
+          },
+      });
+
+      // get report type
+      let res = await getReportType()
+      this.checkType = res.info
+      this.$apply();
+  }
+
+  onReady() {}
+}
+</script>

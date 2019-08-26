@@ -1,0 +1,142 @@
+<style lang="less" scoped>
+    .container{
+        box-sizing: border-box;
+        background-color: white;
+        padding: 40rpx;
+
+        .input-line{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 30rpx;
+            font-size: 30rpx;
+
+            .label{
+                padding: 15rpx 20rpx 15rpx 20rpx;
+                border-radius: 10rpx 0 0 10rpx;
+                background-color: #FADA33;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .input{
+                border: 2rpx solid #FADA33;
+                width: 60%;
+                padding: 14rpx;
+                color: #515151;
+                border-radius: 0 10rpx 10rpx 0;
+            }
+
+            .btn-send{
+                padding: 0 20rpx 0 20rpx;
+                height: 65rpx;
+                line-height: 65rpx;
+                background-color: #FADA33;
+                color: #515151;
+                border-radius: 10rpx;
+                font-size: 26rpx;
+                text-align: center;
+            }
+
+            .btn-send:active{
+                background-color: #F2D232;
+            }
+
+            .btn-send.disable{
+                background-color: #d1d1d1;
+                color: #515151;
+            }
+
+        }
+
+        .input-line:last-child{
+            margin-bottom: 0;
+        }
+
+        .btn-save{
+            border: none;
+            border-radius: 36rpx;
+            font-size: 32rpx;
+            background-color:#FADA33;
+            color: white;
+            margin-top: 40rpx;
+            box-shadow:0 2rpx 5rpx 0px rgba(255,218,26,1);
+        }
+
+        .btn-save::after{
+            border: none;
+        }
+
+        .btn-save:active{
+            background-color: #F2D232;
+        }
+    }
+</style>
+<template>
+    <view class="container">
+        <view class="input-line">
+            <view class="label">
+                <image src="../../../images/ic_account.png" mode="widthFix" class="icon-48"></image>
+            </view>
+            <input class="input" placeholder="请输入手机号" placeholder-style="color:#515151" type="number"/>
+        </view>
+
+        <view class="input-line">
+            <view class="label">
+                <image src="../../../images/ic_account.png" mode="widthFix" class="icon-48"></image>
+            </view>
+            <input class="input" placeholder="图形验证码" placeholder-style="color:#515151" style="width:30%" type="number"/>
+            <image src="{{codeUrl}}" style="width:180rpx;height:60rpx;margin-left:20rpx;" mode="asceptFill"></image>
+            <text style="margin-left:20rpx;color:#515151;font-size:28rpx;" @tap="onRefreshClick">换一张?</text>
+        </view>
+
+        <view class="input-line">
+            <view class="label">
+                <image src="../../../images/ic_account.png" mode="widthFix" class="icon-48"></image>
+            </view>
+            <input class="input" placeholder="短信验证码" placeholder-style="color:#515151" style="width:30%" type="number"/>
+            <view class="btn-send" style="margin-left:20rpx;">发送验证码</view>
+        </view>
+
+        <view class="input-line">
+            <view class="label">
+                <image src="../../../images/ic_account.png" mode="widthFix" class="icon-48"></image>
+            </view>
+            <input class="input" placeholder="请输入新密码" placeholder-style="color:#515151" password="true"/>
+        </view>
+
+        <view class="input-line">
+            <view class="label">
+                <image src="../../../images/ic_account.png" mode="widthFix" class="icon-48"></image>
+            </view>
+            <input class="input" placeholder="请再次输入新密码" placeholder-style="color:#515151" password="true"/>
+        </view>
+
+        <button class="btn-save">确定修改</button>
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+import {HOST} from '../utils/http.js';
+export default class ForgetPwd extends wepy.page {
+  config = {
+    navigationBarTitleText: '忘记密码',
+    navigationBarBackgroundColor: 'white',
+    navigationBarTextStyle: 'black',
+    disableScroll: true 
+  };
+  data = {
+      codeUrl:`${HOST}base/getImgCode?test=${new Date().getTime()}`,
+  };
+  methods = {
+      onRefreshClick(){
+          this.codeUrl = `${HOST}base/getImgCode?test=${new Date().getTime()}`;
+      }
+  };
+
+  onLoad() {}
+}
+</script>

@@ -1,38 +1,37 @@
 <style lang="less">
 @font-face {
-  name:"myFont";
-  font-family: "MicrosoftYaHei";
-  src: url("MicrosoftYaHei");
+  name: 'myFont';
+  font-family: 'MicrosoftYaHei';
+  src: url('MicrosoftYaHei');
 }
-page{
+page {
   font-family: myFont;
   background-color: #f5f7f9;
-  .icon-52{
+  .icon-52 {
     width: 52rpx;
     height: 52rpx;
   }
 
-  .icon-48{
+  .icon-48 {
     width: 48rpx;
     height: 48rpx;
   }
 
-  .icon-64{
+  .icon-64 {
     width: 64rpx;
-    height: 64rpx;;
+    height: 64rpx;
   }
 
-  .icon-150{
-    width:150rpx;
-    height:150rpx;
+  .icon-150 {
+    width: 150rpx;
+    height: 150rpx;
   }
 
-  .icon-170{
+  .icon-170 {
     width: 170rpx;
     height: 170rpx;
   }
 }
-
 
 ::-webkit-scrollbar {
   width: 2rpx;
@@ -40,33 +39,40 @@ page{
   color: #717171;
 }
 
-.single-line{
-  display:-webkit-box;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  -webkit-line-clamp:1;
-  -webkit-box-orient:vertical;
+.single-line {
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
 }
 
-.multi-line{
-  display:-webkit-box;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  -webkit-line-clamp:2;
-  -webkit-box-orient:vertical;
+.multi-line {
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 </style>
 
 <script>
-import wepy from 'wepy'
-import 'wepy-async-function'
+import wepy from 'wepy';
+import 'wepy-async-function';
 
 export default class extends wepy.app {
   config = {
     pages: [
-      'pages/fuzeren/complaintDetail',
-      'pages/fuzeren/home',
+      'pages/xunjianyuan/xjy_location',
+      'pages/xunjianyuan/xjy_detail',
       'pages/index',
+      'pages/xunjianyuan/xjy_jilu',
+      
+      'pages/fuzeren/home',
+      
+      'pages/forget_pwd',
+      'pages/fuzeren/complaintDetail',
+      'pages/xunjianyuan/xjy_home',
       'pages/common_user_main',
       'pages/admin_login',
       'pages/main'
@@ -76,32 +82,49 @@ export default class extends wepy.app {
       navigationBarBackgroundColor: '#2d8cf0',
       navigationBarTitleText: '兰大巡检',
       navigationBarTextStyle: 'white'
-    }
-  }
-
-  globalData = {
-
-  }
-
-  constructor () {
-    super()
-  }
-
-  onLaunch() {
-
-  }
-
-  getUserInfo(cb) {
-    const that = this
-    if (this.globalData.userInfo) {
-      return this.globalData.userInfo
-    }
-    wepy.getUserInfo({
-      success (res) {
-        that.globalData.userInfo = res.userInfo
-        cb && cb(res.userInfo)
+    },
+    "permission":{
+      "scope.userLocation":{
+        "desc":"部分功能需要位置信息才能完成"
       }
-    })
+    }
+  };
+
+  globalData = {};
+  events = {
+    'logout':()=>{
+      console.log('log out events')
+    },
+  };
+  constructor() {
+    super();
   }
+
+  // onLaunch() {
+  //   //console.log('app is launch');
+  //   let user = wx.getStorageSync('login_user_info');
+  //   if (user) {
+  //     //console.log('userinfo is not null');
+  //     if (user.roleId === 5) {
+  //       //巡检区域负责人
+  //       wx.redirectTo({
+  //         url: 'pages/fuzeren/home'
+  //       });
+  //     } else if (user.roleId === 4) {
+  //       //巡检员
+  //       wx.redirectTo({
+  //         url: 'pages/xunjianyuan/xjy_home'
+  //       });
+  //     } else if (user.roleId === 3) {
+  //       //维修工人
+  //     } else if (user.roleId === 6) {
+  //       //投诉负责人
+  //     } else {
+  //       wx.redirectTo({
+  //         url: 'pages/common_user_main'
+  //       });
+  //     }
+  //   }
+  // }
 }
 </script>

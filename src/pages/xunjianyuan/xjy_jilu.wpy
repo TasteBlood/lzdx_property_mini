@@ -1,0 +1,141 @@
+<style lang="less" scoped>
+.list {
+  display: flex;
+  flex-direction: column;
+
+  .list-item {
+    padding: 15rpx;
+    display: flex;
+    flex-direction: row;
+    background-color: white;
+    border-radius: 2rpx;
+    justify-content: space-between;
+    box-sizing: border-box;
+    box-shadow: 0px 0px 8rpx 0px rgba(209, 209, 209, 1);
+    align-items: center;
+    margin-top: 15rpx;
+
+    .pic {
+      width: 200rpx;
+      height: 150rpx;
+    }
+
+    .pic.border {
+      border: 4rpx solid #ffde30;
+    }
+
+    .content {
+      width: 51%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10rpx;
+      box-sizing: border-box;
+
+      .title {
+        color: #414141;
+        font-size: 30rpx;
+      }
+
+      .no {
+        color: #717171;
+        font-size: 28rpx;
+      }
+
+      .desc {
+        color: #515151;
+        font-size: 28rpx;
+      }
+
+      .people {
+        font-size: 26rpx;
+        margin-top: 2rpx;
+        color: #717171;
+      }
+    }
+    .btn-info {
+      padding: 10rpx;
+      border-radius: 8rpx;
+      background-color: #ffde30;
+      font-size: 28rpx;
+      height: 32rpx;
+      color: #414141;
+      text-align: center;
+      line-height: 32rpx;
+      box-shadow: 0px 4rpx 8rpx 0px rgba(198, 210, 222, 1);
+    }
+
+    .btn-info:active {
+      background-color: #ffde30;
+      opacity: 0.8;
+    }
+  }
+
+  .list-item:first-child {
+    margin-top: 0;
+  }
+}
+</style>
+<template>
+    <view>
+        <scroll-view scroll-y scroll-with-animation @scroll="onScroll" style="height:{{height}}px">
+        <view class="list">
+                <view class="list-item" wx:for="{{testNum}}" wx:key="{{index}}">
+                            <image src="{{items[0].src}}" class="pic" lazy-load mode="asceptFill"/>
+                            <view class="content">
+                              <text class="title single-line">城关西区垃圾场冯绍路巡检报告</text>
+                              <text class="no single-line">xj0001</text>
+                              <text class="desc single-line">2018年12月30日哈哈哈6767676767</text>
+                              <view class="people">
+                                <text>巡检员:</text>
+                                <text>许婧姝</text>
+                              </view>
+                            </view>
+                            <view class="btn-info" @tap="onDetailClick">查看详情</view>
+                </view>
+        </view>
+    </scroll-view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class XJYJilu extends wepy.page {
+  config = {
+    navigationBarTitleText: '巡检记录',
+    navigationBarBackgroundColor: '#FFDE30',
+    navigationBarTextStyle: 'black',
+    disableScroll: true,
+    usingComponents: {}
+  };
+
+  data = {
+    testNum: 20,
+    height:0,
+    items: [{ src: 'http://pic1.win4000.com/wallpaper/6/51e35bd45bc92.jpg' }]
+  };
+
+  components = {};
+
+  methods = {
+      onScroll(e){
+
+      },
+      onDetailClick(){
+        wx.navigateTo({
+          url: 'xjy_detail'
+        })
+      }
+  };
+
+  onLoad() {
+    let self = this;
+    wx.getSystemInfo({
+      success: function(res) {
+          console.log(res);
+        self.height = res.windowHeight;
+        self.$apply();
+      }
+    });
+  }
+}
+</script>

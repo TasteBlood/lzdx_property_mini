@@ -1,40 +1,40 @@
 <style lang="less">
-    .image-picker{
-        display: flex;
-        flex-direction: row;
-        padding: 0 20rpx 0 20rpx;
-        width: 100%;
-        box-sizing: border-box;
-        align-items: flex-start;
-        flex-wrap: wrap;
+.image-picker {
+  display: flex;
+  flex-direction: row;
+  padding: 0 20rpx 0 20rpx;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: flex-start;
+  flex-wrap: wrap;
 
-        .item{
-            width: 30%;
-            height: 220rpx;
-            margin: 10rpx;
-            position: relative;
+  .item {
+    width: 22%;
+    height: 155rpx;
+    margin: 10rpx;
+    position: relative;
 
-            .image{
-                width: 100%;
-                height: 100%;
-            }
-
-            .delete{
-                position: absolute;
-                z-index: 1;
-                right: -10rpx;
-                top:-10rpx;
-                width: 40rpx;
-                height: 40rpx;
-                color: white;
-                background-color: red;
-                text-align: center;
-                line-height: 40rpx;
-                border-radius: 50%;
-                opacity: 0.8;
-            }
-        }
+    .image {
+      width: 100%;
+      height: 100%;
     }
+
+    .delete {
+      position: absolute;
+      z-index: 1;
+      right: -10rpx;
+      top: -10rpx;
+      width: 40rpx;
+      height: 40rpx;
+      color: white;
+      background-color: red;
+      text-align: center;
+      line-height: 40rpx;
+      border-radius: 50%;
+      opacity: 0.8;
+    }
+  }
+}
 </style>
 <template>
     <view class="image-picker">
@@ -47,86 +47,85 @@
     </view>
 </template>
 <script>
-import wepy from 'wepy'
-export default class GridImage extends wepy.component{
-    data={
-        resources:[
-            
-        ]
-    };
-    chooseImage(){
-        let self= this;
-        wx.chooseImage({
-            count: 9,	// 默认为9
-            sizeType: ['original', 'compressed'],	// 指定原图或者压缩图
-            sourceType: ['album', 'camera'],	// 指定图片来源
-            success: function(res) {
-                //console.log(res)
-                if(res.errMsg==='chooseImage:ok'){
-                    //if(res.tempFilePaths.length>=9){
-                    self.resources.splice(0,self.resources.length);
-                    //}   
-                    for(let i=0;i<res.tempFilePaths.length;i++){
-                        //console.log(res.tempFilePaths[i])
-                        self.resources.push({
-                            url:res.tempFilePaths[i],
-                            add:false
-                        });
-                        self.$apply();
-                    }
+import wepy from 'wepy';
+export default class GridImage extends wepy.component {
+  data = {
+    resources: []
+  };
+  chooseImage() {
+    let self = this;
+    wx.chooseImage({
+      count: 9, // 默认为9
+      sizeType: ['original', 'compressed'], // 指定原图或者压缩图
+      sourceType: ['album', 'camera'], // 指定图片来源
+      success: function(res) {
+        console.log(res)
+        if (res.errMsg === 'chooseImage:ok') {
+          // first judge the local resource size and choose resource size
+          self.resources.splice(self.resources.length-1,1);
+          if(9 - self.resources.length > 0){
+            //has space to insert image
+            let temp = 9 - self.resources.length;
+            for(let i=0;i<res.tempFilePaths.length;i++){
+              if(i==temp){
+                  break;
+              }
+              self.resources.push({url:res.tempFilePaths[i],add:false});
+              self.$apply();
+            }
+          }
 
-                    if(self.resources.length<9){
-                        self.resources.push({url:'../../images/upload.png',add:true})
-                        self.$apply();
-                    }
-                }
-                self.sendData();
-            }
-        })
-    };
-    sendData(){
-        let resources = JSON.parse(JSON.stringify(this.resources));
-        resources.forEach((item,index) => {
-                    if(item.add){
-                        resources.splice(index,1);
-                        return;
-                    }
-                });
-        this.$emit("onImageChoose",resources);
-    }
-    methods = {
-        onItemClick(e){
-            if(e.currentTarget.dataset.src.add){
-                this.chooseImage();
-                return;
-            }
-            
-            this.$emit('onItemClick',e.currentTarget.dataset.src.url);
-        },
-        onClear(e){
-            this.resources.splice(e.currentTarget.dataset.pos,1);
-            let hasDefault = false;
-            if(this.resources.length<9){
-                this.resources.forEach((item,index) => {
-                    if(item.add){
-                        hasDefault = true;
-                        return;
-                    }
-                });
-                if(!hasDefault){
-                    this.resources.push({url:'../../images/upload.png',add:true});
-                    //console.log(hasDefault);
-                }
-            }
-            this.sendData();
-
+          if (self.resources.length < 9) {
+            self.resources.push({ url: '../../images/upload.png', add: true });
+            self.$apply();
+          }
         }
-    };
-    onLoad(){
-        // console.log(this.deleteMode)
-        // console.log(this.resources)
-        this.resources.push({url:'../../images/upload.png',add:true})
-        this.$apply();
+        self.sendData();
+      }
+    });
+  }
+  sendData() {
+    let resources = JSON.parse(JSON.stringify(this.resources));
+    resources.forEach((item, index) => {
+      if (item.add) {
+        resources.splice(index, 1);
+        return;
+      }
+    });
+    this.$emit('onImageChoose', resources);
+  }
+  methods = {
+    onItemClick(e) {
+      if (e.currentTarget.dataset.src.add) {
+        this.chooseImage();
+        return;
+      }
+
+      this.$emit('onItemClick', e.currentTarget.dataset.src.url);
+    },
+    onClear(e) {
+      this.resources.splice(e.currentTarget.dataset.pos, 1);
+      let hasDefault = false;
+      if (this.resources.length < 9) {
+        this.resources.forEach((item, index) => {
+          if (item.add) {
+            hasDefault = true;
+            return;
+          }
+        });
+        if (!hasDefault) {
+          this.resources.push({ url: '../../images/upload.png', add: true });
+          //console.log(hasDefault);
+        }
+      }
+      this.sendData();
     }
+  };
+  onLoad() {
+    // console.log(this.deleteMode)
+    // console.log(this.resources)
+    this.resources.push({ url: '../../images/upload.png', add: true });
+    this.$apply();
+  }
 }
 </script>

@@ -5,14 +5,14 @@
         padding: 0 20rpx 0 20rpx;
         width: 100%;
         box-sizing: border-box;
-        justify-content: space-between;
         align-items: flex-start;
         flex-wrap: wrap;
 
         .item{
-            width: 30%;
-            height: 220rpx;
+            width: 21.5%;
+            height: 155rpx;
             margin: 10rpx;
+            border: solid 2rpx #f1f1f1;
             position: relative;
 
             .image{
