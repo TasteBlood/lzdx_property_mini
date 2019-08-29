@@ -1,0 +1,113 @@
+<style lang="less" scoped>
+.container {
+  padding: 10rpx;
+  background-color: white;
+  box-sizing: border-box;
+
+  .voice {
+    font-size: 30rpx;
+    box-sizing: border-box;
+    background-color: #ffde30;
+    color: #717171;
+    border-radius: 6rpx;
+    padding: 10rpx;
+    margin: 10rpx 20rpx 0rpx 20rpx;
+    box-shadow: 4rpx 4rpx 2rpx 0rpx #f1f1f1;
+  }
+
+  .btn-call {
+    padding: 5rpx 10rpx 5rpx 10rpx;
+    background-color: #ffde30;
+    color: #717171;
+    border-radius: 6rpx;
+  }
+
+  .btn-call:active{
+    background-color: #fce884;
+  }
+
+  .voice:active {
+    background-color: rgb(255, 233, 125);
+  }
+
+  .question-desc {
+    font-size: 32rpx;
+    color: #414141;
+    padding: 20rpx;
+  }
+}
+</style>
+
+<template>
+    <view class="container">
+        <gridImage :resources="resources" @onItemClick.user="onPicItemClick"></gridImage>
+        <view class="voice" wx:if="{{order.voice}}">TEMP_20190927001.mp3</view>
+        <bigImage :show.sync="showBig" :url.sync="currentUrl" @onClose.user="onClose"></bigImage>
+        <view class="question-desc">
+            {{order.repairReason}}
+        </view>
+        <view style="font-size:28rpx;margin-left:20rpx;margin-right:20rpx;margin-bottom:20rpx;color:#717171;">{{order.regionOneName}}/{{order.regionTwoName}}/{{order.regionName}}</view>
+        <view style="font-size:30rpx;color:#515151;padding:0 20rpx 0 20rpx">发布时间:{{order.createTime}}</view>
+        <view wx:if="{{order.fee}}" style="font-size:30rpx;color:#515151;padding:20rpx 20rpx 0 20rpx">维修费:<text style="color:#2FBDF5">¥12.00</text></view>
+        <view style="font-size:30rpx;color:#515151;padding:15rpx 20rpx 0 20rpx;display:flex;flex-direction:row;align-items:center">
+            <text>报修人:{{order.repairName}}</text>
+            <text style="margin-left:20rpx">{{order.repairMobile}}</text>
+            <view class="btn-call" style="margin-left:10rpx">呼 叫</view>
+        </view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+import GridImage from '../../components/gridImage';
+import BigImage from '../../components/bigImage';
+import { getOrderDetail } from '../../utils/api';
+export default class WXYOrderDetail extends wepy.page {
+  config = {
+    navigationBarTitleText: '维修详情',
+    navigationBarBackgroundColor: '#FFDE30',
+    navigationBarTextStyle: 'black',
+    disableScroll: false,
+    usingComponents: {}
+  };
+
+  components = {
+    gridImage: GridImage,
+    bigImage: BigImage
+  };
+
+  data = {
+    resources: [
+      'http://i1.17173.itc.cn/2010/news/2010/08/09/s0809xyj01s.jpg',
+      'http://pic1.cxtuku.com/00/15/12/b44248cc7209.jpg',
+      'http://a3.att.hudong.com/46/71/01300543947353147692713190613.jpg'
+    ],
+    showBig: false,
+    currentUrl: null,
+    oid: 0,
+    order: null
+  };
+
+  methods = {
+    onPicItemClick(e) {
+      console.log(e);
+      this.currentUrl = e;
+      this.showBig = true;
+    },
+    onClose() {
+      this.showBig = false;
+    }
+  };
+
+  async onLoad(query) {
+    this.oid = query.id;
+    //load data
+    let res = await getOrderDetail(this.oid);
+    if (res.status === 1) {
+      console.log(res);
+      this.order = res.info;
+      this.order.images = this.order.pics.split(';');
+      this.$apply();
+    }
+  }
+}
+</script>

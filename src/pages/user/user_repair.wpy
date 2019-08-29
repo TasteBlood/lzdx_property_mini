@@ -1,0 +1,329 @@
+<style lang="less" scoped>
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .area-info {
+    color: #414141;
+    font-size: 32rpx;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: white;
+    padding: 20rpx;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .info {
+    background-color: white;
+    margin-top: 20rpx;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+
+    .text-area {
+      border: solid 1rpx #e1e1e1;
+      padding: 10rpx;
+      height: 120rpx;
+      margin: 20rpx;
+      border-radius: 4rpx;
+      font-size: 30rpx;
+      width: 90%;
+    }
+
+    .btn-record {
+      padding: 10rpx;
+      border-radius: 32rpx;
+      color: #515151;
+      width: 200rpx;
+      text-align: center;
+    }
+  }
+
+  .btn-submit {
+    background-color: #ffde30;
+    width: 70%;
+    border-radius: 32rpx;
+    color: #515151;
+    height: 70rpx;
+    text-align: center;
+    line-height: 70rpx;
+    margin: 20rpx;
+    box-shadow: 2rpx 2rpx 20rpx 2rpx #e1e1e1;
+  }
+
+  .btn-submit:active {
+    background-color: #fae26b;
+  }
+}
+</style>
+<template>
+    <view class="container">
+        <view class="area-info" @tap="onOpenArea">
+            <text style="color:#515151">报修区域:</text>
+            <text style="width:72%;margin-left:10rpx;">{{threeArea?threeArea.title:'选择区域'}}</text>
+            <image src="../../../../../images/next.png" class="icon-48"></image>
+        </view>
+
+        <view class="area-info" style="margin-top:10rpx;">
+            <text style="color:#515151">报修类型:</text>
+            <picker range="{{repairType}}" @change="onTypeChange" range-key="repairName" style="width:72%;margin-left:10rpx;">
+              <text wx:if="{{repairIndex}}">{{repairType[repairIndex].repairName}}</text>
+              <text wx:else>选择维修类型</text>
+            </picker>
+            <image src="../../../../../images/next.png" class="icon-48"></image>
+        </view>
+
+        <view class="info">
+            <view style="font-size:32rpx;color:#414141;padding:20rpx;"><text style="color:#FFDE30;height:20rpx;border-right:solid 8rpx #FFDE30;margin-right:10rpx;"></text>报修信息</view>
+            <imagePicker @onImageChoose.user="onImageChoose"></imagePicker>
+            <textarea @input="onInput" data-type="reason" class="text-area" placeholder="请描述问题/情况" placeholder-style="color:#919191"></textarea>
+            <text class="btn-record" style="margin:0 20rpx 20rpx 20rpx;background-color:#FFDE30;color:#414141;font-size:32rpx;">开始录音</text>
+        </view>
+
+        <view class="info">
+            <view style="font-size:32rpx;color:#414141;padding:20rpx;"><text style="color:#FFDE30;height:20rpx;border-right:solid 8rpx #FFDE30;margin-right:10rpx;"></text>报修人信息</view>
+            <view style="display:flex;flex-direction:row;align-items:center;padding:0 20rpx 20rpx 20rpx;">
+                <text style="color:#515151;">姓名:</text>
+                <input @input="onInput" data-type="name" placeholder="真实姓名" placeholder-style="color:#919191" style="width:70%;margin-left:10rpx;padding:10rpx;border-bottom:1rpx solid #e1e1e1"/>
+            </view>
+            <view style="display:flex;flex-direction:row;align-items:center;padding:0rpx 20rpx 20rpx 20rpx;">
+                <text style="color:#515151;">电话:</text>
+                <input @input="onInput" data-type="mobile" placeholder="联系方式" placeholder-style="color:#919191" style="width:70%;margin-left:10rpx;padding:10rpx;border-bottom:1rpx solid #e1e1e1"/>
+            </view>
+            <view style="display:flex;flex-direction:row;align-items:center;padding:0rpx 20rpx 20rpx 20rpx;">
+                <text style="color:#515151;">详址:</text>
+                <input @input="onInput" data-type="address" placeholder="楼号/单元/门号" placeholder-style="color:#919191" style="width:80%;margin-left:10rpx;padding:10rpx;border-bottom:1rpx solid #e1e1e1"/>
+            </view>
+        </view>
+
+        <view class="info">
+            <view style="font-size:32rpx;color:#414141;padding:20rpx;"><text style="color:#FFDE30;height:20rpx;border-right:solid 8rpx #FFDE30;margin-right:10rpx;"></text>预约维修</view>
+            <view style="display:flex;flex-direction:row;align-items:center;padding:0rpx 20rpx 20rpx 20rpx;">
+                <text style="color:#515151;">预约:</text>
+                <checkbox-group @change="checkboxChange">
+                  <checkbox value="true"></checkbox>
+                </checkbox-group>
+            </view>
+            <view style="display:flex;flex-direction:row;justify-content:center;align-items:center;padding:0rpx 20rpx 20rpx 20rpx;">
+                <text style="color:#515151;">维修时间:</text>
+                <picker mode="date" style="font-size:32rpx;margin-left:20rpx;color:#515151;width:40%" @change="onDateChange">{{selectDate?selectDate:'选择日期'}}</picker>
+                <picker mode="time" style="font-size:32rpx;margin-left:10rpx;color:#515151;width:36%;" @change="onTimeChange">{{selectTime?selectTime:'选择时间'}}</picker>
+            </view>
+        </view>
+
+        <areaSelector :show.sync="showArea" @onAreaChoose.user="onAreaChoose" @on-close.user="onClose"></areaSelector>
+        <view class="btn-submit" @tap="onSave">报修</view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+import ImagePicker from '../../components/imagePicker';
+import AreaSelector from '../../components/areaSelector';
+import { addRepair,getRepairType } from '../../utils/api';
+import { UploadMulti } from '../../utils/uploader';
+const UID = wx.getStorageSync('login_user_info').id;
+export default class UserRepair extends wepy.page {
+  config = {
+    navigationBarTitleText: '住家户报修',
+    navigationBarBackgroundColor: '#FFDE30',
+    navigationBarTextStyle: 'black',
+    disableScroll: false,
+    usingComponents: {}
+  };
+
+  components = {
+    imagePicker: ImagePicker,
+    areaSelector: AreaSelector
+  };
+
+  data = {
+    showArea: false,
+    oneArea: null,
+    twoArea: null,
+    threeArea: null,
+    repairType:null,
+    repairIndex:null,
+
+    //business variable
+    reason: "",
+    username:"",
+    address:"",
+    appointment:false,
+    appointmentTime:"",
+    mobile: "",
+    images: null,
+    audio: null,
+    selectDate:null,
+    selectTime:null
+  };
+
+  methods = {
+    onImageChoose(e) {
+      //console.log(e);
+      this.images = e;
+    },
+    onOpenArea() {
+      this.showArea = true;
+    },
+    onAreaChoose(one, two, three) {
+      if (!three) {
+        wx.showToast({
+          title: '三级区域不能为空',
+          icon: 'none'
+        });
+        return;
+      }
+      this.oneArea = one;
+      this.twoArea = two;
+      this.threeArea = three;
+
+      this.$apply();
+    },
+    onClose() {
+      this.showArea = false;
+    },
+    onDateChange(e){
+      //console.log(e)
+      this.selectDate = e.detail.value
+    },
+    onTimeChange(e){
+      //console.log(e)
+      this.selectTime = e.detail.value
+    },
+    onTypeChange(e){
+      //console.log(e)
+      this.repairIndex = e.detail.value
+      this.$apply()
+    },
+    checkboxChange(e){
+      if(e.detail.value.length>0){
+        this.appointment = true
+      }else{
+        this.appointment = false
+      }
+      //console.log(e)
+    },
+    onInput(e) {
+      switch (e.currentTarget.dataset.type) {
+        case 'reason':
+          this.reason = e.detail.value;
+          break;
+        case 'name':
+          this.username = e.detail.value;
+          break;
+        case 'mobile':
+          this.mobile = e.detail.value;
+          break;
+        case 'address':
+          this.address = e.detail.value;
+          break;
+      }
+    },
+    onSave() {
+      let self = this;
+      if(!this.repairIndex){
+        wx.showToast({
+          title: '类型为空',
+          icon: 'none'
+        });
+        return;
+      }
+      if (!this.reason) {
+        wx.showToast({
+          title: '报修内容为空',
+          icon: 'none'
+        });
+        return;
+      }
+      if (!this.images) {
+        wx.showToast({
+          title: '现场图片为空',
+          icon: 'none'
+        });
+        return;
+      }
+      if (!this.username) {
+        wx.showToast({
+          title: '姓名为空',
+          icon: 'none'
+        });
+        return;
+      }
+      if (!this.mobile || !/^1[0-9]{10}$/.test(this.mobile)) {
+        wx.showToast({
+          title: '手机号不正确',
+          icon: 'none'
+        });
+        return;
+      }
+
+      //区域报修
+      if (!this.threeArea) {
+        wx.showToast({
+          title: '区域为空',
+          icon: 'none'
+        });
+        return;
+      }
+
+      if(this.appointment){
+        if(!this.selectDate||!this.selectTime){
+          wx.showToast({
+            title: '时间为空',
+            icon: 'none'
+          })
+          return
+        }
+      }
+
+      UploadMulti(
+        this.images,
+        async res => {
+          let repos = await addRepair(
+            self.repairType[Number.parseInt(self.repairIndex)].repairId,
+            self.address,
+            self.appointment?1:0,
+            self.appointment?self.selectDate+' '+self.selectTime:'',
+            self.threeArea.id,
+            self.oneArea.id,
+            self.twoArea.id,
+            self.audio,
+            res.join(';'),
+            self.mobile,
+            self.username,
+            self.reason,
+            UID
+          );
+          if (repos.status === 1) {
+            wx.showToast({
+              title: '报修成功',
+              icon: 'none'
+            });
+            setTimeout(() => {
+              wx.navigateBack();
+            }, 200);
+          }
+        },
+        e => {}
+      );
+    }
+  };
+
+  async onLoad() {
+
+    let res = await getRepairType()
+    if(res.status===1){
+      this.repairType = res.info
+    }
+    this.$apply()
+
+  }
+
+  onShow() {}
+}
+</script>

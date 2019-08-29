@@ -54,59 +54,61 @@
         <view style="padding:20rpx;background-color: white;">
             <view class="location-info">
                 <text style="color:#717171;width:150rpx;">巡检区域:</text>
-                <text>兰州大学观云楼花园</text>
+                <text>{{insReport.regionName}}</text>
             </view>
             <view class="location-info" style="margin-top:10rpx;">
                 <text style="color:#717171;width:150rpx;">区域编号:</text>
-                <text>001</text>
+                <text>{{insReport.regionId}}</text>
             </view>
             <view class="location-info" style="margin-top:10rpx;">
                 <text style="color:#717171;width:120rpx;">负责人:</text>
-                <text>张三、李四、王五、赵六、钱七</text>
+                <text>{{insReport.adminName}}</text>
             </view>
         </view>
 
         <view style="background-color:white;margin-top:20rpx;padding:20rpx 20rpx 20rpx 20rpx;display:flex;flex-direction:row;align-items:center;font-size:30rpx;">
             <text style="color:#717171;width:150rpx;">巡检标题:</text>
-            <text style="font-size:30rpx;">城关区家属院垃圾场巡检</text>
+            <text style="font-size:30rpx;width:80%">{{insReport.title}}</text>
         </view>
         <view class="line"></view>
         <view style="background-color:white;padding:20rpx 20rpx 20rpx 20rpx;display:flex;flex-direction:row;align-items:center;font-size:30rpx;">
             <text style="color:#717171;width:150rpx;">巡检类型:</text>
-            <text style="font-size:30rpx;">卫生检查</text>
+            <text style="font-size:30rpx;">{{insReport.typeName}}</text>
         </view>
 
         <view style="font-size:28rpx;color:#414141;text-align:left;padding:20rpx;">现场图片</view>
-        <gridImage @onItemClick.user="onPicItemClick" :resources="resources"></gridImage>
+        <gridImage @onItemClick.user="onPicItemClick" :resources.sync="getInsImages"></gridImage>
         <bigImage :url.sync="currentUrl" :show.sync="showBig" @onClose.user="onCloseBig"></bigImage>
         <view class="location-info" style="margin-top:10rpx;padding:20rpx;background-color:white">
                 <text style="color:#717171;width:150rpx;">问题描述:</text>
-                <text>垃圾场垃圾未到，并且有臭味，多次警告均不理睬</text>
+                <text style="width:80%">{{insReport.content}}</text>
         </view>
         <view class="line"></view>
         <view class="location-info" style="padding:20rpx;background-color:white">
                 <text style="color:#717171;width:150rpx;">处罚建议:</text>
-                <text>罚款200元，通报两周</text>
+                <text style="width:80%">{{insReport.proposal}}</text>
         </view>
-        <view style="margin-top:20rpx;background-color:white">
+        <view style="margin-top:20rpx;background-color:white" wx:if="{{insReport.state>=2}}">
             <view style="font-size:30rpx;color:#414141;text-align:left;padding:20rpx;display:flex;flex-direction:row;align-items:center">
                 <view style="height:30rpx;border-left:6rpx solid #FFDE30"></view>
                 <text style="margin-left:10rpx;">申诉信息</text>
             </view>
-            <gridImage2 @onItemClick.user="onPicItemClick" :resources="resources2"></gridImage2>
+            <gridImage2 @onItemClick.user="onPicItemClick" :resources.sync="getAppealImages"></gridImage2>
             <view class="location-info" style="padding:20rpx;background-color:white">
                 <text style="color:#717171;width:150rpx;">申诉内容:</text>
-                <text>负责人请假回家，导致工作滞后，以后会改正</text>
+                <text style="width:80%">{{insReport.appealContent}}</text>
             </view>
         </view>
 
-        <view style="margin-top:20rpx;margin-bottom:20rpx;background-color:white">
+        <view style="margin-top:20rpx;margin-bottom:20rpx;background-color:white" wx:if="{{insReport.state>=3}}">
             <view style="font-size:30rpx;color:#414141;text-align:left;padding:20rpx;display:flex;flex-direction:row;align-items:center">
                 <view style="height:30rpx;border-left:6rpx solid #FFDE30"></view>
                 <text style="margin-left:10rpx;">处罚结果</text>
             </view>
-            <view style="color:#515151;font-size:30rpx;padding:0rpx 20rpx 20rpx 20rpx;">
-                情况多次不改善，责令改正，驳回申诉，按照处罚建议进行
+            <view style="color:#515151;font-size:30rpx;padding:0rpx 20rpx 20rpx 20rpx;display:flex;flex-direction:column;">
+                <text>{{insReport.reason}}</text>
+                <text wx:if="{{insReport.deduct_points}}">扣分:{{insReport.deduct_points}}分</text>
+                <text wx:if="{{insReport.forfeit}}">罚款:{{insReport.forfeit/100}}元</text>
             </view>
         </view>
     </view>
@@ -115,6 +117,7 @@
 import wepy from 'wepy';
 import GridImage from '../../components/gridImage';
 import BigImage from '../../components/bigImage';
+import {getReportById} from '../../utils/api'
 export default class XJYDetail extends wepy.page {
   config = {
     navigationBarTitleText: '巡检详情',
@@ -127,17 +130,8 @@ export default class XJYDetail extends wepy.page {
   data = {
     showBig: false,
     currentUrl: '',
-    resources: [
-      'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1566454273458&di=d8863ea51b1130a96ff39baca7a0ee11&imgtype=0&src=http%3A%2F%2Ft8.baidu.com%2Fit%2Fu%3D3832611340%2C1886878365%26fm%3D191%26app%3D48%26wm%3D1%2C17%2C90%2C45%2C20%2C7%26wmo%3D0%2C0%26n%3D0%26g%3D0n%26f%3DJPEG%3Fsec%3D1853310920%26t%3D93b1bc04f42a3e47a05225501b7fc89b',
-      'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1566454273457&di=4f6434d82c477ab43873385a9c46eee4&imgtype=0&src=http%3A%2F%2Fimg3.redocn.com%2F201512%2F20151209%2F2015120911121811121833.jpg',
-      'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1566454273456&di=86f873b6dcf47c9f340f05330424a2d4&imgtype=0&src=http%3A%2F%2Fimg3.redocn.com%2F20091219%2F20091218_4e648c2a044d93f177cbwIN6ijkQvz00.jpg',
-      'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1566454308353&di=7c57acbd544575574af2616daa476adf&imgtype=0&src=http%3A%2F%2Fpic1.win4000.com%2Fwallpaper%2Ff%2F56e91f3087acd.jpg'
-    ],
-    resources2: [
-      'http://n1.itc.cn/img8/wb/recom/2016/05/20/146371924127819178.JPEG',
-      'http://pic13.nipic.com/20110406/3970232_085033327000_2.jpg',
-      'http://file16.zk71.com/File/CorpEditInsertImages/2017/10/31/shipin_3028_20171031155933.jpg'
-    ]
+    insReport:null,
+    insReportId:0
   };
 
   components = {
@@ -155,9 +149,29 @@ export default class XJYDetail extends wepy.page {
       this.showBig = false;
     }
   };
+  computed = {
+    getInsImages(){
+      //console.log(this)
+      if(this.insReport&&this.insReport.fileUrl)
+        return this.insReport.fileUrl.split(';')
+    },
+    getAppealImages(){
+      if(this.insReport&&this.insReport.appealFileUrl)
+        return this.insReport.appealFileUrl.split(';')
+    }    
+  }
 
-  onLoad() {}
+  onLoad(query) {
+    this.insReportId = query.insReportId
+  }
 
-  onReady() {}
+  async onShow() {
+    let res = await getReportById(this.insReportId)
+    if(res.status===1){
+      this.insReport = res.info
+      console.log(this.insReport)
+      this.$apply()
+    }
+  }
 }
 </script>

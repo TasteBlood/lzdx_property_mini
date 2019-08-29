@@ -8,7 +8,10 @@ import { HOST } from './http';
  * @description 上传单张图片
  */
 export const UploadSingle = (filePath, success, fail) => {
-    wx.showLoading()
+    wx.showLoading({
+        title: '图片上传中',
+        mask: true
+    })
     wx.uploadFile({
         url: `${HOST}/base/upload`,
         filePath: filePath.url,
@@ -41,7 +44,10 @@ export const UploadSingle = (filePath, success, fail) => {
 export const UploadMulti = (filePaths, success, fail) => {
     let uploaded = []
     var uploadNum = 0
-    wx.showLoading()
+    wx.showLoading({
+        title: '图片上传中',
+        mask: true
+    })
 
     filePaths.forEach(item => {
         wx.uploadFile({
@@ -50,23 +56,34 @@ export const UploadMulti = (filePaths, success, fail) => {
             name: 'file',
             success: (res) => {
                 if (res.statusCode == 200) {
-                    //upload success
+                    //upload successu.…
                     let data = JSON.parse(res.data)
                     uploaded.push(data.info)
                     uploadNum++
                     console.log('upload success', uploadNum)
 
-                    if(uploadNum === filePaths.length){
+                    if (uploadNum === filePaths.length) {
                         //upload completed
                         wx.hideLoading()
                         success(uploaded)
                     }
                 } else {
                     uploaded.push('error')
+                    if (uploadNum === filePaths.length) {
+                        //upload completed
+                        wx.hideLoading()
+                        success(uploaded)
+                    }
                 }
             },
             error: (e) => {
-
+                console.log(e)
+                uploaded.push('error')
+                if (uploadNum === filePaths.length) {
+                    //upload completed
+                    wx.hideLoading()
+                    success(uploaded)
+                }
             }
         })
     });

@@ -9,7 +9,6 @@
     flex-direction: row;
     background-color: white;
     border-radius: 2rpx;
-    justify-content: space-between;
     box-sizing: border-box;
     box-shadow: 0px 0px 8rpx 0px rgba(209, 209, 209, 1);
     align-items: center;
@@ -17,7 +16,12 @@
 
     .pic {
       width: 200rpx;
-      height: 150rpx;
+      height: 140rpx;
+    }
+
+    .pic-error {
+      width: 160rpx;
+      height: 100rpx;
     }
 
     .pic.border {
@@ -25,7 +29,7 @@
     }
 
     .content {
-      width: 51%;
+      width: 80%;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -53,22 +57,10 @@
         color: #717171;
       }
     }
-    .btn-info {
-      padding: 10rpx;
-      border-radius: 8rpx;
-      background-color: #ffde30;
-      font-size: 28rpx;
-      height: 32rpx;
-      color: #414141;
-      text-align: center;
-      line-height: 32rpx;
-      box-shadow: 0px 4rpx 8rpx 0px rgba(198, 210, 222, 1);
-    }
+  }
 
-    .btn-info:active {
-      background-color: #ffde30;
-      opacity: 0.8;
-    }
+  .list-item:active {
+    background-color: transparent;
   }
 
   .list-item:first-child {
@@ -78,64 +70,112 @@
 </style>
 <template>
     <view>
-        <scroll-view scroll-y scroll-with-animation @scroll="onScroll" style="height:{{height}}px">
-        <view class="list">
-                <view class="list-item" wx:for="{{testNum}}" wx:key="{{index}}">
-                            <image src="{{items[0].src}}" class="pic" lazy-load mode="asceptFill"/>
+        <!-- <scroll-view scroll-y scroll-with-animation @scroll="onScroll" style="height:{{height}}px"> -->
+        <view class="list" wx:if="{{items.length>0}}">
+                <view class="list-item" wx:for="{{items}}" wx:key="{{index}}" @tap="onDetailClick" data-item="{{item}}">
+                            <image wx:if="{{item.images.length>0}}" src="{{item.images[0]}}" class="pic" lazy-load mode="aspectFill"/>
+                            <image wx:else src="../../../../../images/img_error.png" class="pic-error" lazy-load mode="widthFix"/>
                             <view class="content">
-                              <text class="title single-line">城关西区垃圾场冯绍路巡检报告</text>
-                              <text class="no single-line">xj0001</text>
-                              <text class="desc single-line">2018年12月30日哈哈哈6767676767</text>
+                              <text class="title single-line">{{item.title}}</text>
+                              <text class="no single-line">{{item.num}}</text>
+                              <text class="desc single-line">{{item.content}}</text>
                               <view class="people">
                                 <text>巡检员:</text>
-                                <text>许婧姝</text>
+                                <text>{{item.adminName}}</text>
                               </view>
                             </view>
-                            <view class="btn-info" @tap="onDetailClick">查看详情</view>
+                            <image class="icon-48" src="../../../../../images/next.png"></image>
                 </view>
         </view>
-    </scroll-view>
+        <view wx:else style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;">
+            <image src="../../../../../images/no_data.png" style="width:200rpx;height:180rpx;" mode="widthFix"></image>
+            <text style="font-size:28rpx;color:#a1a1a1;margin-top:20rpx;">暂无数据</text>
+        </view>
+    <!-- </scroll-view> -->
     </view>
 </template>
 <script>
 import wepy from 'wepy';
+import { getInsReport } from '../../utils/api';
 export default class XJYJilu extends wepy.page {
   config = {
     navigationBarTitleText: '巡检记录',
     navigationBarBackgroundColor: '#FFDE30',
     navigationBarTextStyle: 'black',
-    disableScroll: true,
-    usingComponents: {}
+    disableScroll: false,
+    enablePullDownRefresh: true,
+    usingComponents: {},
+    onReachBottomDistance:100
   };
 
   data = {
-    testNum: 20,
-    height:0,
-    items: [{ src: 'http://pic1.win4000.com/wallpaper/6/51e35bd45bc92.jpg' }]
+    height: 0,
+    items: [],
+    load: false,
+    noMore: false,
+    page: 1,
+    size: 20
   };
 
   components = {};
 
   methods = {
-      onScroll(e){
-
-      },
-      onDetailClick(){
-        wx.navigateTo({
-          url: 'xjy_detail'
-        })
-      }
+    onScroll(e) {},
+    onDetailClick(e) {
+      wx.navigateTo({
+        url: `xjy_detail?insReportId=${e.currentTarget.dataset.item.id}`
+      });
+    }
   };
+  computed = {};
 
-  onLoad() {
+  async onLoad() {
     let self = this;
     wx.getSystemInfo({
       success: function(res) {
-          console.log(res);
+        // console.log(res);
         self.height = res.windowHeight;
         self.$apply();
       }
     });
+    this.loadData(this.page, this.size);
+  }
+
+  async loadData(pageNum, pageSize) {
+    if (this.load) return;
+    this.load = true;
+    let res = await getInsReport('', '', pageNum, pageSize, true);
+    wx.stopPullDownRefresh();
+    this.load = false;
+    if (res.status === 1) {
+      res.info.records.forEach(e => {
+        e.images = e.fileUrl.split(';');
+      });
+      if (pageNum === 1) {
+        this.items.splice(0, this.items.length);
+        this.items = res.info.records;
+      } else {
+        this.items.concat(res.info.records);
+      }
+      if (res.info.pageindex.endindex === pageNum) {
+        this.noMore = true;
+      } else {
+        this.page++;
+      }
+      this.$apply();
+    }
+  }
+
+  onPullDownRefresh() {
+    this.page = 1;
+    this.loadData(this.page, this.size);
+  }
+
+  onReachBottom(){
+    console.log('on bottom......')
+    if(this.noMore)
+      return;
+    this.loadData(this.page,this.size)
   }
 }
 </script>

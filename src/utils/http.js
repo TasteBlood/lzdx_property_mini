@@ -57,6 +57,8 @@ const GET = async (url, params, loading) => {
                     });
                     console.log(e)
                     //reject(e);
+                    if (loading)
+                        wx.hideLoading()
                 }
             },
             fail: function (e) {
@@ -121,6 +123,8 @@ const POST = async (url, params, loading) => {
                         title: "服务器异常",
                         icon: 'none'
                     });
+                    if (loading)
+                        wx.hideLoading()
                 }
             },
             fail: function (e) {

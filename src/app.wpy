@@ -63,17 +63,26 @@ import 'wepy-async-function';
 export default class extends wepy.app {
   config = {
     pages: [
+      'pages/weixiu/wxy_home',
+      'pages/common_user_main',
+      'pages/user/user_repair',
+      
+      
+      'pages/user/public_area_equip_repair',
+      
+      
+      'pages/xunjianyuan/xjy_jilu',
+      'pages/xunjianyuan/xjy_home',
+      'pages/index',
+      'pages/fuzeren/home',
+      'pages/fuzeren/appeal',
+      'pages/weixiu/wxy_order_detail',
+      'pages/weixiu/wxy_jilu',
       'pages/xunjianyuan/xjy_location',
       'pages/xunjianyuan/xjy_detail',
-      'pages/index',
-      'pages/xunjianyuan/xjy_jilu',
-      
-      'pages/fuzeren/home',
-      
       'pages/forget_pwd',
       'pages/fuzeren/complaintDetail',
-      'pages/xunjianyuan/xjy_home',
-      'pages/common_user_main',
+      
       'pages/admin_login',
       'pages/main'
     ],
@@ -83,18 +92,18 @@ export default class extends wepy.app {
       navigationBarTitleText: '兰大巡检',
       navigationBarTextStyle: 'white'
     },
-    "permission":{
-      "scope.userLocation":{
-        "desc":"部分功能需要位置信息才能完成"
+    permission: {
+      'scope.userLocation': {
+        desc: '部分功能需要位置信息才能完成'
       }
     }
   };
 
   globalData = {};
   events = {
-    'logout':()=>{
-      console.log('log out events')
-    },
+    logout: () => {
+      console.log('log out events');
+    }
   };
   constructor() {
     super();
@@ -126,5 +135,25 @@ export default class extends wepy.app {
   //     }
   //   }
   // }
+
+  onShow() {
+    //检查版本
+    const manager = wx.getUpdateManager();
+    //检查是否更新
+    manager.onCheckForUpdate()
+    //开始更新
+    manager.onUpdateReady(() => {
+      wx.showModal({
+        title: '更新提示',
+        content: '新版本已经准备好，是否重启应用？',
+        success: function(res) {
+          if (res.confirm) {
+            // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
+            updateManager.applyUpdate();
+          }
+        }
+      });
+    });
+  }
 }
 </script>

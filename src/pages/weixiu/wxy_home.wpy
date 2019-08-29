@@ -1,0 +1,220 @@
+<style lang="less" scoped>
+.container {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+
+  .header-info {
+    color: #515151;
+    margin: 20rpx;
+    font-size: 30rpx;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: 10rpx 20rpx 0rpx 20rpx;
+
+    .list-item {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      border-radius: 5rpx;
+      padding: 20rpx 10rpx 20rpx 30rpx;
+      box-shadow: 0rpx 4rpx 20rpx 2rpx #e1e1e1;
+      margin-bottom: 20rpx;
+
+      .pic-error {
+        width: 160rpx;
+        height: 100rpx;
+      }
+
+      .content {
+        font-size: 30rpx;
+        color: #414141;
+        padding: 10rpx;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 65%;
+      }
+
+      .btn {
+        border-radius: 8rpx;
+        font-size: 30rpx;
+        width: 100rpx;
+        height: 30rpx;
+        color: #414141;
+        background-color: #ffde30;
+        text-align: center;
+        line-height: 30rpx;
+        padding: 10rpx;
+        box-shadow: 0px 2rpx 8rpx 0px rgba(198, 210, 222, 1);
+      }
+      .btn:active {
+        background-color: #fceb95;
+      }
+    }
+    .list-item:active{
+      background-color: #f9f9f9;
+    }
+  }
+}
+</style>
+
+<template>
+    <view class="container">
+        <view class="top-box">
+            <view class="header-info">
+                <text>欢迎您，{{name}}</text>
+                <text @tap="logout">退出></text>
+            </view>
+            <view @tap="onOrderClick" style="text-align:left;padding-left:20rpx;color:#414141;font-size:32rpx;text-decoration:underline">
+                我的维修单
+            </view>
+        </view>
+            <view class="list">
+                <view class="list-item" wx:for="{{items}}" wx:key="{{index}}" @tap="onItemClick" data-item="{{item}}">
+                    <image wx:if="{{item.images.length>0 && item.images[0]}}" lazy-mode src="{{item.images[0]}}" mode="aspectFill" style="width:200rpx;height:140rpx;"></image>
+                    <image wx:else src="../../../../../images/img_error.png" class="pic-error" lazy-load mode="widthFix"/>
+                    <view class="content">
+                        <view class="single-line" style="color:#414141">
+                            {{item.repairReason}}
+                        </view>
+                        <text style="font-size:26rpx;color:#717171;margin-top:10rpx">发布于:<text>{{item.createTime}}</text></text>
+                        <text style="font-size:26rpx;color:#717171;margin-top:10rpx" class="single-line">{{item.regionOneName}}/{{item.regionTwoName}}/{{item.regionName}}</text>
+                    </view>
+                    <view class="btn" @tap="onGetClick" data-item="{{item}}">抢单</view>
+                </view>
+            </view>
+    </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+import { getRepairList } from '../../utils/api';
+export default class WXYHome extends wepy.page {
+  config = {
+    navigationBarTitleText: '维修抢单系统',
+    navigationBarBackgroundColor: '#FFDE30',
+    navigationBarTextStyle: 'black',
+    disableScroll: false,
+    usingComponents: {},
+    enablePullDownRefresh: true
+  };
+
+  data = {
+    name: null,
+    height: 0,
+    items: [],
+    load: false,
+    noMore: false,
+    page: 1,
+    size: 20
+  };
+
+  methods = {
+    logout() {
+      wx.showModal({
+        title: '提示',
+        content: '确定退出吗？',
+        success: e => {
+          if (e.confirm) {
+            wx.removeStorageSync('login_user_info');
+            wx.removeStorageSync('login_code');
+            wx.redirectTo({
+              url: '../index'
+            });
+          }
+        }
+      });
+    },
+    onGetClick(e){
+
+    },
+    onItemClick(e){
+      wx.navigateTo({
+        url: `./wxy_order_detail?id=${e.currentTarget.dataset.item.id}`
+      })
+    },
+    onOrderClick() {
+      wx.navigateTo({
+        url: './wxy_jilu'
+      });
+    },
+    loadMore() {
+      console.log('load more...');
+    }
+  };
+
+  initScrollViewHeight() {
+    var that = this;
+    //console.log(that)
+    wx.getSystemInfo({
+      success: function(res) {
+        wx.createSelectorQuery()
+          .select('.top-box')
+          .boundingClientRect(function(rect) {
+            // console.log(res);
+            // console.log(rect);
+            const height = res.windowHeight - rect.height;
+            that.height = height;
+            // set data in async method needs to invoke apply() method
+            that.$apply();
+            //console.log(that.height)
+          })
+          .exec();
+      }
+    });
+  }
+
+  async loadData(page, size) {
+    if (this.load) return;
+    this.load = true;
+    let res = await getRepairList(0, page, size, true);
+    this.load = false;
+    wx.stopPullDownRefresh();
+    if (res.status === 1) {
+      res.info.records.forEach(e => {
+        e.images = e.pics.split(';');
+      });
+
+      if (page === 1) {
+        this.items.splice(0, this.items.length);
+        this.items = res.info.records;
+        this.noMore = false;
+      } else {
+        this.items.concat(res.info.records);
+      }
+
+      if (res.info.pageindex.endindex === page) {
+        //
+        this.noMore = true;
+      } else {
+        this.page++;
+      }
+
+      this.$apply();
+    }
+    console.log(res);
+  }
+
+  onLoad() {
+    let user = wx.getStorageSync('login_user_info');
+    this.name = user.name;
+    this.initScrollViewHeight();
+    this.loadData(this.page, this.size);
+  }
+
+  onPullDownRefresh() {
+    this.page = 1;
+    this.loadData(this.page, this.size);
+  }
+}
+</script>
+

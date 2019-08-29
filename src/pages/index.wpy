@@ -351,6 +351,9 @@ export default class Index extends wepy.page {
           });
         } else if (user.roleId === 3) {
           //维修工人
+          wx.redirectTo({
+            url: '../pages/weixiu/wxy_home'
+          });
         } else if (user.roleId === 6) {
           //投诉负责人
         }

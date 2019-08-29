@@ -1,0 +1,115 @@
+<style lang="less" scoped>
+.container {
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+
+    .wrapper{
+        background-color: white;
+        padding-top: 10rpx;
+        width: 100%;
+        box-sizing: border-box;
+        .content{
+            color: #515151;
+            padding: 20rpx;
+            width: 80%;
+            font-size: 30rpx;
+            height: 200rpx;
+        }
+    }
+
+    .btn-submit{
+        width: 60%;
+        height: 70rpx;
+        background-color: #FFDE30;
+        color: #515151;
+        text-align: center;
+        line-height: 70rpx;
+        margin-top: 20rpx;
+        border-radius: 32rpx;
+    }
+    .btn-submit:active{
+        background-color: rgb(252, 230, 122);
+    }
+
+}
+</style>
+<template>
+    <view class="container">
+        <view class="wrapper">
+            <imagePicker @onImageChoose.user="onImageChoose"></imagePicker>
+            <textarea @input="onInput" class="content" placeholder="请输入申诉内容" placeholder-style="color:#919191"></textarea>
+        </view>
+        <view class="btn-submit" @tap="onSave">提交</view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+import {addReportAppeal} from '../../utils/api'
+import {UploadMulti} from '../../utils/uploader'
+import ImagePicker from '../../components/imagePicker';
+const ADMIN_ID = wx.getStorageSync('login_user_info').id;
+
+export default class Appeal extends wepy.page {
+  config = {
+    navigationBarTitleText: '巡检申诉',
+    navigationBarBackgroundColor: '#FFDE30',
+    navigationBarTextStyle: 'black',
+    disableScroll: false,
+    usingComponents: {}
+  };
+
+  components = {
+    imagePicker: ImagePicker
+  };
+
+  data = {
+      insReportId:0,
+      content:'',
+      images:[]
+  };
+
+  methods = {
+    onImageChoose(e) {
+      console.log(e);
+      this.images = e
+    },
+    onInput(e){
+        this.content = e.detail.value
+    },
+    onSave(){
+        if(!this.content){
+            wx.showToast({
+                title: '内容不能为空',
+                icon: 'none'
+            })
+            return
+        }
+        let self = this
+        UploadMulti(this.images,
+        async (res) =>{
+            console.log(res)
+            let repos = await addReportAppeal(self.insReportId,ADMIN_ID,self.content,res.join(';'),true)
+            if(repos.status===1){
+                //朝前返回2页
+                wx.navigateBack({
+                    delta:2
+                });
+            }
+        },
+        e=>{
+
+        });
+
+    }
+  };
+
+  onLoad(query) {
+      this.insReportId = query.insReportId
+      console.log(query)
+  }
+}
+</script>

@@ -1,79 +1,78 @@
 <style lang="less" scoped>
-    .container{
-        box-sizing: border-box;
-        background-color: white;
-        padding: 40rpx;
+.container {
+  box-sizing: border-box;
+  background-color: white;
+  padding: 40rpx;
 
-        .input-line{
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: flex-start;
-            margin-bottom: 30rpx;
-            font-size: 30rpx;
+  .input-line {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 30rpx;
+    font-size: 30rpx;
 
-            .label{
-                padding: 15rpx 20rpx 15rpx 20rpx;
-                border-radius: 10rpx 0 0 10rpx;
-                background-color: #FADA33;
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .input{
-                border: 2rpx solid #FADA33;
-                width: 60%;
-                padding: 14rpx;
-                color: #515151;
-                border-radius: 0 10rpx 10rpx 0;
-            }
-
-            .btn-send{
-                padding: 0 20rpx 0 20rpx;
-                height: 65rpx;
-                line-height: 65rpx;
-                background-color: #FADA33;
-                color: #515151;
-                border-radius: 10rpx;
-                font-size: 26rpx;
-                text-align: center;
-            }
-
-            .btn-send:active{
-                background-color: #F2D232;
-            }
-
-            .btn-send.disable{
-                background-color: #d1d1d1;
-                color: #515151;
-            }
-
-        }
-
-        .input-line:last-child{
-            margin-bottom: 0;
-        }
-
-        .btn-save{
-            border: none;
-            border-radius: 36rpx;
-            font-size: 32rpx;
-            background-color:#FADA33;
-            color: white;
-            margin-top: 40rpx;
-            box-shadow:0 2rpx 5rpx 0px rgba(255,218,26,1);
-        }
-
-        .btn-save::after{
-            border: none;
-        }
-
-        .btn-save:active{
-            background-color: #F2D232;
-        }
+    .label {
+      padding: 12rpx 20rpx 12rpx 20rpx;
+      border-radius: 10rpx 0 0 10rpx;
+      background-color: #fada33;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
     }
+
+    .input {
+      border: 2rpx solid #fada33;
+      width: 60%;
+      padding: 14rpx;
+      color: #515151;
+      border-radius: 0 10rpx 10rpx 0;
+    }
+
+    .btn-send {
+      padding: 0 20rpx 0 20rpx;
+      height: 65rpx;
+      line-height: 65rpx;
+      background-color: #fada33;
+      color: #515151;
+      border-radius: 10rpx;
+      font-size: 26rpx;
+      text-align: center;
+    }
+
+    .btn-send:active {
+      background-color: #f2d232;
+    }
+
+    .btn-send.disable {
+      background-color: #d1d1d1;
+      color: #515151;
+    }
+  }
+
+  .input-line:last-child {
+    margin-bottom: 0;
+  }
+
+  .btn-save {
+    border: none;
+    border-radius: 36rpx;
+    font-size: 32rpx;
+    background-color: #fada33;
+    color: white;
+    margin-top: 40rpx;
+    box-shadow: 0 2rpx 5rpx 0px rgba(255, 218, 26, 1);
+  }
+
+  .btn-save::after {
+    border: none;
+  }
+
+  .btn-save:active {
+    background-color: #f2d232;
+  }
+}
 </style>
 <template>
     <view class="container">
@@ -81,15 +80,15 @@
             <view class="label">
                 <image src="../../../images/ic_account.png" mode="widthFix" class="icon-48"></image>
             </view>
-            <input class="input" placeholder="请输入手机号" placeholder-style="color:#515151" type="number"/>
+            <input class="input" @input="onInput" data-type="mobile" placeholder="请输入手机号" placeholder-style="color:#515151" type="number"/>
         </view>
 
         <view class="input-line">
             <view class="label">
                 <image src="../../../images/ic_account.png" mode="widthFix" class="icon-48"></image>
             </view>
-            <input class="input" placeholder="图形验证码" placeholder-style="color:#515151" style="width:30%" type="number"/>
-            <image src="{{codeUrl}}" style="width:180rpx;height:60rpx;margin-left:20rpx;" mode="asceptFill"></image>
+            <input class="input" @input="onInput" data-type="randCode" placeholder="图形验证码" placeholder-style="color:#515151" style="width:30%" type="number"/>
+            <image src="{{'data:image/png;base64,'+codeRes.imgCode}}" style="width:180rpx;height:60rpx;margin-left:20rpx;" mode="asceptFill"></image>
             <text style="margin-left:20rpx;color:#515151;font-size:28rpx;" @tap="onRefreshClick">换一张?</text>
         </view>
 
@@ -97,46 +96,195 @@
             <view class="label">
                 <image src="../../../images/ic_account.png" mode="widthFix" class="icon-48"></image>
             </view>
-            <input class="input" placeholder="短信验证码" placeholder-style="color:#515151" style="width:30%" type="number"/>
-            <view class="btn-send" style="margin-left:20rpx;">发送验证码</view>
+            <input class="input" @input="onInput" data-type="smsCode" placeholder="短信验证码" placeholder-style="color:#515151" style="width:30%" type="number"/>
+            <view class="btn-send {{sendState?'disable':''}}" style="margin-left:20rpx;" @tap="onSendSms">{{sendText}}</view>
         </view>
 
         <view class="input-line">
             <view class="label">
                 <image src="../../../images/ic_account.png" mode="widthFix" class="icon-48"></image>
             </view>
-            <input class="input" placeholder="请输入新密码" placeholder-style="color:#515151" password="true"/>
+            <input class="input" @input="onInput" data-type="pwd1" placeholder="请输入新密码" placeholder-style="color:#515151" password="true"/>
         </view>
 
         <view class="input-line">
             <view class="label">
                 <image src="../../../images/ic_account.png" mode="widthFix" class="icon-48"></image>
             </view>
-            <input class="input" placeholder="请再次输入新密码" placeholder-style="color:#515151" password="true"/>
+            <input class="input" @input="onInput" data-type="pwd2" placeholder="请再次输入新密码" placeholder-style="color:#515151" password="true"/>
         </view>
 
-        <button class="btn-save">确定修改</button>
+        <button class="btn-save" @tap="onSave">确定修改</button>
     </view>
 </template>
 <script>
 import wepy from 'wepy';
-import {HOST} from '../utils/http.js';
+import { HOST } from '../utils/http';
+import { sendSms, checkCode, getRandomCode, updatePassWd } from '../utils/api';
+let self = null;
 export default class ForgetPwd extends wepy.page {
   config = {
     navigationBarTitleText: '忘记密码',
     navigationBarBackgroundColor: 'white',
     navigationBarTextStyle: 'black',
-    disableScroll: true 
+    disableScroll: true
   };
   data = {
-      codeUrl:`${HOST}base/getImgCode?test=${new Date().getTime()}`,
+    codeRes: {},
+    mobile: null,
+    randCode: null,
+    smsCode: null,
+    passwd1: null,
+    passwd2: null,
+    sendState: false,
+    sendText: '发送验证码',
+    totalTime: 60,
+    timerId: 0
   };
   methods = {
-      onRefreshClick(){
-          this.codeUrl = `${HOST}base/getImgCode?test=${new Date().getTime()}`;
+    async onRefreshClick() {
+      let res = await getRandomCode();
+      if (res.status === 1) this.codeRes = res.info;
+      this.$apply();
+    },
+    onInput(e) {
+      switch (e.currentTarget.dataset.type) {
+        case 'mobile':
+          this.mobile = e.detail.value;
+          break;
+        case 'randCode':
+          this.randCode = e.detail.value;
+          break;
+        case 'smsCode':
+          this.smsCode = e.detail.value;
+          break;
+        case 'pwd1':
+          this.passwd1 = e.detail.value;
+          break;
+        case 'pwd2':
+          this.passwd2 = e.detail.value;
+          break;
       }
+    },
+    async onSendSms() {
+      if (this.sendState) return;
+      //judge the mobile is valid
+      if (!/^1[0-9]{10}$/.test(this.mobile)) {
+        wx.showToast({
+          title: '手机号格式不正确',
+          icon: 'none'
+        });
+        return;
+      }
+
+      //judge random code is valid
+      if (!this.randCode) {
+        wx.showToast({
+          title: '图形验证码为空',
+          icon: 'none'
+        });
+        return;
+      }
+
+      //发送验证码
+      if (this.randCode === this.codeRes.strCode) {
+        let res = await sendSms(this.mobile);
+        if (res.status === 1) {
+          wx.showToast({
+            title: '短信验证码已发送',
+            icon: 'none'
+          });
+          self.sendState = true
+          this.startTimer();
+        }
+      } else {
+        wx.showToast({
+          title: '验证码不正确',
+          icon: 'none'
+        });
+      }
+    },
+    async onSave() {
+      //judge the mobile is valid
+      if (!/^1[0-9]{10}$/.test(this.mobile)) {
+        wx.showToast({
+          title: '手机号格式不正确',
+          icon: 'none'
+        });
+        return;
+      }
+
+      //judge random code is valid
+      if (!this.smsCode) {
+        wx.showToast({
+          title: '验证码为空',
+          icon: 'none'
+        });
+        return;
+      }
+
+      if(!this.passwd1||!this.passwd2){
+          wx.showToast({
+          title: '密码不能为空',
+          icon: 'none'
+        });
+        return;
+      }
+
+      if(this.passwd1 !== this.passwd2){
+          wx.showToast({
+          title: '密码不一致',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      let res = await updatePassWd(this.passwd1,this.passwd2,this.smsCode)
+      if(res.status===1){
+          wx.showToast({
+              title: '密码修改成功',
+              icon: 'none'
+          })
+          setTimeout(() => {
+              wx.navigateBack()
+          }, 200);
+      }
+
+    }
   };
 
-  onLoad() {}
+  startTimer() {
+    this.timerId = setInterval(this.tiktok, 1000);
+  }
+  stopTimer() {
+    clearInterval(this.timerId);
+  }
+  tiktok() {
+    if (self.totalTime <= 0) {
+      //倒计时结束
+      self.totalTime = 60;
+      self.sendState = false;
+      self.sendText = '发送验证码';
+      clearInterval(self.timerId);
+      self.$apply();
+      return;
+    }
+    self.sendText = `${self.totalTime}S后`;
+    //console.log('step one...');
+    self.totalTime--;
+    self.$apply();
+  }
+
+  async onLoad() {
+    let res = await getRandomCode();
+    if (res.status === 1) this.codeRes = res.info;
+    this.$apply();
+    self = this;
+  }
+
+  onDestroy() {
+    //清除定时器
+    this.stopTimer()
+  }
 }
 </script>

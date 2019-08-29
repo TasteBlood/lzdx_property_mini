@@ -23,7 +23,7 @@
     flex-direction: row;
     width: 100%;
     background-color: white;
-    box-shadow:0px 1px 2px 0px rgba(139,163,187,0.24);
+    box-shadow: 0px 1px 2px 0px rgba(139, 163, 187, 0.24);
     box-sizing: border-box;
     padding: 20rpx;
     align-items: baseline;
@@ -40,8 +40,8 @@
     width: 190rpx;
     height: 180rpx;
     padding: 100rpx 40rpx 60rpx 40rpx;
-    background: rgba(252,227,92,1);
-    box-shadow: 0px 6px 12px 0px rgba(214,224,235,1);
+    background: rgba(252, 227, 92, 1);
+    box-shadow: 0px 6px 12px 0px rgba(214, 224, 235, 1);
     border-radius: 30rpx;
     text-align: center;
     display: flex;
@@ -50,16 +50,16 @@
     align-items: center;
   }
 
-  .menu:active{
+  .menu:active {
     box-shadow: 0rpx 12rpx 20rpx 0rpx rgba(200, 200, 200, 1);
   }
 
-  .top-bar{
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      padding: 20rpx;
-      font-size: 32rpx;
+  .top-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 20rpx;
+    font-size: 32rpx;
   }
 }
 </style>
@@ -74,11 +74,11 @@
       <text style="margin-left:10rpx;font-size:30rpx;color:#4d4d4d">扫码报修</text>
     </view>
     <view class="menu-panel">
-      <view class="menu">
+      <view class="menu" @tap="onItemClick" data-type="public-area">
         <image src="../../../images/quyuguanli.png" mode="widthFix" class="icon-64"/>
         <text style="font-size:36rpx;font-weight:400;">公共区域</text>
       </view>
-      <view class="menu">
+      <view class="menu" @tap="onItemClick" data-type="public-equip">
         <image src="../../../images/saoma.png" mode="widthFix" class="icon-64"/>
         <text style="font-size:36rpx;font-weight:400;">设备扫码</text>
       </view>
@@ -96,11 +96,11 @@
     </view>
 
     <view class="menu-panel">
-      <view class="menu">
+      <view class="menu" @tap="onItemClick" data-type="location">
         <image src="../../../images/dingwei.png" mode="widthFix" class="icon-64"/>
         <text style="font-size:36rpx;font-weight:400;">定位报修</text>
       </view>
-      <view class="menu">
+      <view class="menu" @tap="onItemClick" data-type="user" >
         <image src="../../../images/zhujiahu.png" mode="widthFix" class="icon-64"/>
         <text style="font-size:36rpx;font-weight:400;">住家户保修</text>
       </view>
@@ -110,15 +110,14 @@
 
 <script>
 import wepy from 'wepy';
-import {get} from '../utils/http';
+import { get } from '../utils/http';
 export default class Index extends wepy.page {
   config = {
     navigationBarTitleText: '用户报修系统',
     navigationBarBackgroundColor: '#f5f7f9',
     navigationBarTextStyle: 'black',
     disableScroll: true,
-    usingComponents: {
-    }
+    usingComponents: {}
   };
 
   data = {};
@@ -126,28 +125,50 @@ export default class Index extends wepy.page {
   computed = {};
 
   methods = {
-    logout(){
-        wx.showModal({
-            title: '提示',
-            content: '确定退出吗？',
-            success:(e)=>{
-                if(e.confirm){
-                  wx.removeStorageSync('login_user_info')
-                  wx.removeStorageSync('login_code')
-                    wx.redirectTo({
-                        url: 'index'
-                    })
-                }
-            }
-        })
+    logout() {
+      wx.showModal({
+        title: '提示',
+        content: '确定退出吗？',
+        success: e => {
+          if (e.confirm) {
+            wx.removeStorageSync('login_user_info');
+            wx.removeStorageSync('login_code');
+            wx.redirectTo({
+              url: 'index'
+            });
+          }
+        }
+      });
+    },
+    onItemClick(e) {
+      switch (e.currentTarget.dataset.type) {
+        case 'public-area':
+          wx.navigateTo({
+            url: './user/public_area_equip_repair?repairType=1'
+          })
+          break;
+        case 'public-equip':
+          wx.navigateTo({
+            url: './user/public_area_equip_repair?repairType=2'
+          })
+          break;
+        case 'location':
+          wx.navigateTo({
+            url: './user/public_area_equip_repair?repairType=1&location=true'
+          })
+          break;
+        case 'user':
+          wx.navigateTo({
+            url: './user/user_repair'
+          })
+          break;
+      }
     }
   };
   watch = {};
 
   events = {};
 
-  async onLoad(){
-
-  }
+  async onLoad() {}
 }
 </script>

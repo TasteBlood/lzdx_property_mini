@@ -1,0 +1,166 @@
+<style lang="less" scoped>
+.container {
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f7f9;
+
+  .tabs {
+    background-color: white;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+
+    .tab {
+      padding: 20rpx;
+      font-size: 28rpx;
+      color: #919191;
+      text-align: center;
+      width: 20%;
+    }
+    .tab:active {
+      background-color: #f5f7f9;
+    }
+    .tab.active {
+      border-bottom: 4rpx solid #ffde30;
+      color: #515151;
+    }
+
+    .list {
+      .no-data {
+        text-align: center;
+        padding: 20rpx;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+    }
+  }
+}
+</style>
+<template>
+    <view class="container">
+        <view class="tabs">
+            <view class="tab {{currentIndex===0?'active':''}}" bindtap="onTabClick" data-index="0">
+                已接单
+            </view>
+            <view class="tab {{currentIndex===1?'active':''}}" bindtap="onTabClick" data-index="1">
+                维修中
+            </view>
+            <view class="tab {{currentIndex===2?'active':''}}" bindtap="onTabClick" data-index="2">
+                未付款
+            </view>
+            <view class="tab {{currentIndex===3?'active':''}}" bindtap="onTabClick" data-index="3">
+                已完成
+            </view>
+        </view>
+        <swiper style="margin-top:2px;height:{{height}}px" current="{{currentIndex}}" bindchange="onSwiperChange">
+            <swiper-item>
+                <scroll-view scroll-y scroll-with-animation style="height:{{height}}px" @scroll="onScroll">
+                    <view class="list" wx:if="{{items1.length>0}}">
+                        <view class="list-item" wx:for="{{items1}}" wx:key="{{index}}">
+                            
+                        </view>
+                    </view>
+                    <view wx:else style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;">
+                            <image src="../../../../../images/no_data.png" style="width:200rpx;height:180rpx;" mode="widthFix"></image>
+                            <text style="font-size:28rpx;color:#a1a1a1;margin-top:20rpx;">暂无数据</text>
+                    </view>
+                </scroll-view>
+            </swiper-item>
+            <swiper-item>
+                <scroll-view scroll-y scroll-with-animation style="height:{{height}}px">
+                    <view class="list" wx:if="{{items2.length>0}}">
+                        <view class="list-item" wx:for="{{items2}}" wx:key="{{index}}">
+                            
+                        </view>
+                    </view>
+                    <view wx:else style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;">
+                        <image src="../../../../../images/no_data.png" style="width:200rpx;height:180rpx;" mode="widthFix"></image>
+                        <text style="font-size:28rpx;color:#a1a1a1;margin-top:20rpx;">暂无数据</text>
+                    </view>
+                </scroll-view>
+            </swiper-item>
+            <swiper-item>
+                <scroll-view scroll-y scroll-with-animation style="height:{{height}}px">
+                    <view class="list" wx:if="{{items3.length>0}}">
+                        <view class="list-item" wx:for="{{items3}}" wx:key="{{index}}">
+                            
+                        </view>
+                    </view>
+                    <view wx:else style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;">
+                            <image src="../../../../../images/no_data.png" style="width:200rpx;height:180rpx;" mode="widthFix"></image>
+                            <text style="font-size:28rpx;color:#a1a1a1;margin-top:20rpx;">暂无数据</text>
+                        </view>
+                </scroll-view>
+            </swiper-item>
+            <swiper-item>
+                <scroll-view scroll-y scroll-with-animation style="height:{{height}}px">
+                    <view class="list" wx:if="{{items4.length>0}}">
+                        <view class="list-item" wx:for="{{items4}}" wx:key="{{index}}">
+                            
+                        </view>
+                    </view>
+                    <view vx:else style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;">
+                            <image src="../../../../../images/no_data.png" style="width:200rpx;height:180rpx;" mode="widthFix"></image>
+                            <text style="font-size:28rpx;color:#a1a1a1;margin-top:20rpx;">暂无数据</text>
+                    </view>
+                </scroll-view>
+            </swiper-item>
+        </swiper>
+    </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class WXYJilu extends wepy.page {
+  config = {
+    navigationBarTitleText: '我的维修单',
+    navigationBarBackgroundColor: '#FFDE30',
+    navigationBarTextStyle: 'black',
+    disableScroll: true,
+    usingComponents: {}
+  };
+
+  data = {
+    currentIndex: 0,
+    height: 0,
+    items1: [],
+    items2: [],
+    items3: [],
+    items4: []
+  };
+  initScrollViewHeight() {
+    var that = this;
+    wx.getSystemInfo({
+      success: function(res) {
+        wx.createSelectorQuery()
+          .select('.tabs')
+          .boundingClientRect(function(rect) {
+            const height = res.windowHeight - rect.height;
+            that.height = height;
+            // set data in async method needs to invoke apply() method
+            that.$apply();
+          })
+          .exec();
+      }
+    });
+  }
+  methods = {
+    // on tab click event
+    onTabClick(e) {
+      //console.log(e)
+      this.currentIndex = Number.parseInt(e.currentTarget.dataset.index);
+    },
+    // on swiper change
+    onSwiperChange(e) {
+      this.currentIndex = e.detail.current;
+    },
+    async loadData(type, pageNum, pageSize) {}
+  };
+
+  async onLoad() {
+    this.initScrollViewHeight();
+  }
+}
+</script>
+

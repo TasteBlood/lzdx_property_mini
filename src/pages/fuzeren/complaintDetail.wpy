@@ -1,91 +1,183 @@
 <style lang="less" scoped>
-    .container{
-        display: flex;
-        flex-direction: column;
+.container {
+  display: flex;
+  flex-direction: column;
 
-        .area{
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            padding: 15rpx;
-            background-color: white;
-            font-size: 30rpx;
+  .location-info {
+    font-size: 30rpx;
+    color: #414141;
+    display: flex;
+    flex-direction: row;
+    align-items: top;
+  }
 
-            .title{
-                width: 150rpx;
-                color: #717171;
-            }
-        }
-    }
+  .input {
+    width: 80%;
+  }
+
+  .textarea {
+    width: 90%;
+    background-color: white;
+    border: 2rpx solid #f1f1f1;
+    margin-left: 20rpx;
+    margin-right: 20rpx;
+    padding: 10rpx;
+    color: #515151;
+    font-size: 30rpx;
+  }
+
+  .btn-submit {
+    width: 60%;
+    background-color: #ffde30;
+    margin-top: 20rpx;
+    margin-bottom: 20rpx;
+    font-size: 32rpx;
+    border-radius: 32rpx;
+    color: #414141;
+  }
+
+  .line {
+    border: 1rpx solid #f1f1f1;
+    margin-left: 20rpx;
+  }
+
+  .btn-submit:active {
+    background-color: rgb(253, 232, 124);
+  }
+
+  .btn-submit:after {
+    border: none;
+  }
+}
 </style>
-
 <template>
     <view class="container">
-        <view class="area">
-            <text class="title">投诉区域:</text>
-            <text>城关区垃圾场焚烧炉无人看管你妹的</text>
+        <view style="padding:20rpx;background-color: white;">
+            <view class="location-info">
+                <text style="color:#717171;width:150rpx;">巡检区域:</text>
+                <text>{{insReport.regionName}}</text>
+            </view>
+            <view class="location-info" style="margin-top:10rpx;">
+                <text style="color:#717171;width:150rpx;">区域编号:</text>
+                <text>{{insReport.regionId}}</text>
+            </view>
+            <view class="location-info" style="margin-top:10rpx;">
+                <text style="color:#717171;width:120rpx;">负责人:</text>
+                <text>{{insReport.adminName}}</text>
+            </view>
         </view>
-        <view class="area" style="margin-top:20rpx;">
-            <text class="title">投诉内容:</text>
+
+        <view style="background-color:white;margin-top:20rpx;padding:20rpx 20rpx 20rpx 20rpx;display:flex;flex-direction:row;align-items:center;font-size:30rpx;">
+            <text style="color:#717171;width:150rpx;">巡检标题:</text>
+            <text style="font-size:30rpx;width:80%">{{insReport.title}}</text>
         </view>
-        <view style="padding:15rpx;background-color:white;font-size:30rpx;">
-            城关区垃圾场焚烧炉无人看管城关区垃圾场焚烧炉无人看管城关区垃圾场焚烧炉无人看管
+        <view class="line"></view>
+        <view style="background-color:white;padding:20rpx 20rpx 20rpx 20rpx;display:flex;flex-direction:row;align-items:center;font-size:30rpx;">
+            <text style="color:#717171;width:150rpx;">巡检类型:</text>
+            <text style="font-size:30rpx;">{{insReport.typeName}}</text>
         </view>
-        <text style="font-size:30rpx;color:#F46924;margin:15rpx;">附图:</text>
-        <gridImage :resources="resources" deleteMode="true" @onItemClick.user="onItemClick"></gridImage>
-        <bigImage :url.sync="url" :show.sync="showBig" @onClose.user="onClose"></bigImage>
-        <!-- <imagePicker @onItemClick.user="onItemClick" @onImageChoose.user="onImageChoose"></imagePicker> -->
+
+        <view style="font-size:28rpx;color:#414141;text-align:left;padding:20rpx;">现场图片</view>
+        <gridImage @onItemClick.user="onPicItemClick" :resources.sync="getInsImages"></gridImage>
+        <bigImage :url.sync="currentUrl" :show.sync="showBig" @onClose.user="onCloseBig"></bigImage>
+        <view class="location-info" style="margin-top:10rpx;padding:20rpx;background-color:white">
+                <text style="color:#717171;width:150rpx;">问题描述:</text>
+                <text style="width:80%">{{insReport.content}}</text>
+        </view>
+        <view class="line"></view>
+        <view class="location-info" style="padding:20rpx;background-color:white">
+                <text style="color:#717171;width:150rpx;">处罚建议:</text>
+                <text style="width:80%">{{insReport.proposal}}</text>
+        </view>
+        <view style="margin-top:20rpx;background-color:white" wx:if="{{insReport.state>=2}}">
+            <view style="font-size:30rpx;color:#414141;text-align:left;padding:20rpx;display:flex;flex-direction:row;align-items:center">
+                <view style="height:30rpx;border-left:6rpx solid #FFDE30"></view>
+                <text style="margin-left:10rpx;">申诉信息</text>
+            </view>
+            <gridImage2 @onItemClick.user="onPicItemClick" :resources.sync="getAppealImages"></gridImage2>
+            <view class="location-info" style="padding:20rpx;background-color:white">
+                <text style="color:#717171;width:150rpx;">申诉内容:</text>
+                <text style="width:80%">{{insReport.appealContent}}</text>
+            </view>
+        </view>
+
+        <button class="btn-submit" wx:elif="{{insReport.state===1}}">申诉</button>
+
+        <view style="margin-top:20rpx;margin-bottom:20rpx;background-color:white" wx:if="{{insReport.state>=3}}">
+            <view style="font-size:30rpx;color:#414141;text-align:left;padding:20rpx;display:flex;flex-direction:row;align-items:center">
+                <view style="height:30rpx;border-left:6rpx solid #FFDE30"></view>
+                <text style="margin-left:10rpx;">处罚结果</text>
+            </view>
+            <view style="color:#515151;font-size:30rpx;padding:0rpx 20rpx 20rpx 20rpx;display:flex;flex-direction:column;">
+                <text>{{insReport.reason}}</text>
+                <text wx:if="{{insReport.deduct_points}}">扣分:{{insReport.deduct_points}}分</text>
+                <text wx:if="{{insReport.forfeit}}">罚款:{{insReport.forfeit/100}}元</text>
+            </view>
+        </view>
     </view>
 </template>
 <script>
-import wepy from 'wepy'
-import GridImage from '../../components/gridImage'
-import BigImage from '../../components/bigImage'
+import wepy from 'wepy';
+import GridImage from '../../components/gridImage';
+import BigImage from '../../components/bigImage';
+import {getReportById} from '../../utils/api'
+export default class ComplaintDetail extends wepy.page {
+  config = {
+    navigationBarTitleText: '巡检详情',
+    navigationBarBackgroundColor: '#FFDE30',
+    navigationBarTextStyle: 'black',
+    disableScroll: false,
+    usingComponents: {}
+  };
 
-export default class ComplaintDetail extends wepy.page{
-    config = {
-        navigationBarTitleText: '投诉详情',
-        navigationBarBackgroundColor: '#FFDE30',
-        navigationBarTextStyle: 'black',
-        disableScroll: false,
-        usingComponents: {
-        }
-    };
-    components={
-        gridImage:GridImage,
-        bigImage:BigImage
-    };
+  data = {
+    showBig: false,
+    currentUrl: '',
+    insReportId:0,
+    insReport:null,
+  };
 
-    data = {
-        resources:[
-        ],
-        deleteMode:true,
-        showBig:false,
-        url:''
-    };
+  components = {
+    gridImage: GridImage,
+    gridImage2: GridImage,
+    bigImage: BigImage
+  };
 
-    methods = {
-        onItemClick(e){
-            console.log(e);
-            this.showBig = true;
-            this.url = e;
-        },
-        onClose(){
-            this.showBig = false;
-            this.url = "";
-        },
-        onImageChoose(res){
-            console.log(res)
-        }
-    };
-
-    events = {
-    };
-
-    computed = {};
-    onLoad(){
-        //console.log(GridImage);
+  methods = {
+    onPicItemClick(e) {
+      this.currentUrl = e;
+      this.showBig = true;
+    },
+    onCloseBig() {
+      this.showBig = false;
     }
+  };
+
+  computed = {
+    getInsImages(){
+      //console.log(this)
+      if(this.insReport && this.insReport.fileUrl)
+        return this.insReport.fileUrl.split(';')
+    },
+    getAppealImages(){
+      if(this.insReport && this.insReport.appealFileUrl)
+        return this.insReport.appealFileUrl.split(';')
+    }    
+  }
+
+  onLoad(query) {
+      this.insReportId = query.insReportId
+  }
+
+  onReady() {}
+
+  async onShow(){
+      let res = await getReportById(this.insReportId)
+      if(res.status===1){
+        this.insReport = res.info
+        this.$apply()
+      }
+      console.log(res)
+  }
 }
 </script>
-
