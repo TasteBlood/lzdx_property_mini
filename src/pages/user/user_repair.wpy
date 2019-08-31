@@ -28,7 +28,6 @@
     .text-area {
       border: solid 1rpx #e1e1e1;
       padding: 10rpx;
-      height: 120rpx;
       margin: 20rpx;
       border-radius: 4rpx;
       font-size: 30rpx;
@@ -81,7 +80,7 @@
         <view class="info">
             <view style="font-size:32rpx;color:#414141;padding:20rpx;"><text style="color:#FFDE30;height:20rpx;border-right:solid 8rpx #FFDE30;margin-right:10rpx;"></text>报修信息</view>
             <imagePicker @onImageChoose.user="onImageChoose"></imagePicker>
-            <textarea @input="onInput" data-type="reason" class="text-area" placeholder="请描述问题/情况" placeholder-style="color:#919191"></textarea>
+            <input @input="onInput" data-type="reason" class="text-area" placeholder="请描述问题/情况" placeholder-style="color:#919191" />
             <text class="btn-record" style="margin:0 20rpx 20rpx 20rpx;background-color:#FFDE30;color:#414141;font-size:32rpx;">开始录音</text>
         </view>
 

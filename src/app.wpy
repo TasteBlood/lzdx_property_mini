@@ -63,28 +63,25 @@ import 'wepy-async-function';
 export default class extends wepy.app {
   config = {
     pages: [
+      'pages/index',
+      'pages/weixiu/wxy_jilu',
+      
       'pages/weixiu/wxy_home',
       'pages/common_user_main',
       'pages/user/user_repair',
-      
-      
       'pages/user/public_area_equip_repair',
-      
-      
       'pages/xunjianyuan/xjy_jilu',
       'pages/xunjianyuan/xjy_home',
-      'pages/index',
+      
       'pages/fuzeren/home',
       'pages/fuzeren/appeal',
       'pages/weixiu/wxy_order_detail',
-      'pages/weixiu/wxy_jilu',
+      
       'pages/xunjianyuan/xjy_location',
       'pages/xunjianyuan/xjy_detail',
       'pages/forget_pwd',
       'pages/fuzeren/complaintDetail',
-      
       'pages/admin_login',
-      'pages/main'
     ],
     window: {
       backgroundTextStyle: 'dark',
@@ -149,7 +146,7 @@ export default class extends wepy.app {
         success: function(res) {
           if (res.confirm) {
             // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
-            updateManager.applyUpdate();
+            manager.applyUpdate();
           }
         }
       });

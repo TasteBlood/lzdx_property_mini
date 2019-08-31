@@ -18,11 +18,11 @@
   .btn-call {
     padding: 5rpx 10rpx 5rpx 10rpx;
     background-color: #ffde30;
-    color: #717171;
+    color: #515151;
     border-radius: 6rpx;
   }
 
-  .btn-call:active{
+  .btn-call:active {
     background-color: #fce884;
   }
 
@@ -35,32 +35,94 @@
     color: #414141;
     padding: 20rpx;
   }
+
+  .btn-up{
+    width: 60%;
+    height: 70rpx;
+    background-color: #ffde30;
+    color: #515151;
+    text-align: center;
+    line-height: 70rpx;
+    border-radius: 32rpx;
+  }
+  .btn-up:active{
+    background-color: #fde672;
+  }
 }
 </style>
 
 <template>
-    <view class="container">
-        <gridImage :resources="resources" @onItemClick.user="onPicItemClick"></gridImage>
-        <view class="voice" wx:if="{{order.voice}}">TEMP_20190927001.mp3</view>
-        <bigImage :show.sync="showBig" :url.sync="currentUrl" @onClose.user="onClose"></bigImage>
-        <view class="question-desc">
-            {{order.repairReason}}
-        </view>
-        <view style="font-size:28rpx;margin-left:20rpx;margin-right:20rpx;margin-bottom:20rpx;color:#717171;">{{order.regionOneName}}/{{order.regionTwoName}}/{{order.regionName}}</view>
-        <view style="font-size:30rpx;color:#515151;padding:0 20rpx 0 20rpx">发布时间:{{order.createTime}}</view>
-        <view wx:if="{{order.fee}}" style="font-size:30rpx;color:#515151;padding:20rpx 20rpx 0 20rpx">维修费:<text style="color:#2FBDF5">¥12.00</text></view>
-        <view style="font-size:30rpx;color:#515151;padding:15rpx 20rpx 0 20rpx;display:flex;flex-direction:row;align-items:center">
-            <text>报修人:{{order.repairName}}</text>
-            <text style="margin-left:20rpx">{{order.repairMobile}}</text>
-            <view class="btn-call" style="margin-left:10rpx">呼 叫</view>
-        </view>
+  <view class="container">
+    <gridImage :resources.sync="getImages" @onItemClick.user="onPicItemClick"></gridImage>
+    <view class="voice" wx:if="{{order.voice}}">TEMP_20190927001.mp3</view>
+    <bigImage :show.sync="showBig" :url.sync="currentUrl" @onClose.user="onClose"></bigImage>
+    <view class="question-desc">{{order.repairReason}}</view>
+    <view
+      style="font-size:28rpx;margin-left:20rpx;margin-right:20rpx;margin-bottom:20rpx;color:#717171;"
+    >{{order.regionOneName}}/{{order.regionTwoName}}/{{order.regionName}}</view>
+    <view
+      style="font-size:30rpx;color:#515151;padding:0 20rpx 0 20rpx;margin-bottom:20rpx;"
+    >维修类型:{{order.repairType}}</view>
+    <view style="font-size:30rpx;color:#515151;padding:0 20rpx 0 20rpx">报修时间:{{order.createTime}}</view>
+    <view
+      wx:if="{{order.fee}}"
+      style="font-size:30rpx;color:#515151;padding:20rpx 20rpx 0 20rpx"
+    >维修费:
+      <text style="color:#2FBDF5">¥12.00</text>
     </view>
+    <view
+      style="font-size:30rpx;color:#515151;padding:15rpx 20rpx 0 20rpx;display:flex;flex-direction:row;align-items:center"
+    >
+      <text>报修人:{{order.repairName}}</text>
+      <text style="margin-left:20rpx">{{order.repairMobile}}</text>
+      <view class="btn-call" style="margin-left:10rpx">呼 叫</view>
+    </view>
+    <view style="margin-top:20rpx;font-size:30rpx;color:#515151;padding:20rpx" wx:if="{{order.isAppoint}}">
+      <view>
+        <text>预约维修:</text>
+        <text style="color:#414141">{{order.isAppoint===1?'是':'否'}}</text>
+      </view>
+      <view style="margin-top:20rpx">
+        <text>预约时间:</text>
+        <text style="color:#414141">{{order.appointTime}}</text>
+      </view>
+      <view style="margin-top:20rpx">
+        <text>详细地址:</text>
+        <text style="color:#414141">{{order.address}}</text>
+      </view>
+    </view>
+    <!-- orderState===0 待抢单 -->
+    <view wx:if="{{order.orderState===0}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <view class="btn-up" @tap="onUpOrder">抢 单</view>
+    </view>
+    <!-- orderState===2 待完成 住家户-->
+    <view wx:if="{{order.orderState===2 && order.regionType===2}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <input @input="onInput" placeholder="维修费" inputmode="number" style="border-radius:8rpx;border:1rpx solid #e1e1e1;width:200rpx;padding:10rpx;text-align:center" placeholder-style="color:#919191"/>
+      <text style="color:#717171;font-size:30rpx">(无,可不填)</text>
+      <view class="btn-up" style="margin-top:20rpx;margin-bottom:20rpx" @tap="onWaitPayClick">维修完成</view>
+    </view>
+    <!-- orderState===2 待完成 设备/区域-->
+    <view wx:if="{{order.orderState===2 && order.regionType !== 2}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <view class="btn-up" style="margin-top:20rpx;margin-bottom:20rpx" @tap="onFinishClick">维修完成</view>
+    </view>
+
+    <view wx:if="{{order.orderState===3}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <image src="../../images/wai_pay.png" style="width:100rpx;height:100rpx" mode="widthFix"></image>
+      <text style="color:#414141;font-size:32rpx;margin-top:10rpx">待支付</text>
+    </view>
+    
+    <view wx:if="{{order.orderState===4}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <image src="../../images/finish.png" style="width:100rpx;height:100rpx" mode="widthFix"></image>
+      <text style="color:#414141;font-size:32rpx;margin-top:10rpx">已完成</text>
+    </view>
+  </view>
 </template>
 <script>
 import wepy from 'wepy';
 import GridImage from '../../components/gridImage';
 import BigImage from '../../components/bigImage';
-import { getOrderDetail } from '../../utils/api';
+import { getOrderBySelf,getOrderDetail ,finishOrder,enterPrice} from '../../utils/api'
+const UID = wx.getStorageSync('login_user_info').id
 export default class WXYOrderDetail extends wepy.page {
   config = {
     navigationBarTitleText: '维修详情',
@@ -76,15 +138,11 @@ export default class WXYOrderDetail extends wepy.page {
   };
 
   data = {
-    resources: [
-      'http://i1.17173.itc.cn/2010/news/2010/08/09/s0809xyj01s.jpg',
-      'http://pic1.cxtuku.com/00/15/12/b44248cc7209.jpg',
-      'http://a3.att.hudong.com/46/71/01300543947353147692713190613.jpg'
-    ],
     showBig: false,
     currentUrl: null,
     oid: 0,
-    order: null
+    order: null,
+    serviceFee:0
   };
 
   methods = {
@@ -93,8 +151,82 @@ export default class WXYOrderDetail extends wepy.page {
       this.currentUrl = e;
       this.showBig = true;
     },
+    onInput(e){
+      this.serviceFee = Number.parseFloat(e.detail.value)
+    },
+    
     onClose() {
       this.showBig = false;
+    },
+    async onUpOrder(){
+      let res = await getOrderBySelf(this.order.id,2,UID)
+      if(res.status===1){
+        wx.showToast({
+          title: '抢单成功',
+          icon: 'none'
+        })
+        setTimeout(() => {
+          wx.navigateBack()
+        }, 500);
+      }
+    },
+    async onWaitPayClick(){
+      if(!this.serviceFee){
+        wx.showToast({
+          title:'费用为空',
+          icon:'none'
+        })
+        return
+      }
+      let self = this
+      wx.showModal({
+        title: '此操作不可逆',
+        content: '已完成？',
+        success: async function(e) {
+          //console.log(e)
+          if(e.confirm){
+            let res = await enterPrice(self.order.id, 3,Number.parseInt(self.serviceFee*100))
+            if(res.status===1){
+              wx.showToast({
+                title: '维修完成',
+                icon: 'none'
+              })
+            }
+            setTimeout(() => {
+              wx.navigateBack()
+            }, 500);
+          }
+        }
+      })
+    },
+
+    onFinishClick(){
+      let self = this
+      wx.showModal({
+        title: '此操作不可逆',
+        content: '已完成？',
+        success: async function(e) {
+          //console.log(e)
+          if(e.confirm){
+            let res = await finishOrder(self.order.id, 4)
+            if(res.status===1){
+              wx.showToast({
+                title: '维修完成',
+                icon: 'none'
+              })
+            }
+            setTimeout(() => {
+              wx.navigateBack()
+            }, 500);
+          }
+        }
+      })
+    }
+  };
+
+  computed = {
+    getImages() {
+      if (this.order && this.order.pics) return this.order.pics.split(';');
     }
   };
 

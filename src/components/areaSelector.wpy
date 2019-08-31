@@ -1,5 +1,5 @@
 <style lang="less" scoped>
-    .container{
+    .areaSelector{
         display: flex;
         flex-direction: column;
         position: absolute;
@@ -63,7 +63,7 @@
 </style>
 
 <template>
-    <view class="container {{show?'':'hide'}}">
+    <view class="areaSelector {{show?'':'hide'}}">
         <view class="bg"></view>
         <view class="selector">
             <view class="content">

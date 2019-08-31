@@ -79,17 +79,17 @@
             </view>
         </view>
             <view class="list">
-                <view class="list-item" wx:for="{{items}}" wx:key="{{index}}" @tap="onItemClick" data-item="{{item}}">
+                <view class="list-item" @tap="onItemClick" data-item="{{item}}" wx:for="{{items}}" wx:key="{{index}}" >
                     <image wx:if="{{item.images.length>0 && item.images[0]}}" lazy-mode src="{{item.images[0]}}" mode="aspectFill" style="width:200rpx;height:140rpx;"></image>
                     <image wx:else src="../../../../../images/img_error.png" class="pic-error" lazy-load mode="widthFix"/>
                     <view class="content">
                         <view class="single-line" style="color:#414141">
                             {{item.repairReason}}
                         </view>
-                        <text style="font-size:26rpx;color:#717171;margin-top:10rpx">发布于:<text>{{item.createTime}}</text></text>
+                        <text style="font-size:26rpx;color:#717171;margin-top:10rpx">报修于:<text>{{item.createTime}}</text></text>
                         <text style="font-size:26rpx;color:#717171;margin-top:10rpx" class="single-line">{{item.regionOneName}}/{{item.regionTwoName}}/{{item.regionName}}</text>
                     </view>
-                    <view class="btn" @tap="onGetClick" data-item="{{item}}">抢单</view>
+                    <view class="btn" catchtap="onGetClick" data-item="{{item}}" data-index="{{index}}">抢单</view>
                 </view>
             </view>
     </view>
@@ -97,7 +97,8 @@
 
 <script>
 import wepy from 'wepy';
-import { getRepairList } from '../../utils/api';
+import { getRepairList,getOrderBySelf} from '../../utils/api'
+const UID = wx.getStorageSync('login_user_info').id
 export default class WXYHome extends wepy.page {
   config = {
     navigationBarTitleText: '维修抢单系统',
@@ -134,8 +135,16 @@ export default class WXYHome extends wepy.page {
         }
       });
     },
-    onGetClick(e){
-
+    async onGetClick(e){
+        let res = await getOrderBySelf(e.currentTarget.dataset.item.id,2,UID)
+        if(res.status===1){
+          wx.showToast({
+            title: '抢单成功',
+            icon: 'none'
+          })
+          this.items.splice(Number.parseInt(e.currentTarget.dataset.index),1)
+          this.$apply()
+        }
     },
     onItemClick(e){
       wx.navigateTo({
@@ -176,7 +185,7 @@ export default class WXYHome extends wepy.page {
   async loadData(page, size) {
     if (this.load) return;
     this.load = true;
-    let res = await getRepairList(0, page, size, true);
+    let res = await getRepairList(0, '', '', page, size, true);
     this.load = false;
     wx.stopPullDownRefresh();
     if (res.status === 1) {

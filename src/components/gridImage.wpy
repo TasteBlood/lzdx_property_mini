@@ -1,4 +1,4 @@
-<style lang="less">
+<style lang="less" scoped>
     .gridview{
         display: flex;
         flex-direction: row;

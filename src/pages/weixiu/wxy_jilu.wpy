@@ -24,101 +24,210 @@
       border-bottom: 4rpx solid #ffde30;
       color: #515151;
     }
+  }
+  .list {
+    .no-data {
+      text-align: center;
+      padding: 20rpx;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
 
-    .list {
-      .no-data {
-        text-align: center;
-        padding: 20rpx;
+    .list-item {
+      display: flex;
+      flex-direction: row;
+      box-sizing: border-box;
+      padding: 10rpx 20rpx 10rpx 20rpx;
+      align-items: center;
+      background-color: white;
+      margin-bottom: 20rpx;
+      box-shadow: 2rpx 4rpx 5rpx 0 #f1f1f1;
+
+      .pic-error {
+        width: 160rpx;
+        height: 100rpx;
+      }
+
+      .content {
+        font-size: 30rpx;
+        color: #414141;
+        padding: 10rpx;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: space-between;
+        width: 70%;
       }
+    }
+    .list-item:active {
+      background-color: transparent;
     }
   }
 }
 </style>
 <template>
-    <view class="container">
-        <view class="tabs">
-            <view class="tab {{currentIndex===0?'active':''}}" bindtap="onTabClick" data-index="0">
-                已接单
-            </view>
-            <view class="tab {{currentIndex===1?'active':''}}" bindtap="onTabClick" data-index="1">
-                维修中
-            </view>
-            <view class="tab {{currentIndex===2?'active':''}}" bindtap="onTabClick" data-index="2">
-                未付款
-            </view>
-            <view class="tab {{currentIndex===3?'active':''}}" bindtap="onTabClick" data-index="3">
-                已完成
-            </view>
-        </view>
-        <swiper style="margin-top:2px;height:{{height}}px" current="{{currentIndex}}" bindchange="onSwiperChange">
-            <swiper-item>
-                <scroll-view scroll-y scroll-with-animation style="height:{{height}}px" @scroll="onScroll">
-                    <view class="list" wx:if="{{items1.length>0}}">
-                        <view class="list-item" wx:for="{{items1}}" wx:key="{{index}}">
-                            
-                        </view>
-                    </view>
-                    <view wx:else style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;">
-                            <image src="../../../../../images/no_data.png" style="width:200rpx;height:180rpx;" mode="widthFix"></image>
-                            <text style="font-size:28rpx;color:#a1a1a1;margin-top:20rpx;">暂无数据</text>
-                    </view>
-                </scroll-view>
-            </swiper-item>
-            <swiper-item>
-                <scroll-view scroll-y scroll-with-animation style="height:{{height}}px">
-                    <view class="list" wx:if="{{items2.length>0}}">
-                        <view class="list-item" wx:for="{{items2}}" wx:key="{{index}}">
-                            
-                        </view>
-                    </view>
-                    <view wx:else style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;">
-                        <image src="../../../../../images/no_data.png" style="width:200rpx;height:180rpx;" mode="widthFix"></image>
-                        <text style="font-size:28rpx;color:#a1a1a1;margin-top:20rpx;">暂无数据</text>
-                    </view>
-                </scroll-view>
-            </swiper-item>
-            <swiper-item>
-                <scroll-view scroll-y scroll-with-animation style="height:{{height}}px">
-                    <view class="list" wx:if="{{items3.length>0}}">
-                        <view class="list-item" wx:for="{{items3}}" wx:key="{{index}}">
-                            
-                        </view>
-                    </view>
-                    <view wx:else style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;">
-                            <image src="../../../../../images/no_data.png" style="width:200rpx;height:180rpx;" mode="widthFix"></image>
-                            <text style="font-size:28rpx;color:#a1a1a1;margin-top:20rpx;">暂无数据</text>
-                        </view>
-                </scroll-view>
-            </swiper-item>
-            <swiper-item>
-                <scroll-view scroll-y scroll-with-animation style="height:{{height}}px">
-                    <view class="list" wx:if="{{items4.length>0}}">
-                        <view class="list-item" wx:for="{{items4}}" wx:key="{{index}}">
-                            
-                        </view>
-                    </view>
-                    <view vx:else style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;">
-                            <image src="../../../../../images/no_data.png" style="width:200rpx;height:180rpx;" mode="widthFix"></image>
-                            <text style="font-size:28rpx;color:#a1a1a1;margin-top:20rpx;">暂无数据</text>
-                    </view>
-                </scroll-view>
-            </swiper-item>
-        </swiper>
+  <view class="container">
+    <view class="tabs">
+      <view class="tab {{currentIndex===0?'active':''}}" bindtap="onTabClick" data-index="0">维修中</view>
+      <view class="tab {{currentIndex===1?'active':''}}" bindtap="onTabClick" data-index="1">未付款</view>
+      <view class="tab {{currentIndex===2?'active':''}}" bindtap="onTabClick" data-index="2">已完成</view>
     </view>
+    <swiper
+      style="margin-top:2px;height:{{height}}px"
+      current="{{currentIndex}}"
+      bindchange="onSwiperChange"
+    >
+      <swiper-item>
+        <scroll-view scroll-y scroll-with-animation style="height:{{height}}px" @scroll="onScroll">
+          <view class="list" wx:if="{{items1.length>0}}">
+            <view
+              class="list-item"
+              wx:for="{{items1}}"
+              wx:key="{{index}}"
+              @tap="onItemClick"
+              data-item="{{item}}"
+            >
+              <image
+                wx:if="{{item.images.length>0 && item.images[0]}}"
+                lazy-mode
+                src="{{item.images[0]}}"
+                mode="aspectFill"
+                style="width:200rpx;height:140rpx;"
+              >
+              <image
+                wx:else
+                src="../../../../../images/img_error.png"
+                class="pic-error"
+                lazy-load
+                mode="widthFix"
+              >
+              <view class="content">
+                <view class="single-line" style="color:#414141">{{item.repairReason}}</view>
+                <text style="font-size:26rpx;color:#717171;margin-top:10rpx;display:flex;flex-direction:row">订单号:<text>{{item.orderNo}}</text></text>
+                <text
+                  style="font-size:26rpx;color:#717171;margin-top:10rpx"
+                  class="single-line"
+                >{{item.regionOneName}}/{{item.regionTwoName}}/{{item.regionName}}</text>
+              </view>
+              <image src="../../../../../images/next.png" class="icon-48">
+            </view>
+          </view>
+          <view
+            wx:else
+            style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;"
+          >
+            <image
+              src="../../../../../images/no_data.png"
+              style="width:200rpx;height:180rpx;"
+              mode="widthFix"
+            >
+            <text style="font-size:28rpx;color:#a1a1a1;margin-top:20rpx;">暂无数据</text>
+          </view>
+        </scroll-view>
+      </swiper-item>
+      <swiper-item>
+        <scroll-view scroll-y scroll-with-animation style="height:{{height}}px">
+          <view class="list" wx:if="{{items2.length>0}}">
+            <view class="list-item" wx:for="{{items2}}" wx:key="{{index}}" @tap="onItemClick"
+              data-item="{{item}}">
+              <image
+                wx:if="{{item.images.length>0 && item.images[0]}}"
+                lazy-mode
+                src="{{item.images[0]}}"
+                mode="aspectFill"
+                style="width:200rpx;height:140rpx;"
+              >
+              <image
+                wx:else
+                src="../../../../../images/img_error.png"
+                class="pic-error"
+                lazy-load
+                mode="widthFix"
+              >
+              <view class="content">
+                <view class="single-line" style="color:#414141">{{item.repairReason}}</view>
+                <text style="font-size:26rpx;color:#717171;margin-top:10rpx;display:flex;flex-direction:row">订单号:<text>{{item.orderNo}}</text></text>
+                <text
+                  style="font-size:26rpx;color:#717171;margin-top:10rpx"
+                  class="single-line"
+                >{{item.regionOneName}}/{{item.regionTwoName}}/{{item.regionName}}</text>
+              </view>
+              <image src="../../../../../images/next.png" class="icon-48">
+            </view>
+          </view>
+          <view
+            wx:else
+            style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;"
+          >
+            <image
+              src="../../../../../images/no_data.png"
+              style="width:200rpx;height:180rpx;"
+              mode="widthFix"
+            >
+            <text style="font-size:28rpx;color:#a1a1a1;margin-top:20rpx;">暂无数据</text>
+          </view>
+        </scroll-view>
+      </swiper-item>
+      <swiper-item>
+        <scroll-view scroll-y scroll-with-animation style="height:{{height}}px">
+          <view class="list" wx:if="{{items3.length>0}}">
+            <view class="list-item" wx:for="{{items3}}" wx:key="{{index}}" @tap="onItemClick"
+              data-item="{{item}}">
+              <image
+                wx:if="{{item.images.length>0 && item.images[0]}}"
+                lazy-mode
+                src="{{item.images[0]}}"
+                mode="aspectFill"
+                style="width:200rpx;height:140rpx;"
+              >
+              <image
+                wx:else
+                src="../../../../../images/img_error.png"
+                class="pic-error"
+                lazy-load
+                mode="widthFix"
+              >
+              <view class="content">
+                <view class="single-line" style="color:#414141">{{item.repairReason}}</view>
+                <text style="font-size:26rpx;color:#717171;margin-top:10rpx;display:flex;flex-direction:row">订单号:<text>{{item.orderNo}}</text></text>
+                <text
+                  style="font-size:26rpx;color:#717171;margin-top:10rpx"
+                  class="single-line"
+                >{{item.regionOneName}}/{{item.regionTwoName}}/{{item.regionName}}</text>
+              </view>
+              <image src="../../../../../images/next.png" class="icon-48">
+            </view>
+          </view>
+          <view
+            wx:else
+            style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;"
+          >
+            <image
+              src="../../../../../images/no_data.png"
+              style="width:200rpx;height:180rpx;"
+              mode="widthFix"
+            >
+            <text style="font-size:28rpx;color:#a1a1a1;margin-top:20rpx;">暂无数据</text>
+          </view>
+        </scroll-view>
+      </swiper-item>
+    </swiper>
+  </view>
 </template>
 
 <script>
 import wepy from 'wepy';
+const UID = wx.getStorageSync('login_user_info').id;
+import { getRepairList } from '../../utils/api';
+
 export default class WXYJilu extends wepy.page {
   config = {
     navigationBarTitleText: '我的维修单',
     navigationBarBackgroundColor: '#FFDE30',
     navigationBarTextStyle: 'black',
-    disableScroll: true,
-    usingComponents: {}
+    disableScroll: false,
+    usingComponents: {},
+    enablePullDownRefresh: true
   };
 
   data = {
@@ -127,7 +236,19 @@ export default class WXYJilu extends wepy.page {
     items1: [],
     items2: [],
     items3: [],
-    items4: []
+
+    // business variable
+    orderState: 2, // 值 分别是 2 4 5
+    page1: 1,
+    page2: 1,
+    page3: 1,
+    size: 20,
+    load1: false,
+    load2: false,
+    load3: false,
+    noMore1: false,
+    noMore2: false,
+    noMore3: false
   };
   initScrollViewHeight() {
     var that = this;
@@ -150,16 +271,225 @@ export default class WXYJilu extends wepy.page {
     onTabClick(e) {
       //console.log(e)
       this.currentIndex = Number.parseInt(e.currentTarget.dataset.index);
+      if (this.currentIndex === 0) {
+        //维修中
+        this.orderState = 2;
+        if (this.items1.length > 0) return;
+        this.page1 = 1;
+        this.loadData(
+          this.currentIndex,
+          this.orderState,
+          this.page1,
+          this.size
+        );
+      } else if (this.currentIndex === 1) {
+        //待支付
+        this.orderState = 3;
+        if (this.items2.length > 0) return;
+        this.page2 = 1;
+        this.loadData(
+          this.currentIndex,
+          this.orderState,
+          this.page2,
+          this.size
+        );
+      } else if (this.currentIndex === 2) {
+        //完成
+        this.orderState = 4;
+        if (this.items3.length > 0) return;
+        this.page3 = 1;
+        this.loadData(
+          this.currentIndex,
+          this.orderState,
+          this.page3,
+          this.size
+        );
+      }
     },
     // on swiper change
     onSwiperChange(e) {
       this.currentIndex = e.detail.current;
+      if (this.currentIndex === 0) {
+        //维修中
+        this.orderState = 2;
+        if (this.items1.length > 0) return;
+        this.page1 = 1;
+        this.loadData(
+          this.currentIndex,
+          this.orderState,
+          this.page1,
+          this.size
+        );
+      } else if (this.currentIndex === 1) {
+        //待支付
+        this.orderState = 3;
+        if (this.items2.length > 0) return;
+        this.page2 = 1;
+        this.loadData(
+          this.currentIndex,
+          this.orderState,
+          this.page2,
+          this.size
+        );
+      } else if (this.currentIndex === 2) {
+        //完成
+        this.orderState = 4;
+        if (this.items3.length > 0) return;
+        this.page3 = 1;
+        this.loadData(
+          this.currentIndex,
+          this.orderState,
+          this.page3,
+          this.size
+        );
+      }
     },
-    async loadData(type, pageNum, pageSize) {}
+    onItemClick(e) {
+      wx.navigateTo({
+        url: `./wxy_order_detail?id=${e.currentTarget.dataset.item.id}`
+      });
+    }
   };
+
+  async loadData(type, orderState, pageNum, pageSize) {
+    if (type === 0) {
+      if (this.load1) return;
+      this.load1 = true;
+      let res = await getRepairList(
+        orderState,
+        UID,
+        '',
+        pageNum,
+        pageSize,
+        true
+      );
+      this.load1 = false;
+      wx.stopPullDownRefresh();
+      if (res.status === 1) {
+        res.info.records.forEach(e => {
+          e.images = e.pics.split(';');
+        });
+        if (pageNum === 1) {
+          this.items1.splice(0, this.items1.length);
+          this.items1 = res.info.records;
+          this.noMore1 = false;
+        } else {
+          this.items1.concat(res.info.records);
+        }
+
+        if (pageNum === res.info.pageindex.endindex) {
+          this.noMore1 = true;
+        } else {
+          this.noMore1 = false;
+          this.page1++;
+        }
+      }
+    } else if (type === 1) {
+      if (this.load2) return;
+      this.load2 = true;
+      let res = await getRepairList(
+        orderState,
+        UID,
+        pageNum,
+        '',
+        pageSize,
+        true
+      );
+      this.load2 = false;
+      wx.stopPullDownRefresh();
+      if (res.status === 1) {
+        res.info.records.forEach(e => {
+          e.images = e.pics.split(';');
+        });
+        if (pageNum === 1) {
+          this.items2.splice(0, this.items2.length);
+          this.items2 = res.info.records;
+          this.noMore2 = false;
+        } else {
+          this.items2.concat(res.info.records);
+        }
+
+        if (pageNum === res.info.pageindex.endindex) {
+          this.noMore2 = true;
+        } else {
+          this.noMore2 = false;
+          this.page2++;
+        }
+      }
+    } else if (type === 2) {
+      if (this.load3) return;
+      this.load3 = true;
+      let res = await getRepairList(
+        orderState,
+        UID,
+        pageNum,
+        '',
+        pageSize,
+        true
+      );
+      this.load3 = false;
+      wx.stopPullDownRefresh();
+      if (res.status === 1) {
+        res.info.records.forEach(e => {
+          e.images = e.pics.split(';');
+        });
+        if (pageNum === 1) {
+          this.items3.splice(0, this.items3.length);
+          this.items3 = res.info.records;
+          this.noMore3 = false;
+        } else {
+          this.items3.concat(res.info.records);
+        }
+
+        if (pageNum === res.info.pageindex.endindex) {
+          this.noMore3 = true;
+        } else {
+          this.noMore3 = false;
+          this.page3++;
+        }
+      }
+    }
+    this.$apply();
+  }
 
   async onLoad() {
     this.initScrollViewHeight();
+  }
+
+  async onShow() {
+    this.loadData(this.currentIndex, this.orderState, this.page1, this.size);
+  }
+
+  onPullDownRefresh() {
+    switch (this.currentIndex) {
+      case 0:
+        this.page1 = 1;
+        this.loadData(
+          this.currentIndex,
+          this.orderState,
+          this.page1,
+          this.size
+        );
+        break;
+      case 1:
+        this.page2 = 1;
+        this.loadData(
+          this.currentIndex,
+          this.orderState,
+          this.page2,
+          this.size
+        );
+        break;
+      case 2:
+        this.page3 = 1;
+        this.loadData(
+          this.currentIndex,
+          this.orderState,
+          this.page3,
+          this.size
+        );
+        break;
+    }
   }
 }
 </script>

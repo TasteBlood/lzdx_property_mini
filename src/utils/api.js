@@ -39,7 +39,7 @@ export const adminLogin = async (account, pwd) => {
  */
 export const sendSms = async (mobile) => {
     try {
-        return await get('/base/findSmsCode',{mobile},false)
+        return await get('/base/findSmsCode', { mobile }, false)
     } catch (error) {
         return error
     }
@@ -48,9 +48,9 @@ export const sendSms = async (mobile) => {
 /**
  * @description 获取图形验证码
  */
-export const getRandomCode = async() =>{
+export const getRandomCode = async () => {
     try {
-        return await get('/base/getImgCode',{},false)
+        return await get('/base/getImgCode', {}, false)
     } catch (error) {
         return error
     }
@@ -62,7 +62,7 @@ export const getRandomCode = async() =>{
  */
 export const checkCode = async (code) => {
     try {
-        return await get('/base/checkRandCode',{code},false)
+        return await get('/base/checkRandCode', { code }, false)
     } catch (error) {
         return error
     }
@@ -74,9 +74,9 @@ export const checkCode = async (code) => {
  * @param {String} confirmPwd 
  * @param {String} msgCode 
  */
-export const updatePassWd = async (password,confirmPwd,msgCode) => {
+export const updatePassWd = async (password, confirmPwd, msgCode) => {
     try {
-        return await post('/basics/editPwd',{password,confirmPwd,msgCode},true)
+        return await post('/basics/editPwd', { password, confirmPwd, msgCode }, true)
     } catch (error) {
         return error
     }
@@ -169,7 +169,7 @@ export const getAreaLeader = async (regionId) => {
  * @param {Number} regionTwoId 
  * @param {Number} typeId 
  */
-export const addInsReport = async (adminId, title,content, fileUrl, proposal, regionId, regionOneId, regionTwoId,
+export const addInsReport = async (adminId, title, content, fileUrl, proposal, regionId, regionOneId, regionTwoId,
     typeId) => {
     try {
         return await post('/wx/addInsReport', {
@@ -195,9 +195,9 @@ export const addInsReport = async (adminId, title,content, fileUrl, proposal, re
  * @param {Boolean} loading
  * @description 查询巡检记录 
  */
-export const getInsReport = async (state,adminId, pageNum, pageSize, loading) => {
+export const getInsReport = async (state, adminId, pageNum, pageSize, loading) => {
     try {
-        return await get('/wx/queryInsReports', {state,adminId,pageNum,pageSize}, loading)
+        return await get('/wx/queryInsReports', { state, adminId, pageNum, pageSize }, loading)
     } catch (error) {
         return error
     }
@@ -207,13 +207,15 @@ export const getInsReport = async (state,adminId, pageNum, pageSize, loading) =>
  * 
  * @param {Number} orderState 
  * @param {Number} pageNum 
+ * @param {Number} repairUid 报修人id
+ * @param {Number} serviceUid 维修人id
  * @param {Number} pageSize 
  * @param {Boolean} loading
  * @description 查询报修单 
  */
-export const getRepairList = async (orderState,pageNum,pageSize,loading) => {
+export const getRepairList = async (orderState, serviceUid, repairUid,pageNum, pageSize, loading) => {
     try {
-        return await get('/wx/queryOrders', {orderState,pageNum,pageSize},loading)
+        return await get('/wx/queryOrders', { orderState, serviceUid, repairUid,pageNum, pageSize }, loading)
     } catch (error) {
         return error
     }
@@ -222,11 +224,11 @@ export const getRepairList = async (orderState,pageNum,pageSize,loading) => {
 /**
  * 
  * @param {Number} orderId 
- * @description 查询订单详情
+ * @description 查询报修单详情
  */
 export const getOrderDetail = async (orderId) => {
     try {
-        return await get('/wx/findOrder',{orderId},true)
+        return await get('/wx/findOrder', { orderId }, true)
     } catch (error) {
         return error
     }
@@ -240,9 +242,9 @@ export const getOrderDetail = async (orderId) => {
  * @param {String} fileUrl 
  * @param {Boolean} loading
  */
-export const addReportAppeal = async (insReportId,adminId,content,fileUrl,loading) => {
+export const addReportAppeal = async (insReportId, adminId, content, fileUrl, loading) => {
     try {
-        return await post('/wx/addInsAppeal',{insReportId,adminId,content,fileUrl},loading)
+        return await post('/wx/addInsAppeal', { insReportId, adminId, content, fileUrl }, loading)
     } catch (error) {
         return error;
     }
@@ -255,7 +257,7 @@ export const addReportAppeal = async (insReportId,adminId,content,fileUrl,loadin
  */
 export const getReportById = async (id) => {
     try {
-        return await get('/wx/findReport',{id},true)
+        return await get('/wx/findReport', { id }, true)
     } catch (error) {
         return error
     }
@@ -266,7 +268,7 @@ export const getReportById = async (id) => {
  */
 export const getRepairType = async () => {
     try {
-        return await get('/base/queryRepairType',{},false)
+        return await get('/base/queryRepairType', {}, false)
     } catch (error) {
         return error
     }
@@ -288,12 +290,57 @@ export const getRepairType = async () => {
  * @param {String} repairReason 
  * @param {Number} repairUid 
  */
-export const addRepair = async (repairTypeId,address,isAppoint,appointTime,areaId,regionOneId,regionTwoId,
-    audio,pics,repairMobile,repairName,repairReason,repairUid) => {
+export const addRepair = async (repairTypeId, address, isAppoint, appointTime, areaId, regionOneId, regionTwoId,
+    audio, pics, repairMobile, repairName, repairReason, repairUid) => {
     try {
-        return await post('/wx/addOrder',{repairTypeId,address,isAppoint,appointTime,areaId,regionOneId,regionTwoId,
-        audio,pics,repairMobile,repairName,repairReason,repairUid},true)
+        return await post('/wx/addOrder', {
+            repairTypeId, address, isAppoint, appointTime, areaId, regionOneId, regionTwoId,
+            audio, pics, repairMobile, repairName, repairReason, repairUid
+        }, true)
     } catch (error) {
         return error
     }
 };
+
+/**
+ * 
+ * @param {Number} id 订单id
+ * @param {Number} orderState 订单状态 2 维修中
+ * @param {Number} serviceUid 维修员id
+ * @description 抢单 
+ */
+export const getOrderBySelf = async (id, orderState, serviceUid) => {
+    try {
+        return await post('/wx/editOrder', { id, orderState, serviceUid }, true)
+    } catch (error) {
+        return error
+    }
+};
+
+/**
+ * orderState 0 待抢单 1 已超时 2 维修中 3 待支付 4 已完成
+ * @description 维修员确认价格并完成订单
+ * @param {Number} id 订单id
+ * @param {Number} orderState 订单状态 3 维修工已完成维修、并确认价格
+ * @param {Number} price 价格 以分为单位
+ */
+export const enterPrice = async (id, orderState, serviceFee) => {
+    try {
+        return await post('/wx/editOrder', { id, orderState, serviceFee }, true)
+    } catch (error) {
+        return error
+    }
+};
+
+/**
+ * @description 完成订单（仅仅对于公共报修来说）
+ * @param {Number} id 
+ * @param {Number} orderState 4
+ */
+export const finishOrder = async (id, orderState) => {
+    try {
+        return await post('/wx/editOrder', { id, orderState }, true)
+    } catch (error) {
+        return error
+    }
+}
