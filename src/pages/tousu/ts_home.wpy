@@ -72,17 +72,13 @@
         .no {
           color: #717171;
           font-size: 28rpx;
+          margin-top: 5rpx;
         }
 
         .desc {
           color: #515151;
           font-size: 28rpx;
-        }
-
-        .people {
-          font-size: 26rpx;
-          margin-top: 2rpx;
-          color: #717171;
+          margin-top: 5rpx;
         }
       }
       .btn-info {
@@ -131,10 +127,10 @@
         </view>
         <view class="tabs">
             <view class="tab {{currentIndex===0?'active':''}}" bindtap="onTabClick" data-index="0">
-                巡检记录
+                投诉记录
             </view>
             <view class="tab {{currentIndex===1?'active':''}}" bindtap="onTabClick" data-index="1">
-                待申诉
+                待申辩
             </view>
         </view>
         </view>
@@ -146,13 +142,9 @@
                             <image wx:if="{{item.images.length>0}}" src="{{item.images[0]}}" class="pic" lazy-load mode="aspectFill"/>
                             <image wx:else src="../../../../../images/img_error.png" class="pic-error" lazy-load mode="widthFix"/>
                             <view class="content">
-                              <text class="title single-line">{{item.title}}</text>
-                              <text class="no single-line">{{item.num}}</text>
-                              <text class="desc single-line">{{item.content}}</text>
-                              <view class="people">
-                                <text>巡检员:</text>
-                                <text>{{item.adminName}}</text>
-                              </view>
+                              <text class="title single-single">{{item.content}}</text>
+                              <text class="no single-line">{{item.createTime}}</text>
+                              <text class="desc single-line">{{item.regionOneName}}/{{item.regionTwoName}}/{{item.regionName}}</text>
                             </view>
                             <image src="../../../../../images/next.png" class="icon-48"></image>
                         </view>
@@ -170,15 +162,11 @@
                             <image wx:if="{{item.images.length>0}}" src="{{item.images[0]}}" class="pic" lazy-load mode="aspectFill"/>
                             <image wx:else src="../../../../../images/img_error.png" class="pic-error" lazy-load mode="widthFix"/>
                             <view class="content">
-                              <text class="title single-line">{{item.title}}</text>
-                              <text class="no single-line">{{item.num}}</text>
-                              <text class="desc single-line">{{item.content}}</text>
-                              <view class="people">
-                                <text>巡检员:</text>
-                                <text>{{item.adminName}}</text>
-                              </view>
+                              <text class="title single-single">{{item.content}}</text>
+                              <text class="no single-line">{{item.createTime}}</text>
+                              <text class="desc single-line">{{item.regionOneName}}/{{item.regionTwoName}}/{{item.regionName}}</text>
                             </view>
-                            <view class="btn-info" style="width:100rpx;" @tap="onUpClick" data-item="{{item}}">申诉</view>
+                            <view class="btn-info" style="width:100rpx;" @tap="onUpClick" data-item="{{item}}">申辩</view>
                         </view>
                     </view>
                     <view wx:else style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;">
@@ -193,11 +181,11 @@
 
 <script>
 import wepy from 'wepy';
-import { getInsReport } from '../../utils/api';
+import { getComplain } from '../../utils/api';
 let ADMIN_ID = 0;
-export default class Home extends wepy.page {
+export default class TsHome extends wepy.page {
   config = {
-    navigationBarTitleText: '巡检系统',
+    navigationBarTitleText: '投诉系统',
     navigationBarBackgroundColor: '#FFDE30',
     navigationBarTextStyle: 'black',
     disableScroll: true,
@@ -244,7 +232,7 @@ export default class Home extends wepy.page {
         //加载全部的
         if (this.items1.length <= 0) this.loadData(0, 1, 10);
       } else if (this.currentIndex === 1) {
-        //加载待申诉的
+        //加载待申辩的
         if (this.items2.length <= 0) this.loadData(1, 1, 10);
       }
     },
@@ -265,13 +253,13 @@ export default class Home extends wepy.page {
     },
     onInfoClick(e) {
       wx.navigateTo({
-        url: `./complaintDetail?insReportId=${e.currentTarget.dataset.item.id}`
+        url: `./ts_complaintDetail?tsId=${e.currentTarget.dataset.item.id}`
       });
     },
     onUpClick(e) {
       //console.log(e)
       wx.navigateTo({
-        url: `./appeal?insReportId=${e.currentTarget.dataset.item.id}`
+        url: `./ts_appeal?tsId=${e.currentTarget.dataset.item.id}`
       });
     },
     onBottom(){
@@ -293,7 +281,7 @@ export default class Home extends wepy.page {
       if (this.load1) return;
       //其他
       this.load1 = true;
-      let res = await getInsReport('', ADMIN_ID, pageNum, pageSize, true);
+      let res = await getComplain(pageNum,pageSize,'',ADMIN_ID);
       wx.stopPullDownRefresh()
       this.load1 = false;
       if (res.status === 1) {
@@ -317,8 +305,8 @@ export default class Home extends wepy.page {
     } else if (type === 1) {
       if (this.load2) return;
       this.load2 = true;
-      //待申诉
-      let res = await getInsReport(1, ADMIN_ID, pageNum, pageSize, true);
+      //待申辩
+      let res = await getComplain(pageNum,pageSize,1,ADMIN_ID);
       this.load2 = false;
       wx.stopPullDownRefresh()
       if (res.status === 1) {

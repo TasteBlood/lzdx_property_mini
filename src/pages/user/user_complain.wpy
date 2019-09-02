@@ -1,0 +1,193 @@
+<style lang="less" scoped>
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .area-info {
+    color: #414141;
+    font-size: 32rpx;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: white;
+    padding: 20rpx;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .info {
+    background-color: white;
+    margin-top: 20rpx;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+
+    .text-area {
+      border: solid 1rpx #e1e1e1;
+      padding: 10rpx;
+      margin: 20rpx;
+      border-radius: 4rpx;
+      font-size: 30rpx;
+      width: 90%;
+    }
+
+    .btn-record {
+      padding: 10rpx;
+      border-radius: 32rpx;
+      color: #515151;
+      width: 200rpx;
+      text-align: center;
+    }
+  }
+
+  .btn-submit {
+    background-color: #ffde30;
+    width: 70%;
+    border-radius: 32rpx;
+    color: #515151;
+    height: 70rpx;
+    text-align: center;
+    line-height: 70rpx;
+    margin: 20rpx;
+    box-shadow: 2rpx 2rpx 20rpx 2rpx #e1e1e1;
+  }
+
+  .btn-submit:active {
+    background-color: #fae26b;
+  }
+}
+</style>
+<template>
+    <view class="container">
+        <view class="area-info" @tap="onOpenArea">
+            <text style="color:#515151">投诉区域:</text>
+            <text style="width:72%;margin-left:10rpx;">{{threeArea?threeArea.title:'选择区域'}}</text>
+            <image src="../../../../../images/next.png" class="icon-48"></image>
+        </view>
+
+        <view class="info">
+            <view style="font-size:32rpx;color:#414141;padding:20rpx;"><text style="color:#FFDE30;height:20rpx;border-right:solid 8rpx #FFDE30;margin-right:10rpx;"></text>投诉信息</view>
+            <imagePicker @onImageChoose.user="onImageChoose"></imagePicker>
+            <input @input="onInput" data-type="reason" class="text-area" placeholder="请描述问题/情况" placeholder-style="color:#919191" />
+        </view>
+        <areaSelector :show.sync="showArea" @onAreaChoose.user="onAreaChoose" @on-close.user="onClose"></areaSelector>
+        <view class="btn-submit" @tap="onSave">提交</view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+import ImagePicker from '../../components/imagePicker'
+import AreaSelector from '../../components/areaSelector'
+import {addComplain} from '../../utils/api'
+import {UploadMulti} from '../../utils/uploader'
+
+let UID = 0;
+export default class UserComplain extends wepy.page {
+  config = {
+    navigationBarTitleText: '投诉',
+    navigationBarBackgroundColor: '#FFDE30',
+    navigationBarTextStyle: 'black',
+    disableScroll: false,
+    usingComponents: {}
+  };
+
+  components = {
+    imagePicker: ImagePicker,
+    areaSelector: AreaSelector
+  };
+
+  data = {
+    repairType: 0, //需要其他页面传递的维修类型 设备/区域
+    showArea: false,
+    oneArea: null,
+    twoArea: null,
+    threeArea: null,
+
+    //business variable
+    reason: null,
+    images: null
+  };
+
+  methods = {
+    onImageChoose(e) {
+      //console.log(e);
+      this.images = e;
+    },
+    onOpenArea() {
+      this.showArea = true;
+    },
+    onAreaChoose(one, two, three) {
+      if (!three) {
+        wx.showToast({
+          title: '三级区域不能为空',
+          icon: 'none'
+        });
+        return;
+      }
+      this.oneArea = one;
+      this.twoArea = two;
+      this.threeArea = three;
+
+      this.$apply();
+    },
+    onClose() {
+      this.showArea = false;
+    },
+    onInput(e) {
+      switch (e.currentTarget.dataset.type) {
+        case 'reason':
+          this.reason = e.detail.value;
+          break;
+        case 'name':
+          this.username = e.detail.value;
+          break;
+        case 'mobile':
+          this.mobile = e.detail.value;
+          break;
+      }
+    },
+    onSave() {
+      let self = this;
+      if (!this.reason) {
+        wx.showToast({
+          title: '内容为空',
+          icon: 'none'
+        });
+        return;
+      }
+      if (!this.images) {
+        wx.showToast({
+          title: '图片为空',
+          icon: 'none'
+        });
+        return;
+      }
+
+      UploadMulti(
+        this.images,
+        async res => {
+          let repos = await addComplain(self.reason,res.join(';'),self.threeArea.id,self.oneArea.id,
+          self.twoArea.id,UID)
+          if (repos.status === 1) {
+            wx.showToast({
+              title: '投诉成功',
+              icon: 'none'
+            });
+            setTimeout(() => {
+              wx.navigateBack();
+            }, 500);
+          }
+        },
+        e => {}
+      );
+    }
+  };
+
+  onLoad(){
+    UID = wx.getStorageSync('login_user_info').id
+  }
+}
+</script>

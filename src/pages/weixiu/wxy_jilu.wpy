@@ -78,29 +78,28 @@
       bindchange="onSwiperChange"
     >
       <swiper-item>
-        <scroll-view scroll-y scroll-with-animation style="height:{{height}}px" @scroll="onScroll">
+        <scroll-view @scrolltolower="onBottom" scroll-y scroll-with-animation style="height:{{height}}px">
           <view class="list" wx:if="{{items1.length>0}}">
             <view
               class="list-item"
               wx:for="{{items1}}"
               wx:key="{{index}}"
               @tap="onItemClick"
-              data-item="{{item}}"
-            >
+              data-item="{{item}}">
               <image
                 wx:if="{{item.images.length>0 && item.images[0]}}"
                 lazy-mode
                 src="{{item.images[0]}}"
                 mode="aspectFill"
                 style="width:200rpx;height:140rpx;"
-              >
+              ></image>
               <image
                 wx:else
                 src="../../../../../images/img_error.png"
                 class="pic-error"
                 lazy-load
                 mode="widthFix"
-              >
+              ></image>
               <view class="content">
                 <view class="single-line" style="color:#414141">{{item.repairReason}}</view>
                 <text style="font-size:26rpx;color:#717171;margin-top:10rpx;display:flex;flex-direction:row">订单号:<text>{{item.orderNo}}</text></text>
@@ -109,7 +108,7 @@
                   class="single-line"
                 >{{item.regionOneName}}/{{item.regionTwoName}}/{{item.regionName}}</text>
               </view>
-              <image src="../../../../../images/next.png" class="icon-48">
+              <image src="../../../../../images/next.png" class="icon-48"></image>
             </view>
           </view>
           <view
@@ -120,13 +119,13 @@
               src="../../../../../images/no_data.png"
               style="width:200rpx;height:180rpx;"
               mode="widthFix"
-            >
+            ></image>
             <text style="font-size:28rpx;color:#a1a1a1;margin-top:20rpx;">暂无数据</text>
           </view>
         </scroll-view>
       </swiper-item>
       <swiper-item>
-        <scroll-view scroll-y scroll-with-animation style="height:{{height}}px">
+        <scroll-view @scrolltolower="onBottom" scroll-y scroll-with-animation style="height:{{height}}px">
           <view class="list" wx:if="{{items2.length>0}}">
             <view class="list-item" wx:for="{{items2}}" wx:key="{{index}}" @tap="onItemClick"
               data-item="{{item}}">
@@ -136,14 +135,14 @@
                 src="{{item.images[0]}}"
                 mode="aspectFill"
                 style="width:200rpx;height:140rpx;"
-              >
+              ></image>
               <image
                 wx:else
                 src="../../../../../images/img_error.png"
                 class="pic-error"
                 lazy-load
                 mode="widthFix"
-              >
+              ></image>
               <view class="content">
                 <view class="single-line" style="color:#414141">{{item.repairReason}}</view>
                 <text style="font-size:26rpx;color:#717171;margin-top:10rpx;display:flex;flex-direction:row">订单号:<text>{{item.orderNo}}</text></text>
@@ -152,7 +151,7 @@
                   class="single-line"
                 >{{item.regionOneName}}/{{item.regionTwoName}}/{{item.regionName}}</text>
               </view>
-              <image src="../../../../../images/next.png" class="icon-48">
+              <image src="../../../../../images/next.png" class="icon-48"></image>
             </view>
           </view>
           <view
@@ -163,13 +162,13 @@
               src="../../../../../images/no_data.png"
               style="width:200rpx;height:180rpx;"
               mode="widthFix"
-            >
+            ></image>
             <text style="font-size:28rpx;color:#a1a1a1;margin-top:20rpx;">暂无数据</text>
           </view>
         </scroll-view>
       </swiper-item>
       <swiper-item>
-        <scroll-view scroll-y scroll-with-animation style="height:{{height}}px">
+        <scroll-view @scrolltolower="onBottom" scroll-y scroll-with-animation style="height:{{height}}px">
           <view class="list" wx:if="{{items3.length>0}}">
             <view class="list-item" wx:for="{{items3}}" wx:key="{{index}}" @tap="onItemClick"
               data-item="{{item}}">
@@ -179,14 +178,14 @@
                 src="{{item.images[0]}}"
                 mode="aspectFill"
                 style="width:200rpx;height:140rpx;"
-              >
+              ></image>
               <image
                 wx:else
                 src="../../../../../images/img_error.png"
                 class="pic-error"
                 lazy-load
                 mode="widthFix"
-              >
+              ></image>
               <view class="content">
                 <view class="single-line" style="color:#414141">{{item.repairReason}}</view>
                 <text style="font-size:26rpx;color:#717171;margin-top:10rpx;display:flex;flex-direction:row">订单号:<text>{{item.orderNo}}</text></text>
@@ -195,7 +194,7 @@
                   class="single-line"
                 >{{item.regionOneName}}/{{item.regionTwoName}}/{{item.regionName}}</text>
               </view>
-              <image src="../../../../../images/next.png" class="icon-48">
+              <image src="../../../../../images/next.png" class="icon-48"></image>
             </view>
           </view>
           <view
@@ -206,7 +205,7 @@
               src="../../../../../images/no_data.png"
               style="width:200rpx;height:180rpx;"
               mode="widthFix"
-            >
+            ></image>
             <text style="font-size:28rpx;color:#a1a1a1;margin-top:20rpx;">暂无数据</text>
           </view>
         </scroll-view>
@@ -217,7 +216,7 @@
 
 <script>
 import wepy from 'wepy';
-const UID = wx.getStorageSync('login_user_info').id;
+let UID = 0;
 import { getRepairList } from '../../utils/api';
 
 export default class WXYJilu extends wepy.page {
@@ -348,6 +347,19 @@ export default class WXYJilu extends wepy.page {
       wx.navigateTo({
         url: `./wxy_order_detail?id=${e.currentTarget.dataset.item.id}`
       });
+    },
+    onBottom(){
+      console.log('on bottom')
+      if(this.currentIndex===0){
+        if(this.noMore1)return
+        this.loadData(this.currentIndex,this.orderState,this.page1,this.size)
+      }else if(this.currentIndex===1){
+        if(this.noMore2)return
+        this.loadData(this.currentIndex,this.orderState,this.page2,this.size)
+      }else if(this.currentIndex===2){
+        if(this.noMore3)return
+        this.loadData(this.currentIndex,this.orderState,this.page3,this.size)
+      }
     }
   };
 
@@ -452,8 +464,9 @@ export default class WXYJilu extends wepy.page {
     this.$apply();
   }
 
-  async onLoad() {
+  onLoad() {
     this.initScrollViewHeight();
+    UID = wx.getStorageSync('login_user_info').id
   }
 
   async onShow() {

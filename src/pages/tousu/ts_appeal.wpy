@@ -41,21 +41,21 @@
     <view class="container">
         <view class="wrapper">
             <imagePicker @onImageChoose.user="onImageChoose"></imagePicker>
-            <textarea @input="onInput" class="content" placeholder="请输入申诉内容" placeholder-style="color:#919191"></textarea>
+            <textarea @input="onInput" class="content" placeholder="请输入申辩内容" placeholder-style="color:#919191"></textarea>
         </view>
         <view class="btn-submit" @tap="onSave">提交</view>
     </view>
 </template>
 <script>
 import wepy from 'wepy';
-import {addReportAppeal} from '../../utils/api'
+import {complainApply} from '../../utils/api'
 import {UploadMulti} from '../../utils/uploader'
 import ImagePicker from '../../components/imagePicker';
 let ADMIN_ID = 0;
 
-export default class Appeal extends wepy.page {
+export default class TsAppeal extends wepy.page {
   config = {
-    navigationBarTitleText: '巡检申诉',
+    navigationBarTitleText: '投诉申辩',
     navigationBarBackgroundColor: '#FFDE30',
     navigationBarTextStyle: 'black',
     disableScroll: false,
@@ -67,7 +67,7 @@ export default class Appeal extends wepy.page {
   };
 
   data = {
-      insReportId:0,
+      tsId:0,
       content:'',
       images:[]
   };
@@ -91,8 +91,8 @@ export default class Appeal extends wepy.page {
         let self = this
         UploadMulti(this.images,
         async (res) =>{
-            console.log(res)
-            let repos = await addReportAppeal(self.insReportId,ADMIN_ID,self.content,res.join(';'),true)
+            //console.log(res)
+            let repos = await complainApply(self.tsId,self.content,res.join(';'),ADMIN_ID)
             if(repos.status===1){
                 //朝前返回2页
                 wx.navigateBack({
@@ -108,9 +108,9 @@ export default class Appeal extends wepy.page {
   };
 
   onLoad(query) {
-      this.insReportId = query.insReportId
-      ADMIN_ID = wx.getStorageSync('login_user_info').id
-      console.log(query)
+      this.tsId = query.tsId
+      ADMIN_ID = wx.getStorageSync('login_user_info').id;
+      //console.log(query)
   }
 }
 </script>

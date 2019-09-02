@@ -135,20 +135,23 @@ export default class XJYHome extends wepy.page {
           // 只允许从相机扫码
           wx.scanCode({
             onlyFromCamera: true,
+            scanType: ['qrCode'],
             success(res) {
-              console.log(res);
+              wx.navigateTo({
+                url: `xjy_location?code=${res.result}`
+              });
             }
           });
           break;
         case 'location':
           wx.navigateTo({
             url: 'xjy_location'
-          })
+          });
           break;
         case 'record':
           wx.navigateTo({
             url: 'xjy_jilu'
-          })
+          });
           break;
       }
     }

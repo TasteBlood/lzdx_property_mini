@@ -1,0 +1,167 @@
+<style lang="less" scoped>
+.container {
+  .list {
+    .no-data {
+      text-align: center;
+      padding: 20rpx;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .list-item {
+      display: flex;
+      flex-direction: row;
+      box-sizing: border-box;
+      padding: 10rpx 20rpx 10rpx 20rpx;
+      align-items: center;
+      background-color: white;
+      margin-bottom: 20rpx;
+      box-shadow: 2rpx 4rpx 5rpx 0 #f1f1f1;
+
+      .pic-error {
+        width: 160rpx;
+        height: 100rpx;
+      }
+
+      .content {
+        font-size: 30rpx;
+        color: #414141;
+        padding: 10rpx;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 70%;
+      }
+    }
+    .list-item:active {
+      background-color: transparent;
+    }
+  }
+}
+</style>
+<template>
+    <view class="container">
+        <view class="list" wx:if="{{items.length>0}}">
+            <view class="list-item" wx:for="{{items}}" wx:key="{{index}}" @tap="onItemClick"
+              data-item="{{item}}">
+              <image
+                wx:if="{{item.images.length>0 && item.images[0]}}"
+                lazy-mode
+                src="{{item.images[0]}}"
+                mode="aspectFill"
+                style="width:200rpx;height:140rpx;"
+              ></image>
+              <image
+                wx:else
+                src="../../../../../images/img_error.png"
+                class="pic-error"
+                lazy-load
+                mode="widthFix"
+              ></image>
+              <view class="content">
+                <view class="single-line" style="color:#414141">{{item.repairReason}}</view>
+                <text style="font-size:26rpx;color:#717171;margin-top:10rpx;display:flex;flex-direction:row">订单号:<text>{{item.orderNo}}</text></text>
+                <text
+                  style="font-size:26rpx;color:#717171;margin-top:10rpx"
+                  class="single-line"
+                >{{item.regionOneName}}/{{item.regionTwoName}}/{{item.regionName}}</text>
+              </view>
+              <image src="../../../../../images/next.png" class="icon-48"></image>
+            </view>
+          </view>
+          <view
+            wx:else
+            style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;"
+          >
+            <image
+              src="../../../../../images/no_data.png"
+              style="width:200rpx;height:180rpx;"
+              mode="widthFix"
+            ></image>
+            <text style="font-size:28rpx;color:#a1a1a1;margin-top:20rpx;">暂无数据</text>
+          </view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+import { getRepairList } from '../../utils/api';
+
+let UID = 0;
+
+export default class UserJilu extends wepy.page {
+  config = {
+    navigationBarTitleText: '维修记录',
+    navigationBarBackgroundColor: '#FFDE30',
+    navigationBarTextStyle: 'black',
+    disableScroll: false,
+    usingComponents: {},
+    enablePullDownRefresh: true,
+    //reachBottomDistance: 100
+  };
+
+  data = {
+    items: [],
+    load: false,
+    page: 1,
+    size: 20,
+    noMore: false
+  };
+
+  methods = {
+      onItemClick(e){
+          wx.navigateTo({
+              url: `./user_order_detail?id=${e.currentTarget.dataset.item.id}`
+          })
+      }
+  };
+
+  onLoad() {
+    UID = wx.getStorageSync('login_user_info').id;
+  }
+
+  onShow() {
+    this.loadData(this.page, this.size);
+  }
+
+  onPullDownRefresh() {
+    //console.log('on refresh.....')
+    this.page = 1;
+    this.loadData(this.page, this.size);
+  }
+
+  onReachBottom() {
+    console.log('on bottom')
+    if (this.noMore) return;
+    this.loadData(this.page, this.size);
+  }
+
+  async loadData(pageNum, pageSize) {
+    if (this.load) return;
+    this.load = true;
+    let res = await getRepairList('', '', UID, pageNum, pageSize);
+    this.load = false;
+    wx.stopPullDownRefresh()
+    if (res.status === 1) {
+      res.info.records.forEach(e => {
+        e.images = e.pics.split(';');
+      });
+      if (pageNum === 1) {
+        this.items.splice(0, this.items.length);
+        this.items = res.info.records;
+        this.noMore = false;
+      } else {
+        this.items.concat(res.info.records);
+      }
+
+      if (res.info.pageindex.endindex === pageNum) {
+        this.noMore = true;
+      } else {
+        this.noMore = false;
+        this.page++;
+      }
+    }
+    this.$apply();
+  }
+}
+</script>

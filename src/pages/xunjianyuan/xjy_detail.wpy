@@ -62,7 +62,7 @@
             </view>
             <view class="location-info" style="margin-top:10rpx;">
                 <text style="color:#717171;width:120rpx;">负责人:</text>
-                <text>{{insReport.adminName}}</text>
+                <text wx:for="{{insReport.chargeUsers}}" wx:key="{{index}}">{{item.name}}、</text>
             </view>
         </view>
 

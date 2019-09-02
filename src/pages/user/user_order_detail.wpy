@@ -19,7 +19,7 @@
     padding: 5rpx 10rpx 5rpx 10rpx;
     background-color: #ffde30;
     color: #515151;
-    border-radius: 12rpx;
+    border-radius: 6rpx;
   }
 
   .btn-call:active {
@@ -36,7 +36,7 @@
     padding: 20rpx;
   }
 
-  .btn-up{
+  .btn-up {
     width: 60%;
     height: 70rpx;
     background-color: #ffde30;
@@ -45,7 +45,22 @@
     line-height: 70rpx;
     border-radius: 32rpx;
   }
-  .btn-up:active{
+  .btn-up:active {
+    background-color: #fde672;
+  }
+
+  .btn-pay {
+    width: 60%;
+    height: 70rpx;
+    line-height: 70rpx;
+    background-color: #ffde30;
+    border-radius: 32rpx;
+    box-shadow: 4rpx 4rpx 10rpx 0rpx #f1f1f1;
+    color: #414141;
+    text-align: center;
+  }
+
+  .btn-pay:active {
     background-color: #fde672;
   }
 }
@@ -75,7 +90,7 @@
     >
       <text>报修人:{{order.repairName}}</text>
       <text style="margin-left:20rpx">{{order.repairMobile}}</text>
-      <view class="btn-call" style="margin-left:10rpx">呼 叫</view>
+      <!-- <view class="btn-call" style="margin-left:10rpx">呼 叫</view> -->
     </view>
     <view style="margin-top:20rpx;font-size:30rpx;color:#515151;padding:20rpx" wx:if="{{order.isAppoint}}">
       <view>
@@ -93,24 +108,22 @@
     </view>
     <!-- orderState===0 待抢单 -->
     <view wx:if="{{order.orderState===0}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
-      <view class="btn-up" @tap="onUpOrder">抢 单</view>
-    </view>
-    <!-- orderState===2 待完成 住家户-->
-    <view wx:if="{{order.orderState===2 && order.regionType===2}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
-      <input @input="onInput" placeholder="维修费" inputmode="number" style="border-radius:8rpx;border:1rpx solid #e1e1e1;width:200rpx;padding:10rpx;text-align:center" placeholder-style="color:#919191"/>
-      <text style="color:#717171;font-size:30rpx">(无,可不填)</text>
-      <view class="btn-up" style="margin-top:20rpx;margin-bottom:20rpx" @tap="onWaitPayClick">维修完成</view>
-    </view>
-    <!-- orderState===2 待完成 设备/区域-->
-    <view wx:if="{{order.orderState===2 && order.regionType !== 2}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
-      <view class="btn-up" style="margin-top:20rpx;margin-bottom:20rpx" @tap="onFinishClick">维修完成</view>
+      <image src="../../images/wai_pay.png" style="width:100rpx;height:100rpx" mode="widthFix"></image>
+      <text style="color:#414141;font-size:32rpx;margin-top:10rpx">待抢单</text>
     </view>
 
-    <view wx:if="{{order.orderState===3}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <!-- orderState===2 维修中 -->
+    <view wx:if="{{order.orderState===2}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
       <image src="../../images/wai_pay.png" style="width:100rpx;height:100rpx" mode="widthFix"></image>
-      <text style="color:#414141;font-size:32rpx;margin-top:10rpx">待支付</text>
+      <text style="color:#414141;font-size:32rpx;margin-top:10rpx">维修中</text>
+    </view>
+
+    <!-- 待支付 -->
+    <view wx:if="{{order.orderState===3}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <view class="btn-pay" style="margin-bottom:20rpx" @tap="onPayClick" data-item="{{item}}">去支付</view>
     </view>
     
+    <!-- 已完成 -->
     <view wx:if="{{order.orderState===4}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
       <image src="../../images/finish.png" style="width:100rpx;height:100rpx" mode="widthFix"></image>
       <text style="color:#414141;font-size:32rpx;margin-top:10rpx">已完成</text>
@@ -121,15 +134,21 @@
 import wepy from 'wepy';
 import GridImage from '../../components/gridImage';
 import BigImage from '../../components/bigImage';
-import { getOrderBySelf,getOrderDetail ,finishOrder,enterPrice} from '../../utils/api'
-let UID = 0
-export default class WXYOrderDetail extends wepy.page {
+import {
+  getOrderBySelf,
+  getOrderDetail,
+  finishOrder,
+  enterPrice
+} from '../../utils/api';
+const UID = wx.getStorageSync('login_user_info').id;
+export default class UserOrderDetail extends wepy.page {
   config = {
     navigationBarTitleText: '维修详情',
     navigationBarBackgroundColor: '#FFDE30',
     navigationBarTextStyle: 'black',
     disableScroll: false,
-    usingComponents: {}
+    usingComponents: {},
+    enablePullDownRefresh: true
   };
 
   components = {
@@ -142,7 +161,7 @@ export default class WXYOrderDetail extends wepy.page {
     currentUrl: null,
     oid: 0,
     order: null,
-    serviceFee:0
+    serviceFee: 0
   };
 
   methods = {
@@ -151,75 +170,84 @@ export default class WXYOrderDetail extends wepy.page {
       this.currentUrl = e;
       this.showBig = true;
     },
-    onInput(e){
-      this.serviceFee = Number.parseFloat(e.detail.value)
+    onInput(e) {
+      this.serviceFee = Number.parseFloat(e.detail.value);
     },
-    
+
     onClose() {
       this.showBig = false;
     },
-    async onUpOrder(){
-      let res = await getOrderBySelf(this.order.id,2,UID)
-      if(res.status===1){
+    async onUpOrder() {
+      let res = await getOrderBySelf(this.order.id, 2, UID);
+      if (res.status === 1) {
         wx.showToast({
           title: '抢单成功',
           icon: 'none'
-        })
+        });
         setTimeout(() => {
-          wx.navigateBack()
+          wx.navigateBack();
         }, 500);
       }
     },
-    async onWaitPayClick(){
-      if(!this.serviceFee){
+    async onWaitPayClick() {
+      if (!this.serviceFee) {
         wx.showToast({
-          title:'费用为空',
-          icon:'none'
-        })
-        return
+          title: '费用为空',
+          icon: 'none'
+        });
+        return;
       }
-      let self = this
+      let self = this;
       wx.showModal({
         title: '此操作不可逆',
         content: '已完成？',
         success: async function(e) {
           //console.log(e)
-          if(e.confirm){
-            let res = await enterPrice(self.order.id, 3,Number.parseInt(self.serviceFee*100))
-            if(res.status===1){
+          if (e.confirm) {
+            let res = await enterPrice(
+              self.order.id,
+              3,
+              Number.parseInt(self.serviceFee * 100)
+            );
+            if (res.status === 1) {
               wx.showToast({
                 title: '维修完成',
                 icon: 'none'
-              })
+              });
             }
             setTimeout(() => {
-              wx.navigateBack()
+              wx.navigateBack();
             }, 500);
           }
         }
-      })
+      });
     },
 
-    onFinishClick(){
-      let self = this
+    onFinishClick() {
+      let self = this;
       wx.showModal({
         title: '此操作不可逆',
         content: '已完成？',
         success: async function(e) {
           //console.log(e)
-          if(e.confirm){
-            let res = await finishOrder(self.order.id, 4)
-            if(res.status===1){
+          if (e.confirm) {
+            let res = await finishOrder(self.order.id, 4);
+            if (res.status === 1) {
               wx.showToast({
                 title: '维修完成',
                 icon: 'none'
-              })
+              });
             }
             setTimeout(() => {
-              wx.navigateBack()
+              wx.navigateBack();
             }, 500);
           }
         }
+      });
+    },
+    onPayClick(e){
+      wx.navigateTo({
+        url: `./cashier?oid=${this.order.id}`
       })
     }
   };
@@ -232,9 +260,22 @@ export default class WXYOrderDetail extends wepy.page {
 
   async onLoad(query) {
     this.oid = query.id;
-    UID = wx.getStorageSync('login_user_info').id
+  }
+
+  async onShow() {
     //load data
     let res = await getOrderDetail(this.oid);
+    if (res.status === 1) {
+      console.log(res);
+      this.order = res.info;
+      this.order.images = this.order.pics.split(';');
+      this.$apply();
+    }
+  }
+
+  async onPullDownRefresh() {
+    let res = await getOrderDetail(this.oid);
+    wx.stopPullDownRefresh();
     if (res.status === 1) {
       console.log(res);
       this.order = res.info;

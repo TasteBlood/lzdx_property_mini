@@ -68,6 +68,13 @@
             <image src="../../../../../images/next.png" class="icon-48"></image>
         </view>
 
+        
+        <view class="area-info" wx:if="{{repairType===2}}">
+            <text style="color:#515151">设备信息:</text>
+            <text style="width:78%;margin-left:10rpx;">{{equip.title}}</text>
+        </view>
+
+
         <view class="area-info" style="margin-top:10rpx;">
             <text style="color:#515151">报修类型:</text>
             <picker range="{{repairTypes}}" @change="onTypeChange" range-key="repairName" style="width:72%;margin-left:10rpx;">
@@ -77,16 +84,12 @@
             <image src="../../../../../images/next.png" class="icon-48"></image>
         </view>
 
-        <view class="area-info" wx:if="{{repairType===2}}">
-            <text style="color:#515151">设备信息:</text>
-            <text style="width:78%;margin-left:10rpx;">芝兰元二楼三星遥控电视大屏幕</text>
-        </view>
 
         <view class="info">
             <view style="font-size:32rpx;color:#414141;padding:20rpx;"><text style="color:#FFDE30;height:20rpx;border-right:solid 8rpx #FFDE30;margin-right:10rpx;"></text>报修信息</view>
             <imagePicker @onImageChoose.user="onImageChoose"></imagePicker>
             <input @input="onInput" data-type="reason" class="text-area" placeholder="请描述问题/情况" placeholder-style="color:#919191" />
-            <text class="btn-record" style="margin:0 20rpx 20rpx 20rpx;background-color:#FFDE30;color:#414141;font-size:32rpx;">开始录音</text>
+            <text class="btn-record" style="margin:0 20rpx 20rpx 20rpx;background-color:#FFDE30;color:#414141;font-size:32rpx;display:none">开始录音</text>
         </view>
 
         <view class="info" style="padding-bottom:20rpx;">
@@ -109,9 +112,9 @@
 import wepy from 'wepy';
 import ImagePicker from '../../components/imagePicker';
 import AreaSelector from '../../components/areaSelector';
-import { addRepair, getRepairType } from '../../utils/api';
+import { addRepair, getRepairType, getAreaById } from '../../utils/api';
 import { UploadMulti } from '../../utils/uploader';
-const UID = wx.getStorageSync('login_user_info').id;
+let UID = 0;
 export default class PublicAreaEquip extends wepy.page {
   config = {
     navigationBarTitleText: '公共报修',
@@ -140,7 +143,8 @@ export default class PublicAreaEquip extends wepy.page {
     username: null,
     mobile: null,
     images: null,
-    audio: null
+    audio: null,
+    equip:null
   };
 
   methods = {
@@ -243,9 +247,9 @@ export default class PublicAreaEquip extends wepy.page {
             '',
             0,
             '',
-            self.threeArea.id,
-            self.oneArea.id,
-            self.twoArea.id,
+            self.repairType===1?self.threeArea.id:self.equip.id,
+            self.repairType===1?self.threeArea.regionOneId:self.equip.regionOneId,
+            self.repairType===1?self.threeArea.regionTwoId:self.equip.regionTwoId,
             self.audio,
             res.join(';'),
             self.mobile,
@@ -269,27 +273,46 @@ export default class PublicAreaEquip extends wepy.page {
   };
 
   async onLoad(query) {
-    console.log(query);
+    //console.log(query);
+    UID = wx.getStorageSync('login_user_info').id;
     this.repairType = Number.parseInt(query.repairType);
     this.$apply();
 
-    if (query.location) {
-      //定位报修
-      wx.getLocation({
-        type: 'wgs84',
-        success: function(res) {
-          var latitude = res.latitude;
-          var longitude = res.longitude;
-          console.log(res);
-        }
-      });
+    if (this.repairType === 2) {
+      //设备报修,加载设备信息
+      let res = await getAreaById(query.eid);
+      //console.log(res)
+      if (!res.status === 1 || !res.info.id) {
+        wx.showToast({
+          title: '该设备不存在',
+          icon: 'none'
+        });
+        setTimeout(() => {
+          wx.navigateBack();
+        }, 500);
+      }else{
+        this.equip = res.info
+        this.$apply()
+      }
+    } else if (this.repairType === 1) {
+      if (query.location) {
+        //定位报修
+        wx.getLocation({
+          type: 'wgs84',
+          success: function(res) {
+            var latitude = res.latitude;
+            var longitude = res.longitude;
+            //console.log(res);
+          }
+        });
+      }
     }
-   let res = await getRepairType()
-   if(res.status===1){
-     this.repairTypes = res.info
-     this.$apply()
-   }
 
+    let res = await getRepairType();
+    if (res.status === 1) {
+      this.repairTypes = res.info;
+      this.$apply();
+    }
   }
 
   onShow() {}

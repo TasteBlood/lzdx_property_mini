@@ -318,6 +318,18 @@ export const getOrderBySelf = async (id, orderState, serviceUid) => {
 };
 
 /**
+ * @description 根据id查询区域
+ * @param {Number} id 
+ */
+export const getAreaById = async (id) => {
+    try {
+        return await get('/wx/findInsRegion', {id},true)
+    } catch (error) {
+        return error
+    }
+};
+
+/**
  * orderState 0 待抢单 1 已超时 2 维修中 3 待支付 4 已完成
  * @description 维修员确认价格并完成订单
  * @param {Number} id 订单id
@@ -343,4 +355,77 @@ export const finishOrder = async (id, orderState) => {
     } catch (error) {
         return error
     }
+};
+
+/**
+ * @description 添加投诉
+ * @param {String} content 
+ * @param {String} fileUrl 
+ * @param {Number} regionId 
+ * @param {Number} regionOneId 
+ * @param {Number} regionTwoId 
+ * @param {Number} sysUserId 
+ */
+export const addComplain = async (content,fileUrl,regionId,regionOneId,regionTwoId,sysUserId) => {
+    try {
+        return await post('/wx/addComplaint',{content,fileUrl,regionId,regionOneId,regionTwoId,sysUserId},true)
+    } catch (error) {
+        return error
+    }
 }
+
+/**
+ * @description 添加申辩
+ * @param {Number} complaintId 
+ * @param {String} content 
+ * @param {String} fileUrl 
+ * @param {Number} sysUserId 
+ */
+export const complainApply = async (complaintId,content,fileUrl,sysUserId) => {
+    try {
+        return await post('/wx/addPlead',{complaintId,content,fileUrl,sysUserId},true)
+    } catch (error) {
+        return error
+    }
+};
+
+/**
+ * 
+ * @param {Number} pageNum 
+ * @param {Number} pageSize
+ * @param {Number} pleadState
+ * @param {Number} adminId
+ * @description 查询投诉记录 
+ */
+export const getComplain = async (pageNum,pageSize,pleadState,adminId) => {
+    try {
+        return await get('/wx/queryComplainted',{pageNum,pageSize,pleadState,adminId},true)
+    } catch (error) {
+        return error
+    }
+};
+
+/**
+ * 
+ * @param {Number} id
+ * @description 查询投诉详情 
+ */
+export const getComplainById = async (id) => {
+    try {
+        return await get('/wx/findComplaint', {id}, true)
+    } catch (error) {
+        return error
+    }
+};
+
+/**
+ * @description 微信支付
+ * @param {Number} orderId 
+ */
+export const wxPay = async (orderId) => {
+    try {
+        return await post('/wx/pay',{orderId},false)
+    } catch (error) {
+        return error
+    }
+};

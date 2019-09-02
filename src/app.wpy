@@ -57,26 +57,29 @@ page {
 </style>
 
 <script>
-import wepy from 'wepy';
-import 'wepy-async-function';
-
+import wepy from 'wepy'
+import 'wepy-async-function'
 export default class extends wepy.app {
   config = {
     pages: [
       'pages/index',
-      'pages/weixiu/wxy_jilu',
-      
+      'pages/tousu/ts_home',
+      'pages/tousu/ts_appeal',
+      'pages/tousu/ts_complaintDetail',
+      'pages/user/user_complain',
       'pages/weixiu/wxy_home',
+      'pages/weixiu/wxy_jilu',
       'pages/common_user_main',
+      'pages/user/user_jilu',
+      'pages/user/cashier',
+      'pages/user/user_order_detail',
       'pages/user/user_repair',
       'pages/user/public_area_equip_repair',
       'pages/xunjianyuan/xjy_jilu',
       'pages/xunjianyuan/xjy_home',
-      
       'pages/fuzeren/home',
       'pages/fuzeren/appeal',
       'pages/weixiu/wxy_order_detail',
-      
       'pages/xunjianyuan/xjy_location',
       'pages/xunjianyuan/xjy_detail',
       'pages/forget_pwd',
@@ -106,32 +109,38 @@ export default class extends wepy.app {
     super();
   }
 
-  // onLaunch() {
-  //   //console.log('app is launch');
-  //   let user = wx.getStorageSync('login_user_info');
-  //   if (user) {
-  //     //console.log('userinfo is not null');
-  //     if (user.roleId === 5) {
-  //       //巡检区域负责人
-  //       wx.redirectTo({
-  //         url: 'pages/fuzeren/home'
-  //       });
-  //     } else if (user.roleId === 4) {
-  //       //巡检员
-  //       wx.redirectTo({
-  //         url: 'pages/xunjianyuan/xjy_home'
-  //       });
-  //     } else if (user.roleId === 3) {
-  //       //维修工人
-  //     } else if (user.roleId === 6) {
-  //       //投诉负责人
-  //     } else {
-  //       wx.redirectTo({
-  //         url: 'pages/common_user_main'
-  //       });
-  //     }
-  //   }
-  // }
+  onLaunch() {
+    //console.log('app is launch');
+    let user = wx.getStorageSync('login_user_info');
+    if (user) {
+      //console.log('userinfo is not null');
+      if (user.roleId === 5) {
+        //巡检区域负责人
+        wx.redirectTo({
+          url: 'pages/fuzeren/home'
+        });
+      } else if (user.roleId === 4) {
+        //巡检员
+        wx.redirectTo({
+          url: 'pages/xunjianyuan/xjy_home'
+        });
+      } else if (user.roleId === 3) {
+        //维修工人
+        wx.redirectTo({
+          url: 'pages/weixiu/wxy_home'
+        });
+      } else if (user.roleId === 6) {
+        //投诉负责人
+        wx.redirectTo({
+          url: 'pages/tousu/ts_home'
+        });
+      } else {
+        wx.redirectTo({
+          url: 'pages/common_user_main'
+        });
+      }
+    }
+  }
 
   onShow() {
     //检查版本

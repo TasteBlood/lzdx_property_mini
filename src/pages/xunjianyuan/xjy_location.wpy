@@ -55,10 +55,12 @@
             <view class="location-info">
                 <text style="color:#717171;width:150rpx;">当前区域:</text>
                 <text wx:if="{{currentArea}}">{{currentArea.title}}</text>
+                <text wx:elif="{{queryArea}}">{{queryArea.title}}</text>
             </view>
             <view class="location-info" style="margin-top:10rpx;">
                 <text style="color:#717171;width:150rpx;">区块编号:</text>
-                <text>{{currentArea.num}}</text>
+                <text wx:if="{{currentArea}}">{{currentArea.num}}</text>
+                <text wx:elif="{{queryArea}}">{{queryArea.num}}</text>
             </view>
             <view class="location-info" style="margin-top:10rpx;">
                 <text style="color:#717171;width:120rpx;">负责人:</text>
@@ -67,9 +69,9 @@
                 </text>
             </view>
         </view>
-        <view style="font-size:30rpx;color:#2FBDF5;text-align:right;padding:10rpx 20rpx 10rpx 20rpx;" @tap="onAreaChooseOpen">选择区域?</view>
+        <view wx:if="{{!queryArea}}" style="font-size:30rpx;color:#2FBDF5;text-align:right;padding:10rpx 20rpx 10rpx 20rpx;" @tap="onAreaChooseOpen">选择区域?</view>
         
-        <view style="background-color:white;padding:20rpx 20rpx 20rpx 20rpx;display:flex;flex-direction:row;align-items:center;font-size:30rpx;">
+        <view style="background-color:white;padding:20rpx 20rpx 20rpx 20rpx;margin-top:10rpx;display:flex;flex-direction:row;align-items:center;font-size:30rpx;">
             <text style="color:#717171;width:150rpx;">巡检标题:</text>
             <input class="input" placeholder="请输入标题" placeholder-style="color:#919191" @input="onInput" data-type="title"/>
         </view>
@@ -109,7 +111,8 @@ import {
   getReportType,
   getLocationArea,
   getAreaLeader,
-  addInsReport
+  addInsReport,
+  getAreaById
 } from '../../utils/api';
 import ImagePicker from '../../components/imagePicker';
 import AreaSelector from '../../components/areaSelector';
@@ -127,10 +130,10 @@ export default class XJYLocation extends wepy.page {
     one: null,
     two: null,
     currentArea: null,
-    currentPerson: [],
-    checkType: [],
+    currentPerson: null,
+    checkType: null,
     checkIndex: null,
-    images: [],
+    images: null,
     //business variable
     showBig: false,
     currenUrl: null,
@@ -138,7 +141,9 @@ export default class XJYLocation extends wepy.page {
     //upload variable
     title: null, //标题
     question: null, //内容
-    advise: null //处罚建议
+    advise: null, //处罚建议
+
+    queryArea: null
   };
 
   components = {
@@ -221,46 +226,58 @@ export default class XJYLocation extends wepy.page {
         return;
       }
 
-      if(!this.checkIndex){
-          wx.showToast({
-              title: '巡检类型为空',
-              icon: 'none'
-          })
-          return
-      }
-
-      if(!this.currentArea){
-          wx.showToast({
-              title: '区域为空',
-              icon: 'none'
-          })
-          return
-      }
-
-      if(!this.images||this.images.length<=0){
+      if (!this.checkIndex) {
         wx.showToast({
-              title: '现场图片为空',
-              icon: 'none'
-          })
-          return
+          title: '巡检类型为空',
+          icon: 'none'
+        });
+        return;
       }
 
-      let self = this
+      if (!this.currentArea && !this.queryArea) {
+        wx.showToast({
+          title: '区域为空',
+          icon: 'none'
+        });
+        return;
+      }
+
+      if (!this.images || this.images.length <= 0) {
+        wx.showToast({
+          title: '现场图片为空',
+          icon: 'none'
+        });
+        return;
+      }
+
+      let self = this;
       UploadMulti(
         this.images,
-        async (res) => {
+        async res => {
           let result = res.filter(e => {
             //console.log(e);
             return e.indexOf('null') <= 0;
           });
-          let user = wx.getStorageSync('login_user_info')
-          let repos = await addInsReport(user.id,self.title,self.question,result.join(';'),self.advise,self.currentArea.id,
-          self.one.id,self.two.id,self.checkType[self.checkIndex].id)
-          if(repos.status===1){
-              wx.showToast({
-                  title: '提交成功',
-                  icon: 'none'
-              })
+          let user = wx.getStorageSync('login_user_info');
+          let repos = await addInsReport(
+            user.id,
+            self.title,
+            self.question,
+            result.join(';'),
+            self.advise,
+            self.currentArea?self.currentArea.id:self.queryArea.id,
+            self.currentArea?self.currentArea.regionOneId:self.queryArea.regionOneId,
+            self.currentArea?self.currentArea.regionTwoId:self.queryArea.regionTwoId,
+            self.checkType[self.checkIndex].id
+          );
+          if (repos.status === 1) {
+            wx.showToast({
+              title: '提交成功',
+              icon: 'none'
+            });
+            setTimeout(() => {
+              wx.navigateBack()
+            }, 500);
           }
         },
         e => {
@@ -270,27 +287,24 @@ export default class XJYLocation extends wepy.page {
     }
   };
 
-  async onLoad() {
-    //start location
-    wx.getLocation({
-      type: 'wgs84',
-      success: async function(res) {
-        var latitude = res.latitude;
-        var longitude = res.longitude;
-        console.log(res);
-        res = await getLocationArea(latitude, longitude);
-        if (!res.id) {
-          //未定位区域
-          wx.showToast({
-            title: '暂无法定位到区域信息，请手动选择',
-            icon: 'none'
-          });
-        } else {
-          //定位到区域
+  async onLoad(query) {
+    if (query.code) {
+      let res = await getAreaById(query.code);
+      if (res.status !== 1 || !res.info.id) {
+        wx.showToast({
+          title: '区域查询失败',
+          icon: 'none'
+        });
+      } else {
+        this.queryArea = res.info;
+        this.$apply();
+        res = await getAreaLeader(res.info.id);
+        if (res.status === 1) {
+          this.currentPerson = res.info.chaUser;
         }
-        console.log(res);
+        this.$apply();
       }
-    });
+    }
 
     // get report type
     let res = await getReportType();

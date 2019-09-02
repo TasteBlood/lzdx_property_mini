@@ -81,7 +81,7 @@
             <view style="font-size:32rpx;color:#414141;padding:20rpx;"><text style="color:#FFDE30;height:20rpx;border-right:solid 8rpx #FFDE30;margin-right:10rpx;"></text>报修信息</view>
             <imagePicker @onImageChoose.user="onImageChoose"></imagePicker>
             <input @input="onInput" data-type="reason" class="text-area" placeholder="请描述问题/情况" placeholder-style="color:#919191" />
-            <text class="btn-record" style="margin:0 20rpx 20rpx 20rpx;background-color:#FFDE30;color:#414141;font-size:32rpx;">开始录音</text>
+            <text class="btn-record" style="margin:0 20rpx 20rpx 20rpx;background-color:#FFDE30;color:#414141;font-size:32rpx;display:none">开始录音</text>
         </view>
 
         <view class="info">
@@ -104,7 +104,7 @@
             <view style="font-size:32rpx;color:#414141;padding:20rpx;"><text style="color:#FFDE30;height:20rpx;border-right:solid 8rpx #FFDE30;margin-right:10rpx;"></text>预约维修</view>
             <view style="display:flex;flex-direction:row;align-items:center;padding:0rpx 20rpx 20rpx 20rpx;">
                 <text style="color:#515151;">预约:</text>
-                <checkbox-group @change="checkboxChange">
+                <checkbox-group @change="checkboxChange" style="margin-left:10rpx;">
                   <checkbox value="true"></checkbox>
                 </checkbox-group>
             </view>
@@ -125,7 +125,7 @@ import ImagePicker from '../../components/imagePicker';
 import AreaSelector from '../../components/areaSelector';
 import { addRepair,getRepairType } from '../../utils/api';
 import { UploadMulti } from '../../utils/uploader';
-const UID = wx.getStorageSync('login_user_info').id;
+let UID = 0;
 export default class UserRepair extends wepy.page {
   config = {
     navigationBarTitleText: '住家户报修',
@@ -314,7 +314,7 @@ export default class UserRepair extends wepy.page {
   };
 
   async onLoad() {
-
+    UID = wx.getStorageSync('login_user_info').id;
     let res = await getRepairType()
     if(res.status===1){
       this.repairType = res.info

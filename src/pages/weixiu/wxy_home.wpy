@@ -98,7 +98,7 @@
 <script>
 import wepy from 'wepy';
 import { getRepairList,getOrderBySelf} from '../../utils/api'
-const UID = wx.getStorageSync('login_user_info').id
+let UID = 0
 export default class WXYHome extends wepy.page {
   config = {
     navigationBarTitleText: '维修抢单系统',
@@ -106,7 +106,8 @@ export default class WXYHome extends wepy.page {
     navigationBarTextStyle: 'black',
     disableScroll: false,
     usingComponents: {},
-    enablePullDownRefresh: true
+    enablePullDownRefresh: true,
+    onReachBottomDistance:100
   };
 
   data = {
@@ -155,32 +156,8 @@ export default class WXYHome extends wepy.page {
       wx.navigateTo({
         url: './wxy_jilu'
       });
-    },
-    loadMore() {
-      console.log('load more...');
     }
   };
-
-  initScrollViewHeight() {
-    var that = this;
-    //console.log(that)
-    wx.getSystemInfo({
-      success: function(res) {
-        wx.createSelectorQuery()
-          .select('.top-box')
-          .boundingClientRect(function(rect) {
-            // console.log(res);
-            // console.log(rect);
-            const height = res.windowHeight - rect.height;
-            that.height = height;
-            // set data in async method needs to invoke apply() method
-            that.$apply();
-            //console.log(that.height)
-          })
-          .exec();
-      }
-    });
-  }
 
   async loadData(page, size) {
     if (this.load) return;
@@ -205,24 +182,37 @@ export default class WXYHome extends wepy.page {
         //
         this.noMore = true;
       } else {
+        this.noMore = false
         this.page++;
       }
 
       this.$apply();
     }
-    console.log(res);
+    //console.log(res);
   }
 
   onLoad() {
     let user = wx.getStorageSync('login_user_info');
     this.name = user.name;
-    this.initScrollViewHeight();
+    UID = user.id
+    //this.initScrollViewHeight();
+    
+  }
+
+  onShow(){
     this.loadData(this.page, this.size);
   }
 
   onPullDownRefresh() {
     this.page = 1;
     this.loadData(this.page, this.size);
+  }
+
+  onReachBottom(){
+    console.log('on bottom')
+    if(this.noMore)
+    return
+    this.loadData(this.page,this.size)
   }
 }
 </script>

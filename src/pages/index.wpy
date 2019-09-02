@@ -356,6 +356,9 @@ export default class Index extends wepy.page {
           });
         } else if (user.roleId === 6) {
           //投诉负责人
+          wx.redirectTo({
+            url: '../pages/tousu/ts_home'
+          })
         }
       }
     },
