@@ -96,8 +96,8 @@ export const getReportType = async () => {
 
 /**
  * 
- * @param {Float} latitude 经度
- * @param {Float} longitude 纬度
+ * @param {Float} latitude 纬度
+ * @param {Float} longitude 经度
  * @description 根据经纬度查询区域
  */
 export const getLocationArea = async (latitude, longitude) => {
@@ -425,6 +425,19 @@ export const getComplainById = async (id) => {
 export const wxPay = async (orderId) => {
     try {
         return await post('/wx/pay',{orderId},false)
+    } catch (error) {
+        return error
+    }
+};
+
+/**
+ * @description 查询通知列表
+ * @param {Number} pageNum 
+ * @param {Number} pageSize 
+ */
+export const getNotice = async (pageNum,pageSize) => {
+    try {
+        return await get('/base/queryNotice',{pageNum,pageSize},true)
     } catch (error) {
         return error
     }

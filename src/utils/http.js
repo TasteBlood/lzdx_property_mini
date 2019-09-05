@@ -1,4 +1,5 @@
-const BASE_URL = "http://192.168.31.51:8084";
+// const BASE_URL = "http://192.168.31.51:8084";
+const BASE_URL = "https://wuye-service-landa.lz-cc.com";
 
 
 // get request 
@@ -36,9 +37,11 @@ const GET = async (url, params, loading) => {
                                 icon: 'none'
                             })
                             wx.removeStorageSync('login_user_info')
-                            wx.redirectTo({
-                                url: '../../pages/index'
-                            })
+                            setTimeout(() => {
+                                wx.redirectTo({
+                                    url: '../../pages/index'
+                                })
+                            }, 500);
                         } else {
                             wx.showToast({
                                 title: res.data.info ? res.data.info : "服务器异常",
@@ -103,7 +106,16 @@ const POST = async (url, params, loading) => {
                         if (res.data.status === 1) {
                             resolve(res.data);
                         } else if (res.data.status === 100) {
-
+                            wx.showToast({
+                                title: '登录失效，请重新登录',
+                                icon: 'none'
+                            })
+                            wx.removeStorageSync('login_user_info')
+                            setTimeout(() => {
+                                wx.redirectTo({
+                                    url: '../../pages/index'
+                                })
+                            }, 500);
                         } else {
                             wx.showToast({
                                 title: res.data.info ? res.data.info : "服务器异常",

@@ -63,6 +63,7 @@ export default class extends wepy.app {
   config = {
     pages: [
       'pages/index',
+      'pages/user/notice',
       'pages/tousu/ts_home',
       'pages/tousu/ts_appeal',
       'pages/tousu/ts_complaintDetail',
@@ -95,6 +96,12 @@ export default class extends wepy.app {
     permission: {
       'scope.userLocation': {
         desc: '部分功能需要位置信息才能完成'
+      }
+    },
+    plugins:{
+      "chooseLocation":{
+        "version":"1.0.0",
+        "provider":"wx76a9a06e5b4e693e"
       }
     }
   };

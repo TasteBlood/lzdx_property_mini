@@ -200,7 +200,7 @@ export default class Home extends wepy.page {
     navigationBarTitleText: '巡检系统',
     navigationBarBackgroundColor: '#FFDE30',
     navigationBarTextStyle: 'black',
-    disableScroll: true,
+    disableScroll: false,
     enablePullDownRefresh:true,
     usingComponents: {},
   };

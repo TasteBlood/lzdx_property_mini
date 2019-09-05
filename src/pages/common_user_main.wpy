@@ -176,7 +176,9 @@ export default class Index extends wepy.page {
             success: res => {
               //console.log(res)
               wx.navigateTo({
-                url: `./user/public_area_equip_repair?repairType=2&eid=${res.result}`
+                url: `./user/public_area_equip_repair?repairType=2&eid=${
+                  res.result
+                }`
               });
             }
           });
@@ -192,6 +194,17 @@ export default class Index extends wepy.page {
           });
           break;
         case 'scan':
+          //先扫码，完了跳转
+          wx.scanCode({
+            onlyFromCamera: true,
+            scanType: ['qrCode'],
+            success: res => {
+              //console.log(res)
+              wx.navigateTo({
+                url: `./user/notice`
+              });
+            }
+          });
           break;
         case 'complain':
           wx.navigateTo({

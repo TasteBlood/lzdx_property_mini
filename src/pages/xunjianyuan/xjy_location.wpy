@@ -116,9 +116,10 @@ import {
 } from '../../utils/api';
 import ImagePicker from '../../components/imagePicker';
 import AreaSelector from '../../components/areaSelector';
+const chooseLocation = requirePlugin('chooseLocation');
 export default class XJYLocation extends wepy.page {
   config = {
-    navigationBarTitleText: '定位巡检',
+    navigationBarTitleText: '巡检报告',
     navigationBarBackgroundColor: '#FFDE30',
     navigationBarTextStyle: 'black',
     disableScroll: false,
@@ -265,9 +266,13 @@ export default class XJYLocation extends wepy.page {
             self.question,
             result.join(';'),
             self.advise,
-            self.currentArea?self.currentArea.id:self.queryArea.id,
-            self.currentArea?self.currentArea.regionOneId:self.queryArea.regionOneId,
-            self.currentArea?self.currentArea.regionTwoId:self.queryArea.regionTwoId,
+            self.currentArea ? self.currentArea.id : self.queryArea.id,
+            self.currentArea
+              ? self.currentArea.regionOneId
+              : self.queryArea.regionOneId,
+            self.currentArea
+              ? self.currentArea.regionTwoId
+              : self.queryArea.regionTwoId,
             self.checkType[self.checkIndex].id
           );
           if (repos.status === 1) {
@@ -276,7 +281,7 @@ export default class XJYLocation extends wepy.page {
               icon: 'none'
             });
             setTimeout(() => {
-              wx.navigateBack()
+              wx.navigateBack();
             }, 500);
           }
         },
@@ -304,6 +309,13 @@ export default class XJYLocation extends wepy.page {
         }
         this.$apply();
       }
+    } else {
+      //地图选点巡检
+      let referer = '西武商城';
+      let key = 'S2ZBZ-LGO6F-4OTJB-NQOWC-PS7XS-Q7BLZ';
+      wx.navigateTo({
+        url: 'plugin://chooseLocation/index?key=' + key + '&referer=' + referer
+      });
     }
 
     // get report type
@@ -313,5 +325,16 @@ export default class XJYLocation extends wepy.page {
   }
 
   onReady() {}
+
+  async onShow() {
+    const lc = chooseLocation.getLocation();
+    if (!lc || !lc.latitude) return;
+    //console.log(lc);
+    let res = await getLocationArea(lc.latitude, lc.longitude);
+    console.log(res);
+    if (res.status === 1) {
+      //查询成功
+    }
+  }
 }
 </script>

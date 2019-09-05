@@ -158,13 +158,13 @@ export default class UserComplain extends wepy.page {
         });
         return;
       }
-      if (!this.images) {
-        wx.showToast({
-          title: '图片为空',
-          icon: 'none'
-        });
-        return;
-      }
+      // if (!this.images) {
+      //   wx.showToast({
+      //     title: '图片为空',
+      //     icon: 'none'
+      //   });
+      //   return;
+      // }
 
       UploadMulti(
         this.images,

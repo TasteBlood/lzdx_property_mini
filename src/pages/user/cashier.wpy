@@ -44,7 +44,7 @@
 <template>
     <view class="container">
         <!-- <text class="title">住家户维修缴费平台</text> -->
-        <text class="price-wrapper">需支付，<text class="price fade">¥200</text></text>
+        <text class="price-wrapper">需支付，<text class="price fade">¥{{fee/100}}</text></text>
         <view class="btn-pay" @tap="pay">微信支付</view>
         <text style="color:#919191;font-size:30rpx;margin-top:10rpx;">(暂支持微信支付)</text>
     </view>
@@ -63,6 +63,7 @@ export default class Cashier extends wepy.page {
 
   data = {
     oid:0,
+    fee:0
   };
 
   methods = {
@@ -96,6 +97,7 @@ export default class Cashier extends wepy.page {
 
   onLoad(query){
     this.oid = Number.parseInt(query.oid)
+    this.fee = Number.parseInt(query.fee)
   }
 }
 </script>

@@ -237,7 +237,8 @@ export default class WXYJilu extends wepy.page {
     items3: [],
 
     // business variable
-    orderState: 2, // 值 分别是 2 4 5
+    orderState: 2, // 值 分别是 2 3 4
+
     page1: 1,
     page2: 1,
     page3: 1,
@@ -307,7 +308,7 @@ export default class WXYJilu extends wepy.page {
     },
     // on swiper change
     onSwiperChange(e) {
-      this.currentIndex = e.detail.current;
+      this.currentIndex = Number.parseInt(e.detail.current);
       if (this.currentIndex === 0) {
         //维修中
         this.orderState = 2;
@@ -402,8 +403,8 @@ export default class WXYJilu extends wepy.page {
       let res = await getRepairList(
         orderState,
         UID,
-        pageNum,
         '',
+        pageNum,
         pageSize,
         true
       );
@@ -434,8 +435,8 @@ export default class WXYJilu extends wepy.page {
       let res = await getRepairList(
         orderState,
         UID,
-        pageNum,
         '',
+        pageNum,
         pageSize,
         true
       );

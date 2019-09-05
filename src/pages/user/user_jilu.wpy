@@ -13,11 +13,34 @@
       display: flex;
       flex-direction: row;
       box-sizing: border-box;
+      position: relative;
       padding: 10rpx 20rpx 10rpx 20rpx;
       align-items: center;
       background-color: white;
       margin-bottom: 20rpx;
       box-shadow: 2rpx 4rpx 5rpx 0 #f1f1f1;
+
+      .tag-wait{
+        font-size: 26rpx;
+        border: 1px solid #FFDE30;
+        border-radius: 8rpx;
+        color: #FFDE30;
+        padding: 4rpx 8rpx 4rpx 8rpx;
+        position: absolute;
+        right: 10rpx;
+        top:10rpx;
+      }
+
+      .tag-finish{
+        font-size: 26rpx;
+        border: 1px solid rgb(44, 236, 38);
+        border-radius: 8rpx;
+        color: rgb(44, 236, 38);
+        padding: 4rpx 8rpx 4rpx 8rpx;
+        position: absolute;
+        right:10rpx;
+        top:10rpx;
+      }
 
       .pic-error {
         width: 160rpx;
@@ -45,6 +68,11 @@
         <view class="list" wx:if="{{items.length>0}}">
             <view class="list-item" wx:for="{{items}}" wx:key="{{index}}" @tap="onItemClick"
               data-item="{{item}}">
+              <!-- float tags -->
+              <text class="tag-wait" wx:if="{{item.orderState===0}}">待抢单</text>
+              <text class="tag-wait" wx:elif="{{item.orderState===2}}">维修中</text>
+              <text class="tag-wait" wx:elif="{{item.orderState===3}}">待支付</text>
+              <text class="tag-finish" wx:elif="{{item.orderState===4}}">已完成</text>
               <image
                 wx:if="{{item.images.length>0 && item.images[0]}}"
                 lazy-mode
@@ -91,12 +119,12 @@ let UID = 0;
 
 export default class UserJilu extends wepy.page {
   config = {
-    navigationBarTitleText: '维修记录',
+    navigationBarTitleText: '报修记录',
     navigationBarBackgroundColor: '#FFDE30',
     navigationBarTextStyle: 'black',
     disableScroll: false,
     usingComponents: {},
-    enablePullDownRefresh: true,
+    enablePullDownRefresh: true
     //reachBottomDistance: 100
   };
 
@@ -109,11 +137,11 @@ export default class UserJilu extends wepy.page {
   };
 
   methods = {
-      onItemClick(e){
-          wx.navigateTo({
-              url: `./user_order_detail?id=${e.currentTarget.dataset.item.id}`
-          })
-      }
+    onItemClick(e) {
+      wx.navigateTo({
+        url: `./user_order_detail?id=${e.currentTarget.dataset.item.id}`
+      });
+    }
   };
 
   onLoad() {
@@ -131,7 +159,7 @@ export default class UserJilu extends wepy.page {
   }
 
   onReachBottom() {
-    console.log('on bottom')
+    //console.log('on bottom')
     if (this.noMore) return;
     this.loadData(this.page, this.size);
   }
@@ -141,7 +169,7 @@ export default class UserJilu extends wepy.page {
     this.load = true;
     let res = await getRepairList('', '', UID, pageNum, pageSize);
     this.load = false;
-    wx.stopPullDownRefresh()
+    wx.stopPullDownRefresh();
     if (res.status === 1) {
       res.info.records.forEach(e => {
         e.images = e.pics.split(';');

@@ -2,7 +2,7 @@ import { HOST } from './http';
 
 /**
  * 
- * @param {String} filePath 
+ * @param {Any?} filePath 
  * @param {Function} sucess 
  * @param {Function} fail 
  * @description 上传单张图片
@@ -42,6 +42,10 @@ export const UploadSingle = (filePath, success, fail) => {
  * @description 多张上传
  */
 export const UploadMulti = (filePaths, success, fail) => {
+    if(!filePaths || filePaths.length<=0){
+        success([])
+        return
+    }
     let uploaded = []
     var uploadNum = 0
     wx.showLoading({
@@ -60,7 +64,7 @@ export const UploadMulti = (filePaths, success, fail) => {
                     let data = JSON.parse(res.data)
                     uploaded.push(data.info)
                     uploadNum++
-                    console.log('upload success', uploadNum)
+                    //console.log('upload success', uploadNum)
 
                     if (uploadNum === filePaths.length) {
                         //upload completed
@@ -77,7 +81,7 @@ export const UploadMulti = (filePaths, success, fail) => {
                 }
             },
             error: (e) => {
-                console.log(e)
+                //console.log(e)
                 uploaded.push('error')
                 if (uploadNum === filePaths.length) {
                     //upload completed

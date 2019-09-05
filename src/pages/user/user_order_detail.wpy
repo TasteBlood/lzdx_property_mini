@@ -247,7 +247,7 @@ export default class UserOrderDetail extends wepy.page {
     },
     onPayClick(e){
       wx.navigateTo({
-        url: `./cashier?oid=${this.order.id}`
+        url: `./cashier?oid=${this.order.id}&fee=${this.order.serviceFee}`
       })
     }
   };

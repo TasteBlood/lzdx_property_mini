@@ -112,9 +112,10 @@
 import wepy from 'wepy';
 import ImagePicker from '../../components/imagePicker';
 import AreaSelector from '../../components/areaSelector';
-import { addRepair, getRepairType, getAreaById } from '../../utils/api';
+import { addRepair, getRepairType, getAreaById, getLocationArea} from '../../utils/api';
 import { UploadMulti } from '../../utils/uploader';
 let UID = 0;
+const chooseLocation = requirePlugin('chooseLocation');
 export default class PublicAreaEquip extends wepy.page {
   config = {
     navigationBarTitleText: '公共报修',
@@ -144,7 +145,9 @@ export default class PublicAreaEquip extends wepy.page {
     mobile: null,
     images: null,
     audio: null,
-    equip:null
+    equip: null,
+
+    isLocation:false
   };
 
   methods = {
@@ -247,9 +250,13 @@ export default class PublicAreaEquip extends wepy.page {
             '',
             0,
             '',
-            self.repairType===1?self.threeArea.id:self.equip.id,
-            self.repairType===1?self.threeArea.regionOneId:self.equip.regionOneId,
-            self.repairType===1?self.threeArea.regionTwoId:self.equip.regionTwoId,
+            self.repairType === 1 ? self.threeArea.id : self.equip.id,
+            self.repairType === 1
+              ? self.threeArea.regionOneId
+              : self.equip.regionOneId,
+            self.repairType === 1
+              ? self.threeArea.regionTwoId
+              : self.equip.regionTwoId,
             self.audio,
             res.join(';'),
             self.mobile,
@@ -290,20 +297,19 @@ export default class PublicAreaEquip extends wepy.page {
         setTimeout(() => {
           wx.navigateBack();
         }, 500);
-      }else{
-        this.equip = res.info
-        this.$apply()
+      } else {
+        this.equip = res.info;
+        this.$apply();
       }
     } else if (this.repairType === 1) {
       if (query.location) {
         //定位报修
-        wx.getLocation({
-          type: 'wgs84',
-          success: function(res) {
-            var latitude = res.latitude;
-            var longitude = res.longitude;
-            //console.log(res);
-          }
+        this.isLocation = true;
+        let referer = '西武商城';
+        let key = 'S2ZBZ-LGO6F-4OTJB-NQOWC-PS7XS-Q7BLZ';
+        wx.navigateTo({
+          url:
+            'plugin://chooseLocation/index?key=' + key + '&referer=' + referer
         });
       }
     }
@@ -315,6 +321,17 @@ export default class PublicAreaEquip extends wepy.page {
     }
   }
 
-  onShow() {}
+  async onShow() {
+    if(!this.isLocation)
+    return;
+    const lc = chooseLocation.getLocation();
+    if (!lc || !lc.latitude) return;
+    //console.log(lc);
+    let res = await getLocationArea(lc.latitude, lc.longitude);
+    console.log(res);
+    if (res.status === 1) {
+      //查询成功
+    }
+  }
 }
 </script>

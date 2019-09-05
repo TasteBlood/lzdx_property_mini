@@ -1,0 +1,122 @@
+<style lang="less" scoped>
+.list {
+  display: flex;
+  flex-direction: column;
+
+  .list-item {
+    display: flex;
+    flex-direction: column;
+    padding: 10rpx;
+    background-color: white;
+    color: #414141;
+    font-size: 32rpx;
+    margin-bottom: 20rpx;
+    box-shadow: 0rpx 6rpx 8rpx 0 #f1f1f1;
+
+    .title {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+    }
+
+    .content {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      margin-top: 10rpx;
+    }
+
+    .time {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      margin-top: 20rpx;
+      font-size: 30rpx;
+      justify-content: flex-end;
+      text-align: right;
+    }
+  }
+}
+</style>
+<template>
+    <view class="list">
+        <view class="list-item" wx:for="{{items}}" wx:key="{{index}}">
+            <view class="title">
+                <view style="width:80rpx;color:#717171">标题:</view>
+                <view style="width:90%">{{item.title}}</view>
+            </view>
+            <view class="content">
+                <view style="width:80rpx;color:#717171">内容:</view>
+                <view style="width:90%;font-size:30rpx;color:#515151">{{item.content}}</view>
+            </view>
+            <view class="time">
+                <view style="width:90%;color:#717171">发布于:{{item.createTime}}</view>
+            </view>
+        </view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+import { getNotice } from '../../utils/api';
+export default class Notice extends wepy.page {
+  config = {
+    navigationBarTitleText: '通知',
+    navigationBarBackgroundColor: '#FFDE30',
+    navigationBarTextStyle: 'black',
+    disableScroll: false,
+    usingComponents: {},
+    enablePullDownRefresh: true
+  };
+
+  data = {
+    items:[],
+    pageNum: 1,
+    pageSize: 20,
+    load:false,
+    noMore:false
+  };
+
+  methods = {};
+
+  onLoad() {
+    this.loadData(this.pageNum, this.pageSize);
+  }
+
+  async loadData(page, size) {
+    if(this.load)
+    return;
+    this.load = true;
+    let res = await getNotice(page, size);
+    this.load = false;
+    wx.stopPullDownRefresh()
+    if (res.status === 1) {
+      if (page === 1) {
+        this.items.splice(0, this.items.length);
+        this.items = res.info.records;
+        this.noMore = false
+      } else {
+        this.items.concat(res.info.records);
+      }
+
+      if(res.info.pageindex.endindex===page){
+          this.noMore = true
+      }else{
+          this.noMore = false
+          this.pageNum ++
+      }
+
+      this.$apply();
+    }
+  }
+
+  onReachBottom(){
+      if(this.noMore)return;
+      this.loadData(this.pageNum,this.pageSize)
+  }
+
+  onPullDownRefresh(){
+      this.pageNum = 1
+      this.loadData(this.pageNum,this.pageSize)
+  }
+}
+</script>
