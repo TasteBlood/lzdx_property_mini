@@ -1,0 +1,39 @@
+<style lang="less" scoped>
+</style>
+<template>
+    <view>
+        <button @tap="onOpen">显示</button>
+        <areaSelector :show.sync="showArea" @on-close.user="onClose"></areaSelector>
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+import AreaSelector from '../components/areaSelector';
+
+export default class Test extends wepy.page {
+  config = {
+    navigationBarTitleText: '测试',
+    navigationBarBackgroundColor: '#FFDE30',
+    navigationBarTextStyle: 'black',
+    disableScroll: false,
+    usingComponents: {}
+  };
+
+  components = {
+    areaSelector: AreaSelector
+  };
+
+  data = {
+    showArea: false
+  };
+
+  methods = {
+    onOpen() {
+      this.showArea = true;
+    },
+    onClose(){
+        this.showArea = false;
+    }
+  };
+}
+</script>

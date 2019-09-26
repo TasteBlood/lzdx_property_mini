@@ -61,7 +61,7 @@
           <text>欢迎您，{{name}}</text>
           <text @tap="logout">退出></text>
         </view>
-        <text class="title">A</text>
+        <!-- <text class="title">A</text> -->
         <view class="menu-item" @tap="onItemClick" data-type="scan">
             <view class="menu-left">
                 <view style="position:absolute;z-index:2;left:45rpx;top:35rpx;display:flex;flex-direction:column;align-items:center">
@@ -72,7 +72,7 @@
             </view>
             <image src="../../../../../images/xjy_saoma_img.png" style="width:400rpx;height:200rpx;margin-left:20rpx;"></image>
         </view>
-        <text class="title">B</text>
+        <!-- <text class="title">B</text> -->
         <view class="menu-item" @tap="onItemClick" data-type="location">
             <view class="menu-left">
                 <view style="position:absolute;z-index:2;left:45rpx;top:35rpx;display:flex;flex-direction:column;align-items:center">
@@ -83,7 +83,7 @@
             </view>
             <image src="../../../../../images/xjy_dingwei_img.png" style="width:400rpx;height:230rpx;margin-left:20rpx;margin-top:-50rpx;" mode="asceptFill"></image>
         </view>
-        <text class="title">C</text>
+        <!-- <text class="title">C</text> -->
         <view class="menu-item" @tap="onItemClick" data-type="record">
             <view class="menu-left">
                 <view style="position:absolute;z-index:2;left:45rpx;top:35rpx;display:flex;flex-direction:column;align-items:center">
@@ -137,9 +137,18 @@ export default class XJYHome extends wepy.page {
             onlyFromCamera: true,
             scanType: ['qrCode'],
             success(res) {
-              wx.navigateTo({
-                url: `xjy_location?code=${res.result}`
-              });
+              let src = res.result;
+              if (src.indexOf('https://wuye-service-landa.lz-cc.com') != -1) {
+                let barCode = src.replace(/[^0-9]/gi, '');
+                wx.navigateTo({
+                  url: `xjy_location?barCode=${barCode}`
+                });
+              } else {
+                wx.showToast({
+                  title: '二维码不正确',
+                  icon: 'none'
+                });
+              }
             }
           });
           break;

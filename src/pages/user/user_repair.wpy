@@ -32,6 +32,7 @@
       border-radius: 4rpx;
       font-size: 30rpx;
       width: 90%;
+      height: 200rpx;
     }
 
     .btn-record {
@@ -80,7 +81,7 @@
         <view class="info">
             <view style="font-size:32rpx;color:#414141;padding:20rpx;"><text style="color:#FFDE30;height:20rpx;border-right:solid 8rpx #FFDE30;margin-right:10rpx;"></text>报修信息</view>
             <imagePicker @onImageChoose.user="onImageChoose"></imagePicker>
-            <input @input="onInput" data-type="reason" class="text-area" placeholder="请描述问题/情况" placeholder-style="color:#919191" />
+            <textarea @input="onInput" data-type="reason" class="text-area" placeholder="请描述问题/情况" placeholder-style="color:#919191"></textarea>
             <text class="btn-record" style="margin:0 20rpx 20rpx 20rpx;background-color:#FFDE30;color:#414141;font-size:32rpx;display:none">开始录音</text>
         </view>
 
@@ -88,15 +89,15 @@
             <view style="font-size:32rpx;color:#414141;padding:20rpx;"><text style="color:#FFDE30;height:20rpx;border-right:solid 8rpx #FFDE30;margin-right:10rpx;"></text>报修人信息</view>
             <view style="display:flex;flex-direction:row;align-items:center;padding:0 20rpx 20rpx 20rpx;">
                 <text style="color:#515151;">姓名:</text>
-                <input @input="onInput" data-type="name" placeholder="真实姓名" placeholder-style="color:#919191" style="width:70%;margin-left:10rpx;padding:10rpx;border-bottom:1rpx solid #e1e1e1"/>
+                <input @input="onInput" value="{{username}}" data-type="name" placeholder="真实姓名" placeholder-style="color:#919191" style="width:70%;margin-left:10rpx;padding:10rpx;border-bottom:1rpx solid #e1e1e1"/>
             </view>
             <view style="display:flex;flex-direction:row;align-items:center;padding:0rpx 20rpx 20rpx 20rpx;">
                 <text style="color:#515151;">电话:</text>
-                <input @input="onInput" data-type="mobile" placeholder="联系方式" placeholder-style="color:#919191" style="width:70%;margin-left:10rpx;padding:10rpx;border-bottom:1rpx solid #e1e1e1"/>
+                <input @input="onInput" value="{{mobile}}" data-type="mobile" placeholder="联系方式" placeholder-style="color:#919191" style="width:70%;margin-left:10rpx;padding:10rpx;border-bottom:1rpx solid #e1e1e1"/>
             </view>
             <view style="display:flex;flex-direction:row;align-items:center;padding:0rpx 20rpx 20rpx 20rpx;">
                 <text style="color:#515151;">详址:</text>
-                <input @input="onInput" data-type="address" placeholder="楼号/单元/门号" placeholder-style="color:#919191" style="width:80%;margin-left:10rpx;padding:10rpx;border-bottom:1rpx solid #e1e1e1"/>
+                <input @input="onInput" value="{{address}}" data-type="address" placeholder="楼号/单元/门号" placeholder-style="color:#919191" style="width:80%;margin-left:10rpx;padding:10rpx;border-bottom:1rpx solid #e1e1e1"/>
             </view>
         </view>
 
@@ -123,12 +124,12 @@
 import wepy from 'wepy';
 import ImagePicker from '../../components/imagePicker';
 import AreaSelector from '../../components/areaSelector';
-import { addRepair,getRepairType } from '../../utils/api';
+import { addRepair,getRepairType,getAreaById} from '../../utils/api';
 import { UploadMulti } from '../../utils/uploader';
 let UID = 0;
 export default class UserRepair extends wepy.page {
   config = {
-    navigationBarTitleText: '住家户报修',
+    navigationBarTitleText: '报修',
     navigationBarBackgroundColor: '#FFDE30',
     navigationBarTextStyle: 'black',
     disableScroll: false,
@@ -279,6 +280,10 @@ export default class UserRepair extends wepy.page {
           return
         }
       }
+      // 将姓名、电话、地址信息保存下 下次直接填充
+      let data = {name:this.username,mobile:this.mobile,address:this.address};
+
+      wx.setStorageSync("user", data)
 
       UploadMulti(
         this.images,
@@ -289,14 +294,15 @@ export default class UserRepair extends wepy.page {
             self.appointment?1:0,
             self.appointment?self.selectDate+' '+self.selectTime:'',
             self.threeArea.id,
-            self.oneArea.id,
-            self.twoArea.id,
+            self.threeArea.regionOneId,
+            self.threeArea.regionTwoId,
             self.audio,
             res.join(';'),
             self.mobile,
             self.username,
             self.reason,
-            UID
+            UID,
+            self.repairType[Number.parseInt(self.repairIndex)].payId
           );
           if (repos.status === 1) {
             wx.showToast({
@@ -305,7 +311,7 @@ export default class UserRepair extends wepy.page {
             });
             setTimeout(() => {
               wx.navigateBack();
-            }, 200);
+            }, 500);
           }
         },
         e => {}
@@ -313,9 +319,22 @@ export default class UserRepair extends wepy.page {
     }
   };
 
-  async onLoad() {
+  async onLoad(options) {
+    if(options.barCode && options.barCode !== '' && options.barCode !== '0'){
+      //是扫码进入，需要查询维修区域
+      let res = await getAreaById(options.barCode)
+      if(res.status===1){
+        this.threeArea = res.info;
+      }
+    }
     UID = wx.getStorageSync('login_user_info').id;
     let res = await getRepairType()
+    let user = wx.getStorageSync('user')
+    if(user&&user.mobile){
+      this.username = user.name
+      this.mobile = user.mobile
+      this.address = user.address
+    }
     if(res.status===1){
       this.repairType = res.info
     }

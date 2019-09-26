@@ -239,7 +239,7 @@ export default class ForgetPwd extends wepy.page {
         return;
       }
       
-      let res = await updatePassWd(this.passwd1,this.passwd2,this.smsCode)
+      let res = await updatePassWd(this.mobile,this.smsCode,this.passwd2)
       if(res.status===1){
           wx.showToast({
               title: '密码修改成功',
@@ -247,7 +247,7 @@ export default class ForgetPwd extends wepy.page {
           })
           setTimeout(() => {
               wx.navigateBack()
-          }, 200);
+          }, 500);
       }
 
     }

@@ -57,20 +57,24 @@ page {
 </style>
 
 <script>
-import wepy from 'wepy'
-import 'wepy-async-function'
+import wepy from 'wepy';
+import 'wepy-async-function';
 export default class extends wepy.app {
   config = {
     pages: [
+      'pages/scan_index',
+      'pages/scan_introduce',
       'pages/index',
+      'pages/common_user_main',
+      'pages/user/user_complain',
+      'pages/test',
+      'pages/user/location',
       'pages/user/notice',
       'pages/tousu/ts_home',
       'pages/tousu/ts_appeal',
       'pages/tousu/ts_complaintDetail',
-      'pages/user/user_complain',
       'pages/weixiu/wxy_home',
       'pages/weixiu/wxy_jilu',
-      'pages/common_user_main',
       'pages/user/user_jilu',
       'pages/user/cashier',
       'pages/user/user_order_detail',
@@ -85,7 +89,7 @@ export default class extends wepy.app {
       'pages/xunjianyuan/xjy_detail',
       'pages/forget_pwd',
       'pages/fuzeren/complaintDetail',
-      'pages/admin_login',
+      'pages/admin_login'
     ],
     window: {
       backgroundTextStyle: 'dark',
@@ -96,12 +100,6 @@ export default class extends wepy.app {
     permission: {
       'scope.userLocation': {
         desc: '部分功能需要位置信息才能完成'
-      }
-    },
-    plugins:{
-      "chooseLocation":{
-        "version":"1.0.0",
-        "provider":"wx76a9a06e5b4e693e"
       }
     }
   };
@@ -118,54 +116,67 @@ export default class extends wepy.app {
 
   onLaunch() {
     //console.log('app is launch');
-    let user = wx.getStorageSync('login_user_info');
-    if (user) {
-      //console.log('userinfo is not null');
-      if (user.roleId === 5) {
-        //巡检区域负责人
-        wx.redirectTo({
-          url: 'pages/fuzeren/home'
-        });
-      } else if (user.roleId === 4) {
-        //巡检员
-        wx.redirectTo({
-          url: 'pages/xunjianyuan/xjy_home'
-        });
-      } else if (user.roleId === 3) {
-        //维修工人
-        wx.redirectTo({
-          url: 'pages/weixiu/wxy_home'
-        });
-      } else if (user.roleId === 6) {
-        //投诉负责人
-        wx.redirectTo({
-          url: 'pages/tousu/ts_home'
-        });
-      } else {
-        wx.redirectTo({
-          url: 'pages/common_user_main'
-        });
-      }
-    }
+    // let user = wx.getStorageSync('login_user_info');
+    // if (user) {
+    //   //console.log('userinfo is not null');
+    //   if (user.roleId === 5) {
+    //     //巡检区域负责人
+    //     wx.redirectTo({
+    //       url: 'pages/fuzeren/home'
+    //     });
+    //   } else if (user.roleId === 4) {
+    //     //巡检员
+    //     wx.redirectTo({
+    //       url: 'pages/xunjianyuan/xjy_home'
+    //     });
+    //   } else if (user.roleId === 3) {
+    //     //维修工人
+    //     wx.redirectTo({
+    //       url: 'pages/weixiu/wxy_home'
+    //     });
+    //   } else if (user.roleId === 6) {
+    //     //投诉负责人
+    //     wx.redirectTo({
+    //       url: 'pages/tousu/ts_home'
+    //     });
+    //   } else {
+    //     wx.redirectTo({
+    //       url: 'pages/common_user_main'
+    //     });
+    //   }
+    // }
   }
 
-  onShow() {
+  onShow(options) {
     //检查版本
-    const manager = wx.getUpdateManager();
-    //检查是否更新
-    manager.onCheckForUpdate()
-    //开始更新
-    manager.onUpdateReady(() => {
-      wx.showModal({
-        title: '更新提示',
-        content: '新版本已经准备好，是否重启应用？',
-        success: function(res) {
-          if (res.confirm) {
-            // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
-            manager.applyUpdate();
-          }
-        }
-      });
+    const updateManager = wx.getUpdateManager();
+    updateManager.onCheckForUpdate(function(res) {
+      console.log('onCheckForUpdate====', res);
+      // 请求完新版本信息的回调
+      if (res.hasUpdate) {
+        //console.log('res.hasUpdate====');
+        updateManager.onUpdateReady(function() {
+          wx.showModal({
+            title: '更新提示',
+            content: '新版本已经准备好，是否重启应用？',
+            success: function(res) {
+              console.log('success====', res);
+              // res: {errMsg: "showModal: ok", cancel: false, confirm: true}
+              if (res.confirm) {
+                // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
+                updateManager.applyUpdate();
+              }
+            }
+          });
+        });
+        updateManager.onUpdateFailed(function() {
+          // 新的版本下载失败
+          wx.showModal({
+            title: '已经有新版本了哟~',
+            content: '新版本已经上线啦~，请您删除当前小程序，重新搜索打开哟~'
+          });
+        });
+      }
     });
   }
 }

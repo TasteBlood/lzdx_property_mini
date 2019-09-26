@@ -17,27 +17,25 @@
     margin: 40rpx;
   }
   .price-wrapper {
-    
-
     .price {
       color: #23e263;
       font-size: 48rpx;
     }
   }
 
-  .btn-pay{
-      background-color: #FFDE30;
-      line-height: 100rpx;
-      height: 100rpx;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      text-align: center;
-      color: #414141;
+  .btn-pay {
+    background-color: #ffde30;
+    line-height: 100rpx;
+    height: 100rpx;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: #414141;
   }
-  .btn-pay:active{
-      background-color: rgb(250, 225, 102);
+  .btn-pay:active {
+    background-color: rgb(250, 225, 102);
   }
 }
 </style>
@@ -51,7 +49,7 @@
 </template>
 <script>
 import wepy from 'wepy';
-import {wxPay} from '../../utils/api'
+import { wxPay } from '../../utils/api';
 export default class Cashier extends wepy.page {
   config = {
     navigationBarTitleText: '维修缴费',
@@ -62,42 +60,49 @@ export default class Cashier extends wepy.page {
   };
 
   data = {
-    oid:0,
-    fee:0
+    oid: 0,
+    fee: 0
   };
 
   methods = {
-    async pay(){
-      let res = await wxPay(this.oid)
-      console.log(res)
-      if(res.status===1){
+    async pay() {
+      let res = await wxPay(this.oid);
+      console.log(res);
+      if (res.status === 1) {
         //下单成功，发起客户端支付
         wx.requestPayment({
-          timeStamp: '',
-          nonceStr: '',
-          package: '',
-          signType: '',
-          paySign: '',
-          success: function(res){
+          timeStamp: res.info.timestamp,
+          nonceStr: res.info.nonceStr,
+          package: res.info.packages,
+          signType: 'MD5',
+          paySign: res.info.sign,
+          success: function(res) {
             wx.showToast({
               title: '支付成功',
               icon: 'success'
             });
+
+            setTimeout(() => {
+              wx.navigateBack({
+                delta: 2
+              });
+            }, 1000);
           },
-          fail: function(res){
+          fail: function(e) {
+            console.log(e);
             wx.showToast({
               title: '支付失败',
               icon: 'none'
-            })
+            });
           }
-        })
+        });
       }
     }
   };
 
-  onLoad(query){
-    this.oid = Number.parseInt(query.oid)
-    this.fee = Number.parseInt(query.fee)
+  onLoad(query) {
+    this.oid = Number.parseInt(query.oid);
+    this.fee = Number.parseInt(query.fee);
   }
 }
 </script>

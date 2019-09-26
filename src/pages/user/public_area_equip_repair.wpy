@@ -32,6 +32,7 @@
       border-radius: 4rpx;
       font-size: 30rpx;
       width: 90%;
+      height: 150rpx;
     }
 
     .btn-record {
@@ -88,7 +89,7 @@
         <view class="info">
             <view style="font-size:32rpx;color:#414141;padding:20rpx;"><text style="color:#FFDE30;height:20rpx;border-right:solid 8rpx #FFDE30;margin-right:10rpx;"></text>报修信息</view>
             <imagePicker @onImageChoose.user="onImageChoose"></imagePicker>
-            <input @input="onInput" data-type="reason" class="text-area" placeholder="请描述问题/情况" placeholder-style="color:#919191" />
+            <textarea @input="onInput" data-type="reason" class="text-area" placeholder="请描述问题/情况" placeholder-style="color:#919191"></textarea>
             <text class="btn-record" style="margin:0 20rpx 20rpx 20rpx;background-color:#FFDE30;color:#414141;font-size:32rpx;display:none">开始录音</text>
         </view>
 
@@ -115,7 +116,6 @@ import AreaSelector from '../../components/areaSelector';
 import { addRepair, getRepairType, getAreaById, getLocationArea} from '../../utils/api';
 import { UploadMulti } from '../../utils/uploader';
 let UID = 0;
-const chooseLocation = requirePlugin('chooseLocation');
 export default class PublicAreaEquip extends wepy.page {
   config = {
     navigationBarTitleText: '公共报修',
@@ -280,6 +280,7 @@ export default class PublicAreaEquip extends wepy.page {
   };
 
   async onLoad(query) {
+    wepy.$instance.globalData.location = null
     //console.log(query);
     UID = wx.getStorageSync('login_user_info').id;
     this.repairType = Number.parseInt(query.repairType);
@@ -289,7 +290,7 @@ export default class PublicAreaEquip extends wepy.page {
       //设备报修,加载设备信息
       let res = await getAreaById(query.eid);
       //console.log(res)
-      if (!res.status === 1 || !res.info.id) {
+      if (!res.status === 1 ||!res.info ||!res.info.id) {
         wx.showToast({
           title: '该设备不存在',
           icon: 'none'
@@ -305,12 +306,9 @@ export default class PublicAreaEquip extends wepy.page {
       if (query.location) {
         //定位报修
         this.isLocation = true;
-        let referer = '西武商城';
-        let key = 'S2ZBZ-LGO6F-4OTJB-NQOWC-PS7XS-Q7BLZ';
         wx.navigateTo({
-          url:
-            'plugin://chooseLocation/index?key=' + key + '&referer=' + referer
-        });
+          url: './location'
+        })
       }
     }
 
@@ -324,14 +322,21 @@ export default class PublicAreaEquip extends wepy.page {
   async onShow() {
     if(!this.isLocation)
     return;
-    const lc = chooseLocation.getLocation();
+    const lc = wepy.$instance.globalData.location;
     if (!lc || !lc.latitude) return;
     //console.log(lc);
     let res = await getLocationArea(lc.latitude, lc.longitude);
     console.log(res);
     if (res.status === 1) {
       //查询成功
+      this.threeArea = res.info
+      this.$apply()
+      //查询负责人
     }
+  }
+
+  onUnload(){
+    wepy.$instance.globalData.location = null
   }
 }
 </script>

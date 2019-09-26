@@ -2,14 +2,14 @@
 	"description": "Lanzhou University Property MiniProgram",
 	"setting": {
 		"urlCheck": true,
-		"es6": false,
+		"es6": true,
 		"postcss": false,
 		"minified": false,
 		"newFeature": true,
 		"autoAudits": false
 	},
 	"compileType": "miniprogram",
-	"appid": "wxc794e10711a99f9b",
+	"appid": "wx1014991d487a1279",
 	"projectname": "wepy-iview",
 	"miniprogramRoot": "dist/",
 	"libVersion": "2.4.1",

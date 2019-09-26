@@ -76,6 +76,10 @@
       style="font-size:28rpx;margin-left:20rpx;margin-right:20rpx;margin-bottom:20rpx;color:#717171;"
     >{{order.regionOneName}}/{{order.regionTwoName}}/{{order.regionName}}</view>
     <view
+      wx:if="{{order.payType}}"
+      style="font-size:30rpx;color:#515151;padding:0 20rpx 0 20rpx;margin-bottom:20rpx;"
+    >支付类型:{{order.payType===1?'不缴费':order.payType===2?'校内转账':'微信转账'}}</view>
+    <view
       style="font-size:30rpx;color:#515151;padding:0 20rpx 0 20rpx;margin-bottom:20rpx;"
     >维修类型:{{order.repairType}}</view>
     <view style="font-size:30rpx;color:#515151;padding:0 20rpx 0 20rpx">报修时间:{{order.createTime}}</view>
@@ -92,6 +96,12 @@
       <text style="margin-left:20rpx">{{order.repairMobile}}</text>
       <!-- <view class="btn-call" style="margin-left:10rpx">呼 叫</view> -->
     </view>
+    <view style="margin-top:20rpx;font-size:30rpx;color:#515151;padding:20rpx" wx:if="{{order.address}}">
+      <view style="margin-top:20rpx">
+        <text>详细地址:</text>
+        <text style="color:#414141">{{order.address}}</text>
+      </view>
+    </view>
     <view style="margin-top:20rpx;font-size:30rpx;color:#515151;padding:20rpx" wx:if="{{order.isAppoint}}">
       <view>
         <text>预约维修:</text>
@@ -100,10 +110,6 @@
       <view style="margin-top:20rpx">
         <text>预约时间:</text>
         <text style="color:#414141">{{order.appointTime}}</text>
-      </view>
-      <view style="margin-top:20rpx">
-        <text>详细地址:</text>
-        <text style="color:#414141">{{order.address}}</text>
       </view>
     </view>
     <!-- orderState===0 待抢单 -->
@@ -118,8 +124,8 @@
       <text style="color:#414141;font-size:32rpx;margin-top:10rpx">维修中</text>
     </view>
 
-    <!-- 待支付 -->
-    <view wx:if="{{order.orderState===3}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <!-- 是待支付并且支付方式必须是微信转账-->
+    <view wx:if="{{order.orderState===3 && order.payType===3}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
       <view class="btn-pay" style="margin-bottom:20rpx" @tap="onPayClick" data-item="{{item}}">去支付</view>
     </view>
     

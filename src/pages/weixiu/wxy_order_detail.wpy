@@ -63,6 +63,10 @@
     <view
       style="font-size:30rpx;color:#515151;padding:0 20rpx 0 20rpx;margin-bottom:20rpx;"
     >维修类型:{{order.repairType}}</view>
+    <view
+      wx:if="{{order.payType}}"
+      style="font-size:30rpx;color:#515151;padding:0 20rpx 0 20rpx;margin-bottom:20rpx;"
+    >支付类型:{{order.payType===1?'不缴费':order.payType===2?'校内转账':'微信转账'}}</view>
     <view style="font-size:30rpx;color:#515151;padding:0 20rpx 0 20rpx">报修时间:{{order.createTime}}</view>
     <view
       wx:if="{{order.serviceFee}}"
@@ -75,7 +79,13 @@
     >
       <text>报修人:{{order.repairName}}</text>
       <text style="margin-left:20rpx">{{order.repairMobile}}</text>
-      <view class="btn-call" style="margin-left:10rpx">呼 叫</view>
+      <view class="btn-call" style="margin-left:10rpx" @tap="onMakeCall">呼 叫</view>
+    </view>
+    <view style="margin-top:20rpx;font-size:30rpx;color:#515151;padding:20rpx" wx:if="{{order.address}}">
+      <view style="margin-top:20rpx">
+        <text>详细地址:</text>
+        <text style="color:#414141">{{order.address}}</text>
+      </view>
     </view>
     <view style="margin-top:20rpx;font-size:30rpx;color:#515151;padding:20rpx" wx:if="{{order.isAppoint}}">
       <view>
@@ -86,25 +96,21 @@
         <text>预约时间:</text>
         <text style="color:#414141">{{order.appointTime}}</text>
       </view>
-      <view style="margin-top:20rpx">
-        <text>详细地址:</text>
-        <text style="color:#414141">{{order.address}}</text>
-      </view>
     </view>
     <!-- orderState===0 待抢单 -->
     <view wx:if="{{order.orderState===0}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
       <view class="btn-up" @tap="onUpOrder">抢 单</view>
     </view>
     <!-- orderState===2 待完成 住家户-->
-    <view wx:if="{{order.orderState===2 && order.regionType===2}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
-      <input @input="onInput" placeholder="维修费" inputmode="number" style="border-radius:8rpx;border:1rpx solid #e1e1e1;width:200rpx;padding:10rpx;text-align:center" placeholder-style="color:#919191"/>
+    <view style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <input @input="onInput" placeholder="维修费" inputmode="number" style="font-size:38rpx;border-radius:8rpx;border:1rpx solid #e1e1e1;width:300rpx;padding:20rpx;text-align:center" placeholder-style="color:#919191"/>
       <text style="color:#717171;font-size:30rpx">(无,可不填)</text>
       <view class="btn-up" style="margin-top:20rpx;margin-bottom:20rpx" @tap="onWaitPayClick">维修完成</view>
     </view>
     <!-- orderState===2 待完成 设备/区域-->
-    <view wx:if="{{order.orderState===2 && order.regionType !== 2}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <!-- <view wx:if="{{order.orderState===2 && order.regionType !== 2}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
       <view class="btn-up" style="margin-top:20rpx;margin-bottom:20rpx" @tap="onFinishClick">维修完成</view>
-    </view>
+    </view> -->
 
     <view wx:if="{{order.orderState===3}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
       <image src="../../images/wai_pay.png" style="width:100rpx;height:100rpx" mode="widthFix"></image>
@@ -158,6 +164,18 @@ export default class WXYOrderDetail extends wepy.page {
     onClose() {
       this.showBig = false;
     },
+    onMakeCall(){
+      if(!this.order.repairMobile){
+        wx.showToast({
+          title: '电话为空',
+          icon: 'none'
+        })
+        return;
+      }
+      wx.makePhoneCall({
+        phoneNumber: `${this.order.repairMobile}`
+      })
+    },
     async onUpOrder(){
       let res = await getOrderBySelf(this.order.id,2,UID)
       if(res.status===1){
@@ -185,7 +203,7 @@ export default class WXYOrderDetail extends wepy.page {
         success: async function(e) {
           //console.log(e)
           if(e.confirm){
-            let res = await enterPrice(self.order.id, 3,Number.parseInt(self.serviceFee*100))
+            let res = await enterPrice(self.order.id, self.order.payType===1?4:3,Number.parseInt(self.serviceFee*100))
             if(res.status===1){
               wx.showToast({
                 title: '维修完成',

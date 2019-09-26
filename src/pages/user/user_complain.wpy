@@ -32,6 +32,7 @@
       border-radius: 4rpx;
       font-size: 30rpx;
       width: 90%;
+      height: 200rpx;
     }
 
     .btn-record {
@@ -71,7 +72,7 @@
         <view class="info">
             <view style="font-size:32rpx;color:#414141;padding:20rpx;"><text style="color:#FFDE30;height:20rpx;border-right:solid 8rpx #FFDE30;margin-right:10rpx;"></text>投诉信息</view>
             <imagePicker @onImageChoose.user="onImageChoose"></imagePicker>
-            <input @input="onInput" data-type="reason" class="text-area" placeholder="请描述问题/情况" placeholder-style="color:#919191" />
+            <textarea @input="onInput" data-type="reason" class="text-area" placeholder="请描述问题/情况" placeholder-style="color:#919191"></textarea>
         </view>
         <areaSelector :show.sync="showArea" @onAreaChoose.user="onAreaChoose" @on-close.user="onClose"></areaSelector>
         <view class="btn-submit" @tap="onSave">提交</view>
@@ -81,7 +82,7 @@
 import wepy from 'wepy';
 import ImagePicker from '../../components/imagePicker'
 import AreaSelector from '../../components/areaSelector'
-import {addComplain} from '../../utils/api'
+import {addComplain,getAreaById} from '../../utils/api'
 import {UploadMulti} from '../../utils/uploader'
 
 let UID = 0;
@@ -158,19 +159,19 @@ export default class UserComplain extends wepy.page {
         });
         return;
       }
-      // if (!this.images) {
-      //   wx.showToast({
-      //     title: '图片为空',
-      //     icon: 'none'
-      //   });
-      //   return;
-      // }
+      if (!this.threeArea) {
+        wx.showToast({
+          title: '区域为空',
+          icon: 'none'
+        });
+        return;
+      }
 
       UploadMulti(
         this.images,
         async res => {
-          let repos = await addComplain(self.reason,res.join(';'),self.threeArea.id,self.oneArea.id,
-          self.twoArea.id,UID)
+          let repos = await addComplain(self.reason,res.join(';'),self.threeArea.id,self.threeArea.regionOneId,
+          self.threeArea.regionTwoId,UID)
           if (repos.status === 1) {
             wx.showToast({
               title: '投诉成功',
@@ -186,8 +187,19 @@ export default class UserComplain extends wepy.page {
     }
   };
 
-  onLoad(){
-    UID = wx.getStorageSync('login_user_info').id
+  async onLoad(options){
+    UID = wx.getStorageSync('login_user_info').id;
+    if(options.barCode && options.barCode!==0 && options.barCode !== '0'){
+      //加载投诉区域信息
+      console.log('receive barcode,',options.barCode);
+      let res = await getAreaById(options.barCode);
+      if(res.status===1){
+        //success
+        this.threeArea = res.info;
+        this.$apply();
+      }
+    }
+    
   }
 }
 </script>

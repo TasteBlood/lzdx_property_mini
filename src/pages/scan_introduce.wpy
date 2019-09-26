@@ -1,0 +1,43 @@
+<style scoped>
+</style>
+
+<template>
+    <rich-text nodes='{{html}}'></rich-text>
+</template>
+<script>
+import wepy from 'wepy';
+import {getIntroduce} from '../utils/api';
+export default class ScanIntroduce extends wepy.page {
+  config = {
+    navigationBarTitleText: '介绍',
+    navigationBarBackgroundColor: '#FFDE30',
+    navigationBarTextStyle: 'black',
+    disableScroll: false,
+    usingComponents: {}
+  };
+
+  data = {
+      html:'',
+  };
+
+  methods = {};
+
+  async onLoad(options) {
+    //this.html = this.html.replace("<img","<img style='width:100%;height:auto;' ");
+    let src = options.barCode;
+    if (src) {
+        let res = await getIntroduce(src);
+        if(res.status===1 && res.info){
+            //console.log('row data',res.info);
+            res.info = res.info.replace("<img","<img style='width:100%;height:auto;' ");
+            //console.log('res.info',res.info);
+            this.html = res.info;
+            this.$apply();
+            //console.log('html',this.html);
+        }else{
+
+        }
+    }
+  }
+}
+</script>

@@ -69,14 +69,14 @@ export const checkCode = async (code) => {
 }
 
 /**
- * @description 修改密码
+ * @description 忘记密码
  * @param {String} password 
- * @param {String} confirmPwd 
  * @param {String} msgCode 
+ * @param {String} password 
  */
-export const updatePassWd = async (password, confirmPwd, msgCode) => {
+export const updatePassWd = async (mobile, msgCode, password) => {
     try {
-        return await post('/basics/editPwd', { password, confirmPwd, msgCode }, true)
+        return await post('/base/forgetPwd', { mobile, msgCode, password }, true)
     } catch (error) {
         return error
     }
@@ -102,7 +102,7 @@ export const getReportType = async () => {
  */
 export const getLocationArea = async (latitude, longitude) => {
     try {
-        return await get('/wx/findGpsRegion', { lat: latitude, lon: longitude }, false)
+        return await get('/wx/findGpsRegion', { lat: latitude, lon: longitude }, true)
     } catch (error) {
         return error;
     }
@@ -289,13 +289,14 @@ export const getRepairType = async () => {
  * @param {String} repairName 
  * @param {String} repairReason 
  * @param {Number} repairUid 
+ * @param {Number} payType
  */
 export const addRepair = async (repairTypeId, address, isAppoint, appointTime, areaId, regionOneId, regionTwoId,
-    audio, pics, repairMobile, repairName, repairReason, repairUid) => {
+    audio, pics, repairMobile, repairName, repairReason, repairUid,payType) => {
     try {
         return await post('/wx/addOrder', {
             repairTypeId, address, isAppoint, appointTime, areaId, regionOneId, regionTwoId,
-            audio, pics, repairMobile, repairName, repairReason, repairUid
+            audio, pics, repairMobile, repairName, repairReason, repairUid, payType
         }, true)
     } catch (error) {
         return error
@@ -438,6 +439,51 @@ export const wxPay = async (orderId) => {
 export const getNotice = async (pageNum,pageSize) => {
     try {
         return await get('/base/queryNotice',{pageNum,pageSize},true)
+    } catch (error) {
+        return error
+    }
+};
+
+/**
+ * @description 查询用户是否有未支付的报修单
+ */
+export const getNoPayState = async () => {
+    try {
+        return await get('/wx/findIsOrder',{},false)
+    } catch (error) {
+        return error
+    }
+};
+
+/**
+ * @description 查询扣分列表
+ */
+export const getDeductPoints = async () => {
+    try {
+        return await get('/base/queryDeductPoints',{},false)
+    } catch (error) {
+        return error
+    }
+};
+
+/**
+ * @description 查询罚金列表
+ */
+export const getForfeit = async () => {
+    try {
+        return await get('/base/queryForfeit',{},false)
+    } catch (error) {
+        return error
+    }
+};
+
+/**
+ * 
+ * @param {Number} id 区域id 
+ */
+export const getIntroduce = async (id) => {
+    try {
+        return await get('/wx/findContent', {id}, true);
     } catch (error) {
         return error
     }

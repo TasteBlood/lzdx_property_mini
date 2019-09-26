@@ -1,0 +1,291 @@
+<style scoped>
+.container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.fast-bg {
+  width: 100%;
+  height: 250rpx;
+  position: fixed;
+  top: 0;
+  z-index: -1;
+}
+
+.title {
+  position: absolute;
+  top: 60rpx;
+  margin-left: 40rpx;
+  font-size: 36rpx;
+}
+
+.menu-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.menu-line {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top: 60rpx;
+}
+
+.menu-line:first-child {
+  margin-top: 0;
+}
+
+.menu {
+  padding: 70rpx 90rpx 90rpx 90rpx;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0px 6px 12px 0px rgba(214, 224, 235, 1);
+  border-radius: 20rpx;
+}
+
+.menu-1 {
+  padding: 70rpx 52rpx 50rpx 52rpx;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0px 6px 12px 0px rgba(214, 224, 235, 1);
+  border-radius: 20rpx;
+}
+
+.menu:active,
+.menu-1:active {
+  background-color: transparent;
+}
+
+.icon-60 {
+  width: 90rpx;
+  height: 90rpx;
+}
+</style>
+
+<template>
+    <view class="container">
+        <image src="../../../../../images/ic_fast_bg.png" class="fast-bg"></image>
+        <view class='title'>兰大智能物业快捷通道</view>
+        <view class="menu-panel" style="padding-top:{{top}}px">
+          <view class="menu-line">
+            <view class="menu" @tap="onItemClick" data-type="tousu">
+              <image class="icon-60" src='../../../../../images/ic_fast_tousu.png'></image>
+              <text style="margin-top:30rpx;font-size:36rpx;">投 诉</text>
+            </view>
+            <view class="menu" style="margin-left:60rpx;" @tap="onItemClick" data-type="baoxiu">
+              <image class="icon-60" src='../../../../../images/ic_fast_baoxiu.png'></image>
+              <text style="margin-top:30rpx;font-size:36rpx;">报 修</text>
+            </view>
+          </view>
+          <view class="menu-line">
+            <view class="menu-1" @tap="onItemClick" data-type="xunjian">
+              <image class="icon-60"  src='../../../../../images/ic_fast_xunjian.png'></image>
+              <text style="margin-top:30rpx;font-size:36rpx;">巡 检</text>
+              <text style="color:#717171;font-size:28rpx;">(巡检员入口)</text>
+            </view>
+            <view class="menu" style="margin-left:60rpx;" @tap="onItemClick" data-type="tongzhi">
+              <image class="icon-60" src='../../../../../images/ic_fast_tongzhi.png'></image>
+              <text style="margin-top:30rpx;font-size:36rpx;">通 知</text>
+            </view>
+          </view>
+        </view>
+        <view style="color:#515151;text-align:center;margin-top:100rpx" @tap="skip">跳过 >></view>
+    </view>
+</template>
+
+<script>
+import wepy from 'wepy';
+export default class ScanIndex extends wepy.page {
+  config = {
+    disableScroll: true,
+    navigationStyle: 'custom',
+    usingComponents: {}
+  };
+
+  data = {
+    barCode: 0,
+    top: 0
+  };
+
+  methods = {
+    onItemClick(e) {
+      let user = wx.getStorageSync('login_user_info');
+
+      switch (e.currentTarget.dataset.type) {
+        case 'tousu':
+          if (user) {
+            wx.navigateTo({
+              url: `./user/user_complain?barCode=${this.barCode}`
+            });
+          } else {
+            wx.showToast({
+              title: '请登录',
+              icon: 'none'
+            });
+            setTimeout(() => {
+              wx.navigateTo({
+                url: './index?fromScan=true'
+              });
+            }, 500);
+          }
+          break;
+        case 'baoxiu':
+          if (user) {
+            wx.navigateTo({
+              url: `./user/user_repair?barCode=${this.barCode}`
+            });
+          } else {
+            wx.showToast({
+              title: '请登录',
+              icon: 'none'
+            });
+            setTimeout(() => {
+              wx.navigateTo({
+                url: './index?fromScan=true'
+              });
+            }, 500);
+          }
+          break;
+        case 'xunjian':
+          if (user && user.roleId === 4) {
+            wx.navigateTo({
+              url: `./xunjianyuan/xjy_location?barCode=${this.barCode}`
+            });
+          } else if (user) {
+            wx.showToast({
+              title: '你不是巡检员',
+              icon: 'none'
+            });
+          } else {
+            wx.showToast({
+              title: '请登录',
+              icon: 'none'
+            });
+            setTimeout(() => {
+              wx.navigateTo({
+                url: './index?fromScan=true'
+              });
+            }, 500);
+          }
+          break;
+        case 'tongzhi':
+          //无权限全部看
+          wepy.navigateTo({ url: './user/notice' });
+          break;
+      }
+    },
+    skip() {
+      //判断是否登录
+      // wx.removeStorageSync('login_user_info');
+      let user = wx.getStorageSync('login_user_info');
+      if (user) {
+        if (user.roleId === 5) {
+          //巡检区域负责人
+          wx.redirectTo({
+            url: '../pages/fuzeren/home'
+          });
+        } else if (user.roleId === 4) {
+          //巡检员
+          wx.redirectTo({
+            url: '../pages/xunjianyuan/xjy_home'
+          });
+        } else if (user.roleId === 3) {
+          //维修工人
+          wx.redirectTo({
+            url: '../pages/weixiu/wxy_home'
+          });
+        } else if (user.roleId === 6) {
+          //投诉负责人
+          wx.redirectTo({
+            url: '../pages/tousu/ts_home'
+          });
+        } else {
+          //普通用户
+          wx.redirectTo({
+            url: '../pages/common_user_main'
+          });
+        }
+      } else {
+        wx.navigateTo({
+          url: './index'
+        });
+      }
+    }
+  };
+
+  onLoad(options) {
+    //适配自定义navigationBar的页面
+    let self = this;
+    wx.getSystemInfo({
+      success: res => {
+        // console.log(res);
+        self.top = res.statusBarHeight + 44;
+      }
+    });
+
+    let src = decodeURIComponent(options.q);
+    console.log('enter page receive params', src);
+    if (src) {
+      //扫码进入
+      if (
+        src.indexOf('https://wuye-service-landa.lz-cc.com/introduce') !== -1
+      ) {
+        let barCode = src.replace(/[^0-9]/gi, '');
+        wx.navigateTo({
+          url: `./scan_introduce?barCode=${barCode}`
+        })
+      } else if (src.indexOf('https://wuye-service-landa.lz-cc.com') !== -1) {
+        this.barCode = src.replace(/[^0-9]/gi, '');
+        console.log('barCode==', this.barCode);
+      } else {
+        //
+        console.log('enter this page');
+        let user = wx.getStorageSync('login_user_info');
+        if (user) {
+          //console.log('userinfo is not null');
+          if (user.roleId === 5) {
+            //巡检区域负责人
+            wx.redirectTo({
+              url: './fuzeren/home'
+            });
+          } else if (user.roleId === 4) {
+            //巡检员
+            wx.redirectTo({
+              url: './xunjianyuan/xjy_home'
+            });
+          } else if (user.roleId === 3) {
+            //维修工人
+            wx.redirectTo({
+              url: './weixiu/wxy_home'
+            });
+          } else if (user.roleId === 6) {
+            //投诉负责人
+            wx.redirectTo({
+              url: './tousu/ts_home'
+            });
+          } else {
+            wx.redirectTo({
+              url: './common_user_main'
+            });
+          }
+        } else {
+          wx.redirectTo({
+            url: './index'
+          });
+        }
+      }
+    }
+  }
+}
+</script>

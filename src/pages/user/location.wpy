@@ -1,0 +1,193 @@
+<style lang="less" scoped>
+.container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+
+  .center-img {
+    width: 60rpx;
+    height: 60rpx;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    animation: 2s Jump;
+  }
+
+  .bottom-btn {
+    width: 60%;
+    // height: 100rpx;
+    position: absolute;
+    text-align: center;
+    padding: 25rpx;
+    left: 0;
+    right: 0;
+    bottom: 20rpx;
+    margin: auto;
+    box-shadow: 2rpx 2rpx 20rpx 0 #c1c1c1;
+    color: #414141;
+    background-color: #ffde30;
+    border-radius: 48rpx;
+    margin-bottom: 40rpx;
+  }
+  .bottom-btn:active {
+    //color: #414141;
+    background-color: rgb(255, 232, 119);
+    //border-radius: 48rpx;
+  }
+
+  .top-box {
+    width: 100%;
+    height: 6%;
+    // height: 100rpx;
+    padding: 15rpx;
+    box-shadow: 2rpx 2rpx 20rpx 0 #c1c1c1;
+    color: #414141;
+    background-color: white;
+    border-radius: 2rpx;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+
+    .btn-search {
+      padding: 10rpx 20rpx 10rpx 20rpx;
+      border-radius: 4rpx;
+      text-align: center;
+      background-color: #ffde30;
+      justify-content: center;
+    }
+
+    .btn-search:active {
+      background-color: #fae57b;
+    }
+  }
+}
+</style>
+<template>
+    <view class="container">
+        <view class="top-box">
+          <input placeholder="请输入地址进行查询" @input="onInput" placeholder-style="color:#919191" style="width:77%;border-bottom:1rpx solid #e1e1e1;padding:10rpx;"/>
+          <view class="btn-search" style="margin-left:20rpx;" @tap="onSearch">查询</view>
+        </view>
+        <map id="myMap" longitude="{{log}}" latitude="{{lat}}" @regionchange="regionChange" style="position:releative;left:0;top:0;width:100%;height:94%;z-index:1000" show-location="true" scale="18">
+            <cover-view class="center-img">
+                <cover-image src="../../../../../images/location.png" style="width:60rpx;height:60rpx;"></cover-image>
+            </cover-view>
+            <cover-view class="bottom-btn" @tap="onOkClick">选择该点</cover-view>
+            <!-- <cover-view class="top-box">
+              <input placeholder="请输入地址信息查询" placeholder-style="color:#919191"/>
+              <button class="btn-search">搜索</button>
+            </cover-view> -->
+        </map>
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+//import qq map js sdk
+const QQMapSDK = require('../../utils/qqmap-wx-jssdk.min.js');
+let qqMap = null;
+
+export default class Location extends wepy.page {
+  config = {
+    navigationBarTitleText: '地图选点',
+    navigationBarBackgroundColor: '#FFDE30',
+    navigationBarTextStyle: 'black',
+    disableScroll: false,
+    usingComponents: {},
+    enablePullDownRefresh: false
+  };
+
+  data = {
+    log: 0,
+    lat: 0,
+    latitude: 0,
+    longitude: 0,
+    address: null
+  };
+
+  methods = {
+    regionChange(e) {
+      let self = this;
+      self.mapCtx = wx.createMapContext('myMap');
+      self.mapCtx.getScale({
+        //获取当前地图的缩放级别
+        success: res => {
+          //console.log('地图缩放级别',res.scale)
+          self.mapCtx.getCenterLocation({
+            //获取当前地图中心的经纬度。返回的是 gcj02 坐标系
+            success: res => {
+              //   console.log(res)
+              //   self.lat = res.latitude
+              //   self.log = res.longitude
+              // let location = {latitude:res.latitude,longitude:res.longitude};
+              // wepy.$instance.globalData.location = location;
+              self.latitude = res.latitude;
+              self.longitude = res.longitude;
+            }
+          });
+        },
+        fail: function() {
+          //console.log('获取当前地图的缩放级别失败===')
+        }
+      });
+    },
+    onOkClick() {
+      let location = { latitude: this.latitude, longitude: this.longitude };
+      wepy.$instance.globalData.location = location;
+      wx.navigateBack();
+    },
+    onInput(e) {
+      this.address = e.detail.value;
+    },
+    onSearch() {
+      // start qq geocode address
+      if (!this.address) return;
+      let self = this;
+
+      qqMap.geocoder({
+        address: self.address,
+        region: '兰州市',
+        sig: 'ijeflnLGIoNX5Ct6axVhqd2lRIOLeJh8',
+        success: function(res) {
+          if ('query ok' === res.message) {
+            //geocode success
+            self.lat = res.result.location.lat;
+            self.log = res.result.location.lng;
+
+            console.log(self.lat, self.log);
+
+            self.$apply();
+          } else {
+            wx.showToast({
+              title: '查询失败',
+              icon: 'none'
+            });
+          }
+        }
+      });
+    }
+  };
+
+  onLoad() {
+    qqMap = new QQMapSDK({
+      key: 'S2ZBZ-LGO6F-4OTJB-NQOWC-PS7XS-Q7BLZ'
+    });
+
+    let self = this;
+    wx.getLocation({
+      type: 'gcj02',
+      success: function(res) {
+        var latitude = res.latitude;
+        var longitude = res.longitude;
+        self.lat = latitude;
+        self.log = longitude;
+        self.$apply();
+      }
+    });
+  }
+}
+</script>

@@ -10,6 +10,12 @@
     z-index: -1;
   }
 
+  .back {
+    position: absolute;
+    top: 60rpx;
+    left: 40rpx;
+  }
+
   // .yello-dot {
   //   background-color: #ffda1a;
   //   width: 50rpx;
@@ -94,6 +100,24 @@
     align-items: center;
     justify-content: center;
 
+    .login-guide {
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 40rpx;
+      //width: 80%;
+      color: #515151;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-radius: 20rpx 20rpx 20rpx 20rpx;
+
+      .top-menu {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+
     .input-line {
       display: flex;
       flex-direction: row;
@@ -150,7 +174,7 @@
   }
 
   .login-btn:active {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.9);
   }
 
   .login-btn-normal {
@@ -220,6 +244,7 @@
   </view> -->
   <view class="container">
     <image src="../../../images/login_bg.png" class="bg" mode="asceptFit" />
+    <image src="../../../images/back.png" class="icon-48 back" @tap='back'></image>
     <view class="main" style="margin-top:{{top}}px;padding-top:40rpx;">
       <text style="text-align:center;font-size:36rpx;color:#414141">兰大后勤保障部智能物业信息系统</text>
       <view style="position:relative;margin-top:20rpx;">
@@ -237,7 +262,21 @@
           <block>
               <swiper-item> 
                   <view class="login-panel" style="padding:40rpx 40rpx 40rpx 40rpx;">
+                    
                     <button class="login-btn-normal" open-type="getPhoneNumber" @getphonenumber="phoneNumber" lang="zh_CN">授权登录</button>
+                    <view class="login-guide" style="margin-top:40rpx;">
+                        <view class="top-menu">
+                          <view style="display:flex;flex-direction:row;align-items:center">
+                              <image src='../../../../../images/ic_main_baoxiu.jpg' class="icon-48"></image>
+                              <text style="margin-left:10rpx">公共、住户报修</text>
+                          </view>
+                          <view style="margin-left:50rpx;display:flex;flex-direction:row;align-items:center">
+                              <image src='../../../../../images/ic_main_tousu.jpg' class="icon-48"></image>
+                              <text style="margin-left:10rpx">在线投诉</text>
+                          </view>
+                        </view>
+                        <view style="margin-top:40rpx;">授权登录即可使用</view>
+                    </view>
                   </view>
               </swiper-item>
               <swiper-item> 
@@ -282,12 +321,16 @@ export default class Index extends wepy.page {
     top: 0,
     currentPage: 0,
     account: null,
-    password: null
+    password: null,
+    fromScan: false
   };
 
   computed = {};
 
   methods = {
+    back() {
+      wepy.navigateBack({});
+    },
     async phoneNumber(e) {
       if ('getPhoneNumber:ok' === e.detail.errMsg) {
         let code = wx.getStorageSync('login_code');
@@ -295,9 +338,13 @@ export default class Index extends wepy.page {
         if (respos.status === 1) {
           //登录成功
           wx.setStorageSync('login_user_info', respos.info);
-          wx.redirectTo({
-            url: 'common_user_main'
-          });
+          if (this.fromScan) {
+            wepy.navigateBack({});
+          } else {
+            wx.redirectTo({
+              url: 'common_user_main'
+            });
+          }
         } else {
           wx.showToast({
             title: '登录失败',
@@ -338,27 +385,39 @@ export default class Index extends wepy.page {
       let res = await adminLogin(this.account, this.password);
       if (res.status === 1) {
         let user = res.info;
-        wx.setStorageSync('login_user_info', user);
-        if (user.roleId === 5) {
-          //巡检区域负责人
-          wx.redirectTo({
-            url: '../pages/fuzeren/home'
-          });
-        } else if (user.roleId === 4) {
-          //巡检员
-          wx.redirectTo({
-            url: '../pages/xunjianyuan/xjy_home'
-          });
-        } else if (user.roleId === 3) {
-          //维修工人
-          wx.redirectTo({
-            url: '../pages/weixiu/wxy_home'
-          });
-        } else if (user.roleId === 6) {
-          //投诉负责人
-          wx.redirectTo({
-            url: '../pages/tousu/ts_home'
-          })
+        if (this.fromScan) {
+          wepy.navigateBack({});
+        } else {
+          if (user.roleId === 5) {
+            //巡检区域负责人
+            wx.setStorageSync('login_user_info', user);
+            wx.redirectTo({
+              url: '../pages/fuzeren/home'
+            });
+          } else if (user.roleId === 4) {
+            //巡检员
+            wx.setStorageSync('login_user_info', user);
+            wx.redirectTo({
+              url: '../pages/xunjianyuan/xjy_home'
+            });
+          } else if (user.roleId === 3) {
+            //维修工人
+            wx.setStorageSync('login_user_info', user);
+            wx.redirectTo({
+              url: '../pages/weixiu/wxy_home'
+            });
+          } else if (user.roleId === 6) {
+            //投诉负责人
+            wx.setStorageSync('login_user_info', user);
+            wx.redirectTo({
+              url: '../pages/tousu/ts_home'
+            });
+          }else{
+            wx.showToast({
+              title: '工作人员不存在',
+              icon: 'none'
+            });
+          }
         }
       }
     },
@@ -372,15 +431,17 @@ export default class Index extends wepy.page {
 
   events = {};
 
-  async onLoad() {
-    //适配自定义navigationBar的页面
-    wx.getSystemInfo({
-      success: res => {
-        // console.log(res);
-        this.top = res.statusBarHeight + 44;
-      }
-    });
-
+  async onLoad(options) {
+    // let src = decodeURIComponent(options.q);
+    // if (src.indexOf('https://wuye-service-landa.lz-cc.com/introduce') != -1) {
+    //     let barCode = src.replace(/[^0-9]/gi, '');
+    //     //console.log('barCode==', this.barCode);
+    //     // load introduce 
+    //     wx.navigateTo({
+    //       url: `./scan_introduce?barCode=${barCode}`
+    //     })
+        
+    // }
     //获取login_code
     wx.login({
       success: function(res) {
@@ -389,6 +450,17 @@ export default class Index extends wepy.page {
         } else {
           console.log(res.errMsg);
         }
+      }
+    });
+
+    // this.fromScan = options.fromScan;
+    // let src = decodeURIComponent(options.q);
+    // console.log('index scan code enter mini,params=', src);
+    //适配自定义navigationBar的页面
+    wx.getSystemInfo({
+      success: res => {
+        // console.log(res);
+        this.top = res.statusBarHeight + 44;
       }
     });
   }
