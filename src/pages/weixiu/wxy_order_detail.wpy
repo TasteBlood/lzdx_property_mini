@@ -102,7 +102,7 @@
       <view class="btn-up" @tap="onUpOrder">抢 单</view>
     </view>
     <!-- orderState===2 待完成 住家户-->
-    <view style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <view wx:if="{{order.orderState===2}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
       <input @input="onInput" placeholder="维修费" inputmode="number" style="font-size:38rpx;border-radius:8rpx;border:1rpx solid #e1e1e1;width:300rpx;padding:20rpx;text-align:center" placeholder-style="color:#919191"/>
       <text style="color:#717171;font-size:30rpx">(无,可不填)</text>
       <view class="btn-up" style="margin-top:20rpx;margin-bottom:20rpx" @tap="onWaitPayClick">维修完成</view>
