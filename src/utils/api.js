@@ -478,12 +478,27 @@ export const getForfeit = async () => {
 };
 
 /**
- * 
+ * @description 查询区域描述
  * @param {Number} id 区域id 
  */
 export const getIntroduce = async (id) => {
     try {
         return await get('/wx/findContent', {id}, true);
+    } catch (error) {
+        return error
+    }
+};
+
+/**
+ * @description 维修工重新修改报修单区域
+ * @param {Number} orderId 
+ * @param {Number} areaId 
+ * @param {Number} regionOneId 
+ * @param {Number} regionTwoId 
+ */
+export const updateOrderArea = async (orderId,areaId,regionOneId,regionTwoId) => {
+    try {
+        return await post('/wx/editOrderRegion',{orderId,areaId,regionOneId,regionTwoId},true)
     } catch (error) {
         return error
     }

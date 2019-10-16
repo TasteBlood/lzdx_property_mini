@@ -19,7 +19,7 @@
     padding: 5rpx 10rpx 5rpx 10rpx;
     background-color: #ffde30;
     color: #515151;
-    border-radius: 12rpx;
+    border-radius: 10rpx;
   }
 
   .btn-call:active {
@@ -36,7 +36,7 @@
     padding: 20rpx;
   }
 
-  .btn-up{
+  .btn-up {
     width: 60%;
     height: 70rpx;
     background-color: #ffde30;
@@ -45,8 +45,91 @@
     line-height: 70rpx;
     border-radius: 32rpx;
   }
-  .btn-up:active{
+  .btn-up:active {
     background-color: #fde672;
+  }
+
+  .btn-change {
+    width: 200rpx;
+    height: 60rpx;
+    border-radius: 10rpx;
+    line-height: 60rpx;
+    background-color: #ffde30;
+    font-size: 30rpx;
+    text-align: center;
+    margin-left: 20rpx;
+    margin-bottom: 20rpx;
+    color: #515151;
+  }
+
+  .modal {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.4);
+    left: 0;
+    top: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    .content {
+      background-color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 10rpx;
+      border-radius: 10rpx;
+
+      .line {
+        text-align: center;
+        padding: 20rpx;
+        color: #414141;
+        font-size: 34rpx;
+        width: 300rpx;
+        border-bottom: solid 2rpx #e1e1e1;
+      }
+      .line:active {
+        background-color: #f1f1f1;
+      }
+      .line:last-child {
+        border: none;
+      }
+    }
+  }
+}
+.three-selector {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  .content {
+    width: 90%;
+    height: 80%;
+    padding: 20rpx;
+    background-color: white;
+    border-radius: 10rpx;
+
+    .list {
+      overflow-y: scroll;
+      margin-top: 20rpx;
+
+      .item {
+        padding: 20rpx;
+        border-bottom: 1rpx solid #e1e1e1;
+      }
+      .item:active {
+        background-color: #f1f1f1;
+      }
+    }
   }
 }
 </style>
@@ -60,6 +143,7 @@
     <view
       style="font-size:28rpx;margin-left:20rpx;margin-right:20rpx;margin-bottom:20rpx;color:#717171;"
     >{{order.regionOneName}}/{{order.regionTwoName}}/{{order.regionName}}</view>
+    <view class="btn-change" wx:if="{{order.orderState===2}}" @tap='changeArea'>更改区域</view>
     <view
       style="font-size:30rpx;color:#515151;padding:0 20rpx 0 20rpx;margin-bottom:20rpx;"
     >维修类型:{{order.repairType}}</view>
@@ -104,7 +188,6 @@
     <!-- orderState===2 待完成 住家户-->
     <view wx:if="{{order.orderState===2}}" style="margin-top:40rpx;display:flex;flex-direction:column;align-items:center;justify-content:center">
       <input @input="onInput" placeholder="维修费" inputmode="number" style="font-size:38rpx;border-radius:8rpx;border:1rpx solid #e1e1e1;width:300rpx;padding:20rpx;text-align:center" placeholder-style="color:#919191"/>
-      <text style="color:#717171;font-size:30rpx">(无,可不填)</text>
       <view class="btn-up" style="margin-top:20rpx;margin-bottom:20rpx" @tap="onWaitPayClick">维修完成</view>
     </view>
     <!-- orderState===2 待完成 设备/区域-->
@@ -121,14 +204,48 @@
       <image src="../../images/finish.png" style="width:100rpx;height:100rpx" mode="widthFix"></image>
       <text style="color:#414141;font-size:32rpx;margin-top:10rpx">已完成</text>
     </view>
+
+    <!-- 选择地点的弹框 -->
+    <cover-view class="modal" wx:if='{{showModal}}'>
+      <cover-view class="content">
+        <cover-view class="line" @tap='modalToMap'>地图选点</cover-view>
+        <cover-view class="line" @tap='modalToArea'>手动选择</cover-view>
+        <cover-view class="line" @tap='closeModal'>取 消</cover-view>
+      </cover-view>
+    </cover-view>
+    <!-- 手动区域选择 -->
+    <areaSelector :show.sync='showArea' @onAreaChoose.user="onAreaChoose" @on-close.user="onAreaClose"></areaSelector>
+    <!-- three area selector -->
+    <view class="three-selector" wx:if='{{showThree}}'>
+          <view class="content">
+              <view style="display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+                <text>选择三级区域</text>
+                <image @tap='onThreeClose' src='../../../../../images/ic_close.png' class="icon-48"></image>
+              </view>
+              <view class="list">
+                <view class="item" wx:for='{{threeItems}}' wx:key="{{index}}"  @tap='onThreeClick' data-item='{{item}}'>
+                  {{item.num}}{{item.title}}
+                </view>
+              </view>
+          </view>
+        </view>
   </view>
 </template>
 <script>
 import wepy from 'wepy';
 import GridImage from '../../components/gridImage';
 import BigImage from '../../components/bigImage';
-import { getOrderBySelf,getOrderDetail ,finishOrder,enterPrice} from '../../utils/api'
-let UID = 0
+import AreaSelector from '../../components/areaSelector';
+import {
+  getOrderBySelf,
+  getOrderDetail,
+  finishOrder,
+  enterPrice,
+  updateOrderArea,
+  getThirdArea,
+  getLocationArea
+} from '../../utils/api';
+let UID = 0;
 export default class WXYOrderDetail extends wepy.page {
   config = {
     navigationBarTitleText: '维修详情',
@@ -140,105 +257,205 @@ export default class WXYOrderDetail extends wepy.page {
 
   components = {
     gridImage: GridImage,
-    bigImage: BigImage
+    bigImage: BigImage,
+    areaSelector: AreaSelector
   };
 
   data = {
     showBig: false,
+    showModal: false,
     currentUrl: null,
     oid: 0,
     order: null,
-    serviceFee:0
+    serviceFee: 0,
+    showArea: false,
+    threeItems: [],
+    showThree: false
   };
 
   methods = {
+    //当三级区域点击
+    async onThreeClick(e) {
+      this.showThree = false;
+      let threeArea = e.currentTarget.dataset.item;
+      let res = await updateOrderArea(
+        this.oid,
+        threeArea.id,
+        threeArea.regionOneId,
+        threeArea.regionTwoId
+      );
+      if (res.status === 1) {
+        wx.showToast({
+          title: '修改成功',
+          icon: 'none'
+        });
+        //重新加载数据
+        let res = await getOrderDetail(this.oid);
+        if (res.status === 1) {
+          //console.log(res);
+          this.order = res.info;
+          this.order.images = this.order.pics.split(';');
+          this.$apply();
+        }
+      } else {
+        //修改区域失败
+        wx.showToast({
+          title: '修改失败',
+          icon: 'none'
+        });
+      }
+    },
+    onThreeClose() {
+      this.threeItems = [];
+      this.showThree = false;
+    },
+    async onAreaChoose(one, two, three) {
+      if (!three) {
+        wx.showToast({
+          title: '三级区域不能为空',
+          icon: 'none'
+        });
+        return;
+      }
+      this.$apply();
+      //先提交修改数据
+      let res = await updateOrderArea(
+        this.oid,
+        three.id,
+        three.regionOneId,
+        three.regionTwoId
+      );
+      if (res.status === 1) {
+        wx.showToast({
+          title: '修改成功',
+          icon: 'none'
+        });
+        //重新加载数据
+        let res = await getOrderDetail(this.oid);
+        if (res.status === 1) {
+          console.log(res);
+          this.order = res.info;
+          this.order.images = this.order.pics.split(';');
+          this.$apply();
+        }
+      } else {
+        //修改区域失败
+        wx.showToast({
+          title: '修改失败',
+          icon: 'none'
+        });
+      }
+    },
+    onAreaClose() {
+      this.showArea = false;
+    },
+    changeArea() {
+      this.showModal = true;
+    },
+    closeModal() {
+      this.showModal = false;
+    },
+    modalToMap() {
+      this.showModal = false;
+      wx.navigateTo({
+        url: '../user/location'
+      });
+    },
+    modalToArea() {
+      this.showModal = false;
+      this.showArea = true;
+    },
     onPicItemClick(e) {
       console.log(e);
       this.currentUrl = e;
       this.showBig = true;
     },
-    onInput(e){
-      this.serviceFee = Number.parseFloat(e.detail.value)
+    onInput(e) {
+      this.serviceFee = Number.parseFloat(e.detail.value);
     },
-    
+
     onClose() {
       this.showBig = false;
     },
-    onMakeCall(){
-      if(!this.order.repairMobile){
+    onMakeCall() {
+      if (!this.order.repairMobile) {
         wx.showToast({
           title: '电话为空',
           icon: 'none'
-        })
+        });
         return;
       }
       wx.makePhoneCall({
         phoneNumber: `${this.order.repairMobile}`
-      })
+      });
     },
-    async onUpOrder(){
-      let res = await getOrderBySelf(this.order.id,2,UID)
-      if(res.status===1){
+    async onUpOrder() {
+      let res = await getOrderBySelf(this.order.id, 2, UID);
+      if (res.status === 1) {
         wx.showToast({
           title: '抢单成功',
           icon: 'none'
-        })
+        });
         setTimeout(() => {
-          wx.navigateBack()
+          wx.navigateBack();
         }, 500);
       }
     },
-    async onWaitPayClick(){
-      if(!this.serviceFee){
+    async onWaitPayClick() {
+      if (!this.serviceFee) {
         wx.showToast({
-          title:'费用为空',
-          icon:'none'
-        })
-        return
+          title: '费用为空',
+          icon: 'none'
+        });
+        return;
       }
-      let self = this
+      let self = this;
       wx.showModal({
         title: '此操作不可逆',
         content: '已完成？',
         success: async function(e) {
           //console.log(e)
-          if(e.confirm){
-            let res = await enterPrice(self.order.id, self.order.payType===1?4:3,Number.parseInt(self.serviceFee*100))
-            if(res.status===1){
+          if (e.confirm) {
+            let res = await enterPrice(
+              self.order.id,
+              self.order.payType === 1 ? 4 : 3,
+              Number.parseInt(self.serviceFee * 100)
+            );
+            if (res.status === 1) {
               wx.showToast({
                 title: '维修完成',
                 icon: 'none'
-              })
+              });
             }
             setTimeout(() => {
-              wx.navigateBack()
+              wx.navigateBack();
             }, 500);
           }
         }
-      })
+      });
     },
 
-    onFinishClick(){
-      let self = this
+    onFinishClick() {
+      let self = this;
       wx.showModal({
         title: '此操作不可逆',
         content: '已完成？',
         success: async function(e) {
           //console.log(e)
-          if(e.confirm){
-            let res = await finishOrder(self.order.id, 4)
-            if(res.status===1){
+          if (e.confirm) {
+            let res = await finishOrder(self.order.id, 4);
+            if (res.status === 1) {
               wx.showToast({
                 title: '维修完成',
                 icon: 'none'
-              })
+              });
             }
             setTimeout(() => {
-              wx.navigateBack()
+              wx.navigateBack();
             }, 500);
           }
         }
-      })
+      });
     }
   };
 
@@ -250,15 +467,85 @@ export default class WXYOrderDetail extends wepy.page {
 
   async onLoad(query) {
     this.oid = query.id;
-    UID = wx.getStorageSync('login_user_info').id
+    UID = wx.getStorageSync('login_user_info').id;
     //load data
     let res = await getOrderDetail(this.oid);
     if (res.status === 1) {
-      console.log(res);
+      //console.log(res);
       this.order = res.info;
       this.order.images = this.order.pics.split(';');
       this.$apply();
     }
+  }
+  async updateOrderArea(oid, threeArea) {
+    let res = await updateOrderArea(
+      this.oid,
+      threeArea.id,
+      threeArea.regionOneId,
+      threeArea.regionTwoId
+    );
+    if (res.status === 1) {
+      wx.showToast({
+        title: '修改成功',
+        icon: 'none'
+      });
+      //重新加载数据
+      let res = await getOrderDetail(this.oid);
+      if (res.status === 1) {
+        console.log(res);
+        this.order = res.info;
+        this.order.images = this.order.pics.split(';');
+        this.$apply();
+      }
+    } else {
+      //修改区域失败
+      wx.showToast({
+        title: '修改失败',
+        icon: 'none'
+      });
+    }
+  }
+  async onShow() {
+    //这是二级区域，查询三级区域
+    let lc = wepy.$instance.globalData.location;
+    if (!lc || !lc.latitude) return;
+    //console.log(lc);
+    let res = await getLocationArea(lc.latitude, lc.longitude);
+    //console.log(res);
+    if (res.status === 1 && res.info && res.info.id) {
+      //查询成功，需要判断是二级区域还是三级区域
+      if (res.info.regionTwoId && res.info.regionTwoId >= 0) {
+        //这是三级区域,直接更新
+        this.updateOrderArea(this.oid, res.info);
+      } else {
+        //这是二级区域，查询三级区域
+        let threeRes = await getThirdArea(res.info.id);
+        // let threeRes = await getThirdArea(50)
+        if (threeRes.status === 1) {
+          //查询成功，显示弹框选择
+          this.showThree = true;
+          this.threeItems = threeRes.info;
+        } else {
+          //查询三级区域失败
+          wx.showToast({
+            title: '查询三级区域失败',
+            icon: 'none'
+          });
+        }
+      }
+      this.$apply();
+    } else {
+      //提示区域不存在
+      wx.showToast({
+        title: '未找到该区域',
+        icon: 'none'
+      });
+    }
+    wepy.$instance.globalData.location = null;
+  }
+
+  onUnload() {
+    wepy.$instance.globalData.location = null;
   }
 }
 </script>

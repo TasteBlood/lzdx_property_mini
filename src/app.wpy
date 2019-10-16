@@ -33,12 +33,6 @@ page {
   }
 }
 
-::-webkit-scrollbar {
-  width: 2rpx;
-  height: 0;
-  color: #717171;
-}
-
 .single-line {
   display: -webkit-box;
   overflow: hidden;
@@ -63,8 +57,13 @@ export default class extends wepy.app {
   config = {
     pages: [
       'pages/scan_index',
+      'pages/xunjianyuan/xjy_location',
+      'pages/user/user_repair',
+      
       'pages/scan_introduce',
       'pages/index',
+      'pages/weixiu/wxy_order_detail',
+      
       'pages/common_user_main',
       'pages/user/user_complain',
       'pages/test',
@@ -78,14 +77,14 @@ export default class extends wepy.app {
       'pages/user/user_jilu',
       'pages/user/cashier',
       'pages/user/user_order_detail',
-      'pages/user/user_repair',
+      
       'pages/user/public_area_equip_repair',
       'pages/xunjianyuan/xjy_jilu',
       'pages/xunjianyuan/xjy_home',
       'pages/fuzeren/home',
       'pages/fuzeren/appeal',
-      'pages/weixiu/wxy_order_detail',
-      'pages/xunjianyuan/xjy_location',
+      
+      
       'pages/xunjianyuan/xjy_detail',
       'pages/forget_pwd',
       'pages/fuzeren/complaintDetail',

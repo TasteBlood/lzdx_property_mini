@@ -39,7 +39,7 @@ const GET = async (url, params, loading) => {
                             wx.removeStorageSync('login_user_info')
                             setTimeout(() => {
                                 wx.redirectTo({
-                                    url: '../../../../pages/index'
+                                    url: '../../../../../pages/index'
                                 })
                             }, 500);
                         } else {
@@ -116,7 +116,7 @@ const POST = async (url, params, loading) => {
                             wx.removeStorageSync('login_user_info')
                             setTimeout(() => {
                                 wx.redirectTo({
-                                    url: '../../../../pages/index'
+                                    url: '../../../../../pages/index'
                                 })
                             }, 500);
                         } else {

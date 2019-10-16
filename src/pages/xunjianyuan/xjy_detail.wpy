@@ -57,8 +57,8 @@
                 <text>{{insReport.regionName}}</text>
             </view>
             <view class="location-info" style="margin-top:10rpx;">
-                <text style="color:#717171;width:150rpx;">区域编号:</text>
-                <text>{{insReport.regionId}}</text>
+                <text style="color:#717171;width:150rpx;">二维码编号:</text>
+                <text>{{insReport.num}}</text>
             </view>
             <view class="location-info" style="margin-top:10rpx;">
                 <text style="color:#717171;width:120rpx;">负责人:</text>

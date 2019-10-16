@@ -66,6 +66,40 @@
     }
   }
 }
+.three-selector {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  .content {
+    width: 90%;
+    height: 80%;
+    padding: 20rpx;
+    background-color: white;
+    border-radius: 10rpx;
+
+    .list {
+      overflow-y: scroll;
+      margin-top: 20rpx;
+
+      .item {
+        padding: 20rpx;
+        border-bottom: 1rpx solid #e1e1e1;
+      }
+      .item:active {
+        background-color: #f1f1f1;
+      }
+    }
+  }
+}
 </style>
 <template>
     <view class="container">
@@ -76,7 +110,7 @@
                 <text wx:elif="{{queryArea}}">{{queryArea.title}}</text>
             </view>
             <view class="location-info" style="margin-top:10rpx;">
-                <text style="color:#717171;width:150rpx;">区块编号:</text>
+                <text style="color:#717171;width:150rpx;">二维码编号:</text>
                 <text wx:if="{{currentArea}}">{{currentArea.num}}</text>
                 <text wx:elif="{{queryArea}}">{{queryArea.num}}</text>
             </view>
@@ -126,6 +160,20 @@
         </view>
 
         <areaSelector :show.sync="showAreaPicker" @on-close.user="onAreaClose" @onAreaChoose.user="onAreaChoose"></areaSelector>
+        
+        <view class="three-selector" wx:if='{{showThree}}'>
+          <view class="content">
+              <view style="display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+                <text>选择三级区域</text>
+                <image @tap='onThreeClose' src='../../../../../images/ic_close.png' class="icon-48"></image>
+              </view>
+              <view class="list">
+                <view class="item" wx:for='{{threeItems}}' wx:key="{{index}}"  @tap='onThreeClick' data-item='{{item}}'>
+                  {{item.num}}{{item.title}}
+                </view>
+              </view>
+          </view>
+        </view>
 
         <button class="btn-submit" @tap="onSave">提交</button>
         
@@ -141,7 +189,8 @@ import {
   addInsReport,
   getAreaById,
   getDeductPoints,
-  getForfeit
+  getForfeit,
+  getThirdArea
 } from '../../utils/api';
 import ImagePicker from '../../components/imagePicker';
 import AreaSelector from '../../components/areaSelector';
@@ -173,12 +222,15 @@ export default class XJYLocation extends wepy.page {
     money: 0,
     score: 0,
     advise: null, //处罚建议
-    koufen:[],
-    fajin:[],
-    faJinIndex:null,
-    kouFenIndex:null,
+    koufen: [],
+    fajin: [],
+    faJinIndex: null,
+    kouFenIndex: null,
 
-    queryArea: null
+    queryArea: null,
+
+    threeItems: [],
+    showThree: false
   };
 
   components = {
@@ -187,6 +239,21 @@ export default class XJYLocation extends wepy.page {
   };
 
   methods = {
+    //当三级区域点击
+    async onThreeClick(e) {
+      this.currentArea = e.currentTarget.dataset.item;
+      this.$apply();
+      this.showThree = false;
+      let res = await getAreaLeader(this.currentArea.id);
+      if (res.status === 1) {
+        this.currentPerson = res.info.chaUser;
+      }
+      this.$apply();
+    },
+    onThreeClose() {
+      this.threeItems = [];
+      this.showThree = false;
+    },
     onAreaClose() {
       this.showAreaPicker = false;
     },
@@ -243,10 +310,10 @@ export default class XJYLocation extends wepy.page {
           this.advise = e.detail.value;
           break;
         case 'money':
-          this.money = Number.parseInt(e.detail.value)
+          this.money = Number.parseInt(e.detail.value);
           break;
         case 'score':
-          this.score = Number.parseInt(e.detail.value)
+          this.score = Number.parseInt(e.detail.value);
           break;
       }
     },
@@ -275,7 +342,7 @@ export default class XJYLocation extends wepy.page {
         return;
       }
 
-      if (!this.currentArea && !this.queryArea) {
+      if (!this.currentArea) {
         wx.showToast({
           title: '区域为空',
           icon: 'none'
@@ -308,23 +375,17 @@ export default class XJYLocation extends wepy.page {
             return e.indexOf('null') <= 0;
           });
           let user = wx.getStorageSync('login_user_info');
-          if(self.kouFenIndex)
-            self.score = self.koufen[self.kouFenIndex].name;
-          if(self.faJinIndex)  
-            self.money = self.fajin[self.faJinIndex].name;
+          if (self.kouFenIndex) self.score = self.koufen[self.kouFenIndex].name;
+          if (self.faJinIndex) self.money = self.fajin[self.faJinIndex].name;
           let repos = await addInsReport(
             user.id,
             self.title,
             self.question,
             result.join(';'),
             `扣分:${self.score},罚款:${self.money}`,
-            self.currentArea ? self.currentArea.id : self.queryArea.id,
-            self.currentArea
-              ? self.currentArea.regionOneId
-              : self.queryArea.regionOneId,
-            self.currentArea
-              ? self.currentArea.regionTwoId
-              : self.queryArea.regionTwoId,
+            self.currentArea.id,
+            self.currentArea.regionOneId,
+            self.currentArea.regionTwoId,
             self.checkType[self.checkIndex].id
           );
           if (repos.status === 1) {
@@ -347,15 +408,15 @@ export default class XJYLocation extends wepy.page {
   async onLoad(query) {
     //查询罚金、扣分
     let res = await getDeductPoints();
-    if(res.status===1){
+    if (res.status === 1) {
       this.koufen = res.info;
     }
 
     res = await getForfeit();
-    if(res.status===1){
+    if (res.status === 1) {
       this.fajin = res.info;
-      this.fajin.map(e=>{
-        e.name = e.name/100;
+      this.fajin.map(e => {
+        e.name = e.name / 100;
       });
     }
 
@@ -368,7 +429,7 @@ export default class XJYLocation extends wepy.page {
           icon: 'none'
         });
       } else {
-        this.queryArea = res.info;
+        this.currentArea = res.info;
         this.$apply();
         res = await getAreaLeader(res.info.id);
         if (res.status === 1) {
@@ -396,20 +457,56 @@ export default class XJYLocation extends wepy.page {
   }
 
   async onShow() {
+    let threeRes = await getThirdArea(50);
+    if (threeRes.status === 1) {
+      //查询成功，显示弹框选择
+      this.showThree = true;
+      this.threeItems = threeRes.info;
+    } else {
+      //查询三级区域失败
+      wx.showToast({
+        title: '查询三级区域失败',
+        icon: 'none'
+      });
+    }
     const lc = wepy.$instance.globalData.location;
     if (!lc || !lc.latitude) return;
     //console.log(lc);
     let res = await getLocationArea(lc.latitude, lc.longitude);
     console.log(res);
-    if (res.status === 1) {
+    if (res.status === 1 && res.info && res.info.id) {
       //查询成功
-      this.currentArea = res.info;
-      this.$apply();
-      res = await getAreaLeader(res.info.id);
-      if (res.status === 1) {
-        this.currentPerson = res.info.chaUser;
+      if (res.info.regionTwoId && res.info.regionTwoId >= 0) {
+        //三级区域
+        this.currentArea = res.info;
+        this.$apply();
+        res = await getAreaLeader(res.info.id);
+        if (res.status === 1) {
+          this.currentPerson = res.info.chaUser;
+        }
+        this.$apply();
+      } else {
+        //二级区域，还需要查询三级区域进行查询
+        let threeRes = await getThirdArea(res.info.id)
+        // let threeRes = await getThirdArea(50);
+        if (threeRes.status === 1) {
+          //查询成功，显示弹框选择
+          this.showThree = true;
+          this.threeItems = threeRes.info;
+        } else {
+          //查询三级区域失败
+          wx.showToast({
+            title: '查询三级区域失败',
+            icon: 'none'
+          });
+        }
       }
-      this.$apply();
+    } else {
+      //提示区域不存在
+      wx.showToast({
+        title: '未找到该区域',
+        icon: 'none'
+      });
     }
   }
 }
