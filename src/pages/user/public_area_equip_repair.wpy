@@ -68,14 +68,7 @@
             <text style="width:72%;margin-left:10rpx;">{{threeArea?threeArea.title:'选择区域'}}</text>
             <image src="../../../../../images/next.png" class="icon-48"></image>
         </view>
-
         
-        <view class="area-info" wx:if="{{repairType===2}}">
-            <text style="color:#515151">设备信息:</text>
-            <text style="width:78%;margin-left:10rpx;">{{equip.title}}</text>
-        </view>
-
-
         <view class="area-info" style="margin-top:10rpx;">
             <text style="color:#515151">报修类型:</text>
             <picker range="{{repairTypes}}" @change="onTypeChange" range-key="repairName" style="width:72%;margin-left:10rpx;">

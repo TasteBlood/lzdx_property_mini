@@ -102,7 +102,7 @@
                 <cover-view style="padding:10rpx;">三级区域</cover-view>
                 <cover-view class="list">
                     <cover-view wx:for="{{threeItems}}" @tap="onThirdItemClick" data-id="{{item.id}}" data-index="{{index}}" class="list-item-3 {{index===thirdIndex?'active':''}}"  wx:key="{{index}}">
-                        <cover-view>{{item.num}}:{{item.title}}</cover-view>
+                        <cover-view>{{item.title}}</cover-view>
                     </cover-view>
                 </cover-view>
             </cover-view>

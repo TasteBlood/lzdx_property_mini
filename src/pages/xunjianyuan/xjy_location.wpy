@@ -89,6 +89,7 @@
     .list {
       overflow-y: scroll;
       margin-top: 20rpx;
+      height: 90%;
 
       .item {
         padding: 20rpx;
@@ -106,13 +107,13 @@
         <view style="padding:20rpx;background-color: white;">
             <view class="location-info">
                 <text style="color:#717171;width:150rpx;">当前区域:</text>
-                <text wx:if="{{currentArea}}">{{currentArea.title}}</text>
-                <text wx:elif="{{queryArea}}">{{queryArea.title}}</text>
+                <text wx:if="{{currentArea}}">{{currentArea.regionTwoName+'/'+currentArea.title}}</text>
+                <text wx:elif="{{queryArea}}">{{queryArea.regionTwoName+'/'+queryArea.title}}</text>
             </view>
             <view class="location-info" style="margin-top:10rpx;">
-                <text style="color:#717171;width:150rpx;">二维码编号:</text>
-                <text wx:if="{{currentArea}}">{{currentArea.num}}</text>
-                <text wx:elif="{{queryArea}}">{{queryArea.num}}</text>
+                <text style="color:#717171;">二维码编号:</text>
+                <text wx:if="{{currentArea}}">{{currentArea.id}}</text>
+                <text wx:elif="{{queryArea}}">{{queryArea.id}}</text>
             </view>
             <view class="location-info" style="margin-top:10rpx;">
                 <text style="color:#717171;width:120rpx;">负责人:</text>
@@ -161,19 +162,33 @@
 
         <areaSelector :show.sync="showAreaPicker" @on-close.user="onAreaClose" @onAreaChoose.user="onAreaChoose"></areaSelector>
         
-        <view class="three-selector" wx:if='{{showThree}}'>
-          <view class="content">
-              <view style="display:flex;flex-direction:row;justify-content:space-between;align-items:center">
-                <text>选择三级区域</text>
-                <image @tap='onThreeClose' src='../../../../../images/ic_close.png' class="icon-48"></image>
-              </view>
-              <view class="list">
-                <view class="item" wx:for='{{threeItems}}' wx:key="{{index}}"  @tap='onThreeClick' data-item='{{item}}'>
-                  {{item.num}}{{item.title}}
-                </view>
-              </view>
-          </view>
-        </view>
+        <cover-view class="three-selector" wx:if='{{showThree}}'>
+          <cover-view class="content">
+              <cover-view style="display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+                <cover-view>选择三级区域</cover-view>
+                <cover-image @tap='onThreeClose' src='../../../../../images/ic_close.png' class="icon-48"></cover-image>
+              </cover-view>
+              <cover-view class="list">
+                <cover-view class="item" wx:for='{{threeItems}}' wx:key="{{index}}"  @tap='onThreeClick' data-item='{{item}}'>
+                  {{item.title}}
+                </cover-view>
+              </cover-view>
+          </cover-view>
+        </cover-view>
+
+        <cover-view class="three-selector" wx:if='{{showTwo}}'>
+          <cover-view class="content">
+              <cover-view style="display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+                <cover-view>选择二级区域</cover-view>
+                <cover-image @tap='onTwoClose' src='../../../../../images/ic_close.png' class="icon-48"></cover-image>
+              </cover-view>
+              <cover-view class="list">
+                <cover-view class="item" wx:for='{{twoItems}}' wx:key="{{index}}"  @tap='onTwoClick' data-item='{{item}}'>
+                  {{item.name}}
+                </cover-view>
+              </cover-view>
+          </cover-view>
+        </cover-view>
 
         <button class="btn-submit" @tap="onSave">提交</button>
         
@@ -230,7 +245,9 @@ export default class XJYLocation extends wepy.page {
     queryArea: null,
 
     threeItems: [],
-    showThree: false
+    showThree: false,
+    twoItems:[],
+    showTwo:false,
   };
 
   components = {
@@ -239,6 +256,24 @@ export default class XJYLocation extends wepy.page {
   };
 
   methods = {
+    //二级区域点击
+    async onTwoClick(e){
+      //二级区域，还需要查询三级区域进行查询
+        let threeRes = await getThirdArea(e.currentTarget.dataset.item.id)
+        // let threeRes = await getThirdArea(50);
+        if (threeRes.status === 1) {
+          //查询成功，显示弹框选择
+          this.showThree = true;
+          this.threeItems = threeRes.info;
+        }
+        this.showTwo = false;
+        this.twoItems = [];
+        this.$apply();
+    },
+    onTwoClose() {
+      this.twoItems = [];
+      this.showTwo = false;
+    },
     //当三级区域点击
     async onThreeClick(e) {
       this.currentArea = e.currentTarget.dataset.item;
@@ -457,50 +492,15 @@ export default class XJYLocation extends wepy.page {
   }
 
   async onShow() {
-    let threeRes = await getThirdArea(50);
-    if (threeRes.status === 1) {
-      //查询成功，显示弹框选择
-      this.showThree = true;
-      this.threeItems = threeRes.info;
-    } else {
-      //查询三级区域失败
-      wx.showToast({
-        title: '查询三级区域失败',
-        icon: 'none'
-      });
-    }
     const lc = wepy.$instance.globalData.location;
     if (!lc || !lc.latitude) return;
     //console.log(lc);
     let res = await getLocationArea(lc.latitude, lc.longitude);
     console.log(res);
-    if (res.status === 1 && res.info && res.info.id) {
-      //查询成功
-      if (res.info.regionTwoId && res.info.regionTwoId >= 0) {
-        //三级区域
-        this.currentArea = res.info;
-        this.$apply();
-        res = await getAreaLeader(res.info.id);
-        if (res.status === 1) {
-          this.currentPerson = res.info.chaUser;
-        }
-        this.$apply();
-      } else {
-        //二级区域，还需要查询三级区域进行查询
-        let threeRes = await getThirdArea(res.info.id)
-        // let threeRes = await getThirdArea(50);
-        if (threeRes.status === 1) {
-          //查询成功，显示弹框选择
-          this.showThree = true;
-          this.threeItems = threeRes.info;
-        } else {
-          //查询三级区域失败
-          wx.showToast({
-            title: '查询三级区域失败',
-            icon: 'none'
-          });
-        }
-      }
+    if (res.status === 1 && res.info) {
+      this.twoItems = res.info;
+      this.showTwo = true;
+      this.$apply();
     } else {
       //提示区域不存在
       wx.showToast({
@@ -508,6 +508,7 @@ export default class XJYLocation extends wepy.page {
         icon: 'none'
       });
     }
+    wepy.$instance.globalData.location = null;
   }
 }
 </script>

@@ -5,6 +5,7 @@
   height: 100%;
   left: 0;
   top: 0;
+  box-sizing: border-box;
   background-color: #f5f7f9;
 
   .yello-dot {
@@ -92,6 +93,11 @@
     display: none;
   }
 }
+
+.top-pic{
+  width: 94%;
+  height: 240rpx;
+}
 </style>
 <template>
   <view class="container">
@@ -103,7 +109,11 @@
         <text wx:if="{{loginUser.id}}" style="color:#515151" bindtap="logout">退出></text>
     </view>
     
-    <view class="menu-panel">
+    <view style="text-align:center;margin-top:20rpx;">
+      <image src='../../../../../images/ic_main_top.png' class="top-pic" mode='asceptFill'></image>
+    </view>
+
+    <view class="menu-panel" style="margin-top:10rpx;">
       <view class="menu" @tap="onItemClick" data-type="user">
         <image src="../../../images/ic_repair_now.png" mode="widthFix" class="icon-64"/>
         <text style="font-size:36rpx;font-weight:400;">我要报修</text>

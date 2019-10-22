@@ -166,7 +166,7 @@
                               <text class="no single-line">{{item.createTime}}</text>
                               <text class="desc single-line">{{item.regionOneName}}/{{item.regionTwoName}}/{{item.regionName}}</text>
                             </view>
-                            <view class="btn-info" style="width:100rpx;" @tap="onUpClick" data-item="{{item}}">申辩</view>
+                            <view class="btn-info" style="width:100rpx;" catchtap="onUpClick" data-item="{{item}}">申辩</view>
                         </view>
                     </view>
                     <view wx:else style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;">

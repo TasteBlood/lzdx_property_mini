@@ -147,7 +147,7 @@
                             <image wx:else src="../../../../../images/img_error.png" class="pic-error" lazy-load mode="widthFix"/>
                             <view class="content">
                               <text class="title single-line">{{item.title}}</text>
-                              <text class="no single-line">{{item.num}}</text>
+                              <text class="no single-line">{{item.regionTwoName+"/"+item.regionName}}</text>
                               <text class="desc single-line">{{item.content}}</text>
                               <view class="people">
                                 <text>巡检员:</text>
@@ -171,14 +171,14 @@
                             <image wx:else src="../../../../../images/img_error.png" class="pic-error" lazy-load mode="widthFix"/>
                             <view class="content">
                               <text class="title single-line">{{item.title}}</text>
-                              <text class="no single-line">{{item.num}}</text>
+                              <text class="no single-line">{{item.regionTwoName+"/"+item.regionName}}</text>
                               <text class="desc single-line">{{item.content}}</text>
                               <view class="people">
                                 <text>巡检员:</text>
                                 <text>{{item.adminName}}</text>
                               </view>
                             </view>
-                            <view class="btn-info" style="width:100rpx;" @tap="onUpClick" data-item="{{item}}">申诉</view>
+                            <view class="btn-info" style="width:100rpx;" catchtap="onUpClick" data-item="{{item}}">申诉</view>
                         </view>
                     </view>
                     <view wx:else style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;">

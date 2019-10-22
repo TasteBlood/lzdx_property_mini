@@ -60,35 +60,36 @@
     background-color: #fae26b;
   }
 }
-.three-selector{
+.three-selector {
   width: 100%;
   height: 100%;
   position: fixed;
   z-index: 10;
-  top:0;
-  left:0;
+  top: 0;
+  left: 0;
   background-color: rgba(0, 0, 0, 0.4);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 
-  .content{
+  .content {
     width: 90%;
     height: 80%;
     padding: 20rpx;
     background-color: white;
     border-radius: 10rpx;
 
-    .list{
+    .list {
       overflow-y: scroll;
       margin-top: 20rpx;
+      height: 90%;
 
-      .item{
+      .item {
         padding: 20rpx;
         border-bottom: 1rpx solid #e1e1e1;
       }
-      .item:active{
+      .item:active {
         background-color: #f1f1f1;
       }
     }
@@ -99,17 +100,18 @@
     <view class="container">
         <view class="area-info" @tap="onOpenArea">
             <text style="color:#515151">报修区域:</text>
-            <text style="width:72%;margin-left:10rpx;">{{threeArea?threeArea.title:'选择区域'}}</text>
+            <text style="width:72%;margin-left:10rpx;">{{threeArea?(threeArea.regionTwoName+"/"+threeArea.title):'选择区域'}}</text>
             <image src="../../../../../images/next.png" class="icon-48"></image>
         </view>
 
         <view class="area-info" style="margin-top:10rpx;">
             <text style="color:#515151">报修类型:</text>
-            <picker range="{{repairType}}" @change="onTypeChange" range-key="repairName" style="width:72%;margin-left:10rpx;">
+            <!-- <picker range="{{repairType}}" @change="onTypeChange" range-key="repairName" style="width:72%;margin-left:10rpx;">
               <text wx:if="{{repairIndex}}">{{repairType[repairIndex].repairName}}</text>
               <text wx:else>选择维修类型</text>
-            </picker>
-            <image src="../../../../../images/next.png" class="icon-48"></image>
+            </picker> -->
+            <text style="width:72%;margin-left:10rpx;">{{threeArea?threeArea.typeName:'选择区域自动填入'}}</text>
+            <!-- <image src="../../../../../images/next.png" class="icon-48"></image> -->
         </view>
 
         <view class="info">
@@ -152,19 +154,33 @@
 
         <areaSelector :show.sync="showArea" @onAreaChoose.user="onAreaChoose" @on-close.user="onClose"></areaSelector>
         <view class="btn-submit" @tap="onSave">报修</view>
-        <view class="three-selector" wx:if='{{showThree}}'>
-          <view class="content">
-              <view style="display:flex;flex-direction:row;justify-content:space-between;align-items:center">
-                <text>选择三级区域</text>
-                <image @tap='onThreeClose' src='../../../../../images/ic_close.png' class="icon-48"></image>
-              </view>
-              <view class="list">
-                <view class="item" wx:for='{{threeItems}}' wx:key="{{index}}"  @tap='onThreeClick' data-item='{{item}}'>
-                  {{item.num}}{{item.title}}
-                </view>
-              </view>
-          </view>
-        </view>
+        <cover-view class="three-selector" wx:if='{{showThree}}'>
+          <cover-view class="content">
+              <cover-view style="display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+                <cover-view>选择三级区域</cover-view>
+                <cover-image @tap='onThreeClose' src='../../../../../images/ic_close.png' class="icon-48"></cover-image>
+              </cover-view>
+              <cover-view class="list">
+                <cover-view class="item" wx:for='{{threeItems}}' wx:key="{{index}}"  @tap='onThreeClick' data-item='{{item}}'>
+                  {{item.title}}
+                </cover-view>
+              </cover-view>
+          </cover-view>
+        </cover-view>
+
+        <cover-view class="three-selector" wx:if='{{showTwo}}'>
+          <cover-view class="content">
+              <cover-view style="display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+                <cover-view>选择二级区域</cover-view>
+                <cover-image @tap='onTwoClose' src='../../../../../images/ic_close.png' class="icon-48"></cover-image>
+              </cover-view>
+              <cover-view class="list">
+                <cover-view class="item" wx:for='{{twoItems}}' wx:key="{{index}}"  @tap='onTwoClick' data-item='{{item}}'>
+                  {{item.name}}
+                </cover-view>
+              </cover-view>
+          </cover-view>
+        </cover-view>
     </view>
 </template>
 <script>
@@ -210,9 +226,30 @@ export default class UserRepair extends wepy.page {
 
     threeItems:[],
     showThree:false,
+    twoItems:[],
+    showTwo:false,
   };
 
   methods = {
+    //二级区域点击
+    //当三级区域点击
+    async onTwoClick(e){
+      //加载三级区域
+      let threeRes = await getThirdArea(e.currentTarget.dataset.item.id)
+      // let threeRes = await getThirdArea(50)
+      if(threeRes.status===1){
+          //查询成功，显示弹框选择
+          this.showThree = true;
+          this.threeItems = threeRes.info;
+      }
+      this.showTwo = false;
+      this.twoItems = [];
+      this.$apply();
+    },
+    onTwoClose(){
+      this.twoItems = [];
+      this.showTwo = false;
+    },
     //当三级区域点击
     onThreeClick(e){
       this.threeArea = e.currentTarget.dataset.item;
@@ -286,13 +323,6 @@ export default class UserRepair extends wepy.page {
     },
     onSave() {
       let self = this;
-      if(!this.repairIndex){
-        wx.showToast({
-          title: '类型为空',
-          icon: 'none'
-        });
-        return;
-      }
       if (!this.reason) {
         wx.showToast({
           title: '报修内容为空',
@@ -344,12 +374,17 @@ export default class UserRepair extends wepy.page {
       let data = {name:this.username,mobile:this.mobile,address:this.address};
 
       wx.setStorageSync("user", data)
-
+      let payTypeId = 0;
+      self.repairType.map(e=>{
+        if(e.repairId === self.threeArea.type){
+          payTypeId = e.payId;
+        }
+      });
       UploadMulti(
         this.images,
         async res => {
           let repos = await addRepair(
-            self.repairType[Number.parseInt(self.repairIndex)].repairId,
+            self.threeArea.type,
             self.address,
             self.appointment?1:0,
             self.appointment?self.selectDate+' '+self.selectTime:'',
@@ -362,7 +397,7 @@ export default class UserRepair extends wepy.page {
             self.username,
             self.reason,
             UID,
-            self.repairType[Number.parseInt(self.repairIndex)].payId
+            payTypeId
           );
           if (repos.status === 1) {
             wx.showToast({
@@ -419,27 +454,10 @@ export default class UserRepair extends wepy.page {
     //console.log(lc);
     let res = await getLocationArea(lc.latitude, lc.longitude);
     console.log(res);
-    if (res.status === 1 && res.info && res.info.id) {
-      //查询成功，需要判断是二级区域还是三级区域
-      if(res.info.regionTwoId && res.info.regionTwoId>=0){
-        //这是三级区域
-        this.threeArea = res.info;
-      }else{
-        //这是二级区域，查询三级区域
-        let threeRes = await getThirdArea(res.info.id)
-        // let threeRes = await getThirdArea(50)
-        if(threeRes.status===1){
-          //查询成功，显示弹框选择
-          this.showThree = true;
-          this.threeItems = threeRes.info;
-        }else{
-          //查询三级区域失败
-          wx.showToast({
-            title: '查询三级区域失败',
-            icon: 'none'
-          })
-        }
-      }
+    if (res.status === 1 && res.info) {
+      //查询成功，现在全部是二级区域，先展示二级区域，然后手动选择三级区域
+      this.twoItems = res.info;
+      this.showTwo = true;
       this.$apply();
     }else{
       //提示区域不存在

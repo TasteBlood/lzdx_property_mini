@@ -58,7 +58,7 @@
                 <text>{{tsReport.regionOneName}}/{{tsReport.regionTwoName}}/{{tsReport.regionName}}</text>
             </view>
             <view class="location-info" style="margin-top:10rpx;">
-                <text style="color:#717171;width:150rpx;">二维码编号:</text>
+                <text style="color:#717171;">二维码编号:</text>
                 <text>{{tsReport.regionId}}</text>
             </view>
             <view class="location-info" style="margin-top:10rpx;">

@@ -12,7 +12,7 @@
 
   .back {
     position: absolute;
-    top: 60rpx;
+    top: 25rpx;
     left: 40rpx;
   }
 
@@ -244,7 +244,7 @@
   </view> -->
   <view class="container">
     <image src="../../../images/login_bg.png" class="bg" mode="asceptFit" />
-    <image src="../../../images/back.png" class="icon-48 back" @tap='back'></image>
+    <image src="../../../images/back.png" class="icon-48 back" @tap='back' style="margin-top:{{height}}px"></image>
     <view class="main" style="margin-top:{{top}}px;padding-top:40rpx;">
       <text style="text-align:center;font-size:36rpx;color:#414141">兰大后勤保障部智能物业信息系统</text>
       <view style="position:relative;margin-top:20rpx;">
@@ -322,7 +322,8 @@ export default class Index extends wepy.page {
     currentPage: 0,
     account: null,
     password: null,
-    fromScan: false
+    fromScan: false,
+    height:0
   };
 
   computed = {};
@@ -460,7 +461,8 @@ export default class Index extends wepy.page {
     wx.getSystemInfo({
       success: res => {
         // console.log(res);
-        this.top = res.statusBarHeight + 44;
+        this.top = res.statusBarHeight+44;
+        this.height = res.statusBarHeight;
       }
     });
   }
