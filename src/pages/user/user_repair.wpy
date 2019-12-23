@@ -449,9 +449,11 @@ export default class UserRepair extends wepy.page {
   }
 
   async onShow() {
+    console.log('on show...')
     let lc = wepy.$instance.globalData.location;
+    console.log(lc,'123456');
     if (!lc || !lc.latitude) return;
-    //console.log(lc);
+    console.log(lc);
     let res = await getLocationArea(lc.latitude, lc.longitude);
     console.log(res);
     if (res.status === 1 && res.info) {

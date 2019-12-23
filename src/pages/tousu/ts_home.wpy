@@ -121,24 +121,20 @@
 <template>
     <view class="container">
         <view class="top-box">
-          <view class="header-info">
-          <text>欢迎您，{{name}}</text>
-          <text @tap="logout">退出></text>
-        </view>
         <view class="tabs">
             <view class="tab {{currentIndex===0?'active':''}}" bindtap="onTabClick" data-index="0">
-                投诉记录
+                待申辩
             </view>
             <view class="tab {{currentIndex===1?'active':''}}" bindtap="onTabClick" data-index="1">
-                待申辩
+                已申辩
             </view>
         </view>
         </view>
         <swiper style="margin-top:2px;height:{{height}}px" current="{{currentIndex}}" bindchange="onSwiperChange">
             <swiper-item>
                 <scroll-view @scrolltolower="onBottom" scroll-y scroll-with-animation style="height:{{height}}px">
-                    <view class="list" wx:if="{{items1.length>0}}">
-                        <view  class="list-item" wx:for="{{items1}}" wx:key="{{index}}" @tap="onInfoClick" data-item="{{item}}">
+                    <view class="list" wx:if="{{items1.length>0}}" >
+                        <view class="list-item" wx:for="{{items1}}" wx:key="{{index}}" @tap="onInfoClick" data-item="{{item}}">
                             <image wx:if="{{item.images.length>0}}" src="{{item.images[0]}}" class="pic" lazy-load mode="aspectFill"/>
                             <image wx:else src="../../../../../images/img_error.png" class="pic-error" lazy-load mode="widthFix"/>
                             <view class="content">
@@ -146,7 +142,7 @@
                               <text class="no single-line">{{item.createTime}}</text>
                               <text class="desc single-line">{{item.regionOneName}}/{{item.regionTwoName}}/{{item.regionName}}</text>
                             </view>
-                            <image src="../../../../../images/next.png" class="icon-48"></image>
+                            <view class="btn-info" style="width:100rpx;" catchtap="onUpClick" data-item="{{item}}">申辩</view>
                         </view>
                     </view>
                     <view wx:else style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;">
@@ -157,8 +153,8 @@
             </swiper-item>
             <swiper-item>
                 <scroll-view @scrolltolower="onBottom" scroll-y scroll-with-animation style="height:{{height}}px">
-                    <view class="list" wx:if="{{items2.length>0}}" >
-                        <view class="list-item" wx:for="{{items2}}" wx:key="{{index}}" @tap="onInfoClick" data-item="{{item}}">
+                    <view class="list" wx:if="{{items2.length>0}}">
+                        <view  class="list-item" wx:for="{{items2}}" wx:key="{{index}}" @tap="onInfoClick" data-item="{{item}}">
                             <image wx:if="{{item.images.length>0}}" src="{{item.images[0]}}" class="pic" lazy-load mode="aspectFill"/>
                             <image wx:else src="../../../../../images/img_error.png" class="pic-error" lazy-load mode="widthFix"/>
                             <view class="content">
@@ -166,7 +162,7 @@
                               <text class="no single-line">{{item.createTime}}</text>
                               <text class="desc single-line">{{item.regionOneName}}/{{item.regionTwoName}}/{{item.regionName}}</text>
                             </view>
-                            <view class="btn-info" style="width:100rpx;" catchtap="onUpClick" data-item="{{item}}">申辩</view>
+                            <image src="../../../../../images/next.png" class="icon-48"></image>
                         </view>
                     </view>
                     <view wx:else style="text-align: center;padding: 40rpx;display: flex;flex-direction: column;align-items:center;justify-content: center;">
@@ -185,7 +181,7 @@ import { getComplain } from '../../utils/api';
 let ADMIN_ID = 0;
 export default class TsHome extends wepy.page {
   config = {
-    navigationBarTitleText: '投诉系统',
+    navigationBarTitleText: '投诉处理',
     navigationBarBackgroundColor: '#FFDE30',
     navigationBarTextStyle: 'black',
     disableScroll: true,
@@ -218,10 +214,10 @@ export default class TsHome extends wepy.page {
       //console.log(e)
       this.currentIndex = Number.parseInt(e.currentTarget.dataset.index);
       if (this.currentIndex === 0) {
-        //加载全部的
+        //加载待申辩的
         if (this.items1.length <= 0) this.loadData(0, 1, 10);
       } else if (this.currentIndex === 1) {
-        //加载待申诉的
+        //加载已申辩的
         if (this.items2.length <= 0) this.loadData(1, 1, 10);
       }
     },
@@ -229,7 +225,7 @@ export default class TsHome extends wepy.page {
     onSwiperChange(e) {
       this.currentIndex = e.detail.current;
       if (this.currentIndex === 0) {
-        //加载全部的
+        //加载已申辩
         if (this.items1.length <= 0) this.loadData(0, 1, 10);
       } else if (this.currentIndex === 1) {
         //加载待申辩的
@@ -279,9 +275,9 @@ export default class TsHome extends wepy.page {
   async loadData(type, pageNum, pageSize) {
     if (type === 0) {
       if (this.load1) return;
-      //其他
+      //待申辩
       this.load1 = true;
-      let res = await getComplain(pageNum,pageSize,'',ADMIN_ID);
+      let res = await getComplain(pageNum,pageSize,1,ADMIN_ID);
       wx.stopPullDownRefresh()
       this.load1 = false;
       if (res.status === 1) {
@@ -305,8 +301,8 @@ export default class TsHome extends wepy.page {
     } else if (type === 1) {
       if (this.load2) return;
       this.load2 = true;
-      //待申辩
-      let res = await getComplain(pageNum,pageSize,1,ADMIN_ID);
+      //已申辩
+      let res = await getComplain(pageNum,pageSize,2,ADMIN_ID);
       this.load2 = false;
       wx.stopPullDownRefresh()
       if (res.status === 1) {

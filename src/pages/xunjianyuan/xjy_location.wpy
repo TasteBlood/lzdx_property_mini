@@ -111,7 +111,7 @@
                 <text wx:elif="{{queryArea}}">{{queryArea.regionTwoName+'/'+queryArea.title}}</text>
             </view>
             <view class="location-info" style="margin-top:10rpx;">
-                <text style="color:#717171;">二维码编号:</text>
+                <text style="color:#717171;">区域编号:</text>
                 <text wx:if="{{currentArea}}">{{currentArea.id}}</text>
                 <text wx:elif="{{queryArea}}">{{queryArea.id}}</text>
             </view>

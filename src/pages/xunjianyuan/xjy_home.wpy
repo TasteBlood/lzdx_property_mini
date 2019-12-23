@@ -101,7 +101,7 @@ import wepy from 'wepy';
 export default class XJYHome extends wepy.page {
   config = {
     navigationBarTitleText: '巡检系统',
-    navigationBarBackgroundColor: 'white',
+    navigationBarBackgroundColor: '#fff',
     navigationBarTextStyle: 'black',
     disableScroll: true,
     usingComponents: {}

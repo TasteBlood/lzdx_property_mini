@@ -88,7 +88,7 @@ import {UploadMulti} from '../../utils/uploader'
 let UID = 0;
 export default class UserComplain extends wepy.page {
   config = {
-    navigationBarTitleText: '投诉',
+    navigationBarTitleText: '投诉建议',
     navigationBarBackgroundColor: '#FFDE30',
     navigationBarTextStyle: 'black',
     disableScroll: false,

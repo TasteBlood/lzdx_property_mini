@@ -136,7 +136,7 @@
       </view>
       <view class="menu" @tap="onItemClick" data-type="complain">
         <image src="../../../images/quanju_tousu.png" mode="widthFix" class="icon-64"/>
-        <text style="font-size:36rpx;font-weight:400;">我要投诉</text>
+        <text style="font-size:36rpx;font-weight:400;">投诉建议</text>
       </view>
       
     </view>

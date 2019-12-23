@@ -125,10 +125,6 @@
 <template>
     <view class="container">
         <view class="top-box">
-          <view class="header-info">
-          <text>欢迎您，{{name}}</text>
-          <text @tap="logout">退出></text>
-        </view>
         <view class="tabs">
             <view class="tab {{currentIndex===0?'active':''}}" bindtap="onTabClick" data-index="0">
                 巡检记录
@@ -197,12 +193,12 @@ import { getInsReport } from '../../utils/api';
 let ADMIN_ID = 0;
 export default class Home extends wepy.page {
   config = {
-    navigationBarTitleText: '巡检系统',
+    navigationBarTitleText: '巡检处理',
     navigationBarBackgroundColor: '#FFDE30',
     navigationBarTextStyle: 'black',
     disableScroll: false,
-    enablePullDownRefresh:true,
-    usingComponents: {},
+    enablePullDownRefresh: true,
+    usingComponents: {}
   };
 
   data = {
@@ -274,13 +270,13 @@ export default class Home extends wepy.page {
         url: `./appeal?insReportId=${e.currentTarget.dataset.item.id}`
       });
     },
-    onBottom(){
-      if(this.currentIndex===0){
-        if(this.noMore1)return
-        this.loadData(this.currentIndex,this.page1,this.size)
-      }else if(this.currentIndex===1){
-        if(this.noMore2)return
-        this.loadData(this.currentIndex,this.page2,this.size)
+    onBottom() {
+      if (this.currentIndex === 0) {
+        if (this.noMore1) return;
+        this.loadData(this.currentIndex, this.page1, this.size);
+      } else if (this.currentIndex === 1) {
+        if (this.noMore2) return;
+        this.loadData(this.currentIndex, this.page2, this.size);
       }
     }
   };
@@ -294,7 +290,7 @@ export default class Home extends wepy.page {
       //其他
       this.load1 = true;
       let res = await getInsReport('', ADMIN_ID, pageNum, pageSize, true);
-      wx.stopPullDownRefresh()
+      wx.stopPullDownRefresh();
       this.load1 = false;
       if (res.status === 1) {
         res.info.records.forEach(e => {
@@ -303,7 +299,7 @@ export default class Home extends wepy.page {
         if (pageNum === 1) {
           this.items1.splice(0, this.items1.length);
           this.items1 = res.info.records;
-          this.noMore1 = false
+          this.noMore1 = false;
         } else {
           this.items1.append(res.info.records);
         }
@@ -320,7 +316,7 @@ export default class Home extends wepy.page {
       //待申诉
       let res = await getInsReport(1, ADMIN_ID, pageNum, pageSize, true);
       this.load2 = false;
-      wx.stopPullDownRefresh()
+      wx.stopPullDownRefresh();
       if (res.status === 1) {
         res.info.records.forEach(e => {
           e.images = e.fileUrl.split(';');
@@ -328,7 +324,7 @@ export default class Home extends wepy.page {
         if (pageNum === 1) {
           this.items2.splice(0, this.items2.length);
           this.items2 = res.info.records;
-          this.noMore2 = false
+          this.noMore2 = false;
         } else {
           this.items2.append(res.info.records);
         }
@@ -367,20 +363,20 @@ export default class Home extends wepy.page {
     this.initScrollViewHeight();
     let user = wx.getStorageSync('login_user_info');
     this.name = user.name;
-    ADMIN_ID = user.id
+    ADMIN_ID = user.id;
   }
 
   onShow() {
     this.loadData(this.currentIndex, this.page1, this.size);
   }
 
-  onPullDownRefresh(){
-    if(this.currentIndex===0){
-      this.page1 = 1
-      this.loadData(0,this.page1,this.size)
-    }else if(this.currentIndex===1){
-      this.page2 = 1
-      this.loadData(1,this.page2,this.size)
+  onPullDownRefresh() {
+    if (this.currentIndex === 0) {
+      this.page1 = 1;
+      this.loadData(0, this.page1, this.size);
+    } else if (this.currentIndex === 1) {
+      this.page2 = 1;
+      this.loadData(1, this.page2, this.size);
     }
   }
 }

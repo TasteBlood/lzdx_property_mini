@@ -257,7 +257,7 @@ export default class ScanIndex extends wepy.page {
           if (user.roleId === 5) {
             //巡检区域负责人
             wx.redirectTo({
-              url: './fuzeren/home'
+              url: './tousu/ts_xj_index'
             });
           } else if (user.roleId === 4) {
             //巡检员
@@ -272,7 +272,7 @@ export default class ScanIndex extends wepy.page {
           } else if (user.roleId === 6) {
             //投诉负责人
             wx.redirectTo({
-              url: './tousu/ts_home'
+              url: './tousu/ts_xj_index'
             });
           } else {
             wx.redirectTo({

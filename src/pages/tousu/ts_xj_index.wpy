@@ -1,0 +1,118 @@
+<template>
+    <view class="container">
+        <view class="top-menu">
+            <text>欢迎您，{{user.name}}</text>
+            <view class="back" @tap='onBack'>
+                <text>退出</text>
+                <image src='../../images/next.png' class="icon-48" mode='aspectFill'></image>
+            </view>
+        </view>
+        <view class="menu">
+            <view class="menu-item" @tap='onItemClick' data-type='xjrk'>
+                <image src='../../images/ic_fast_xunjian.png' class="icon-64" mode='aspectFill'></image>
+                <text style="margin-top:30rpx;font-size:34rpx">巡检处理</text>
+            </view>
+            <view class="menu-item" @tap='onItemClick' data-type='tsrk'>
+                <image src='../../images/ic_fast_tousu.png' class="icon-64" mode='aspectFill'></image>
+                <text style="margin-top:30rpx;font-size:34rpx">投诉处理</text>
+            </view>
+        </view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy';
+export default class WXXJIndex extends wepy.page {
+  config = {
+    navigationBarTitleText: '巡检投诉处理平台',
+    navigationBarBackgroundColor: '#FFDE30',
+    navigationBarTextStyle: 'black',
+    disableScroll: true,
+    usingComponents: {}
+  };
+  data = {
+    user: null
+  };
+  methods = {
+    onBack() {
+      wx.showModal({
+        title: '提示',
+        content: '确定退出吗？',
+        success: e => {
+          if (e.confirm) {
+            wx.removeStorageSync('login_user_info');
+            wx.removeStorageSync('login_code');
+            wx.redirectTo({
+              url: '../index'
+            });
+          }
+        }
+      });
+    },
+    onItemClick(e) {
+      if (e.currentTarget.dataset.type === 'xjrk') {
+        wx.navigateTo({
+          url: '../../pages/fuzeren/home'
+        });
+      } else if (e.currentTarget.dataset.type === 'tsrk') {
+        wx.navigateTo({
+          url: '../../pages/tousu/ts_home'
+        });
+      }
+    }
+  };
+  onLoad() {
+    this.user = wx.getStorageSync('login_user_info');
+  }
+}
+</script>
+<style lang="less" scoped>
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+
+  .top-menu {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    top: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20rpx;
+
+    .back {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      color: #515151;
+    }
+  }
+
+  .menu {
+    .menu-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 80rpx 60rpx 80rpx 60rpx;
+      background-color: #ffde30;
+      border-radius: 32rpx;
+      box-shadow: 2rpx 2rpx 10rpx 6rpx #e1e1e1;
+    }
+    .menu-item:active {
+      box-shadow: 2rpx 2rpx 14rpx 2rpx #d1d1d1;
+    }
+    .menu-item:last-child {
+      margin-top: 80rpx;
+    }
+  }
+}
+</style>

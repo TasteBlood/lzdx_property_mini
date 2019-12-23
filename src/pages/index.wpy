@@ -323,7 +323,7 @@ export default class Index extends wepy.page {
     account: null,
     password: null,
     fromScan: false,
-    height:0
+    height: 0
   };
 
   computed = {};
@@ -333,32 +333,49 @@ export default class Index extends wepy.page {
       wepy.navigateBack({});
     },
     async phoneNumber(e) {
-      if ('getPhoneNumber:ok' === e.detail.errMsg) {
-        let code = wx.getStorageSync('login_code');
-        let respos = await wxLogin(code, e.detail.iv, e.detail.encryptedData);
-        if (respos.status === 1) {
-          //登录成功
-          wx.setStorageSync('login_user_info', respos.info);
-          if (this.fromScan) {
-            wepy.navigateBack({});
+      //获取login_code
+      let self = this;
+      wx.login({
+        success: async function(res) {
+          if (res.code) {
+            if ('getPhoneNumber:ok' === e.detail.errMsg) {
+              let respos = await wxLogin(
+                res.code,
+                e.detail.iv,
+                e.detail.encryptedData
+              );
+              if (respos.status === 1) {
+                //登录成功
+                wx.setStorageSync('login_user_info', respos.info);
+                if (self.fromScan) {
+                  wepy.navigateBack({});
+                } else {
+                  wx.redirectTo({
+                    url: 'common_user_main'
+                  });
+                }
+              } else {
+                wx.showToast({
+                  title: '登录失败',
+                  icon: 'none'
+                });
+              }
+              //console.log(respos);
+            } else {
+              wx.showToast({
+                icon: 'none',
+                title: '你已拒绝授权'
+              });
+            }
           } else {
-            wx.redirectTo({
-              url: 'common_user_main'
+            console.log(res.errMsg);
+            wx.showToast({
+              title: '微信登录失败',
+              icon: 'none'
             });
           }
-        } else {
-          wx.showToast({
-            title: '登录失败',
-            icon: 'none'
-          });
         }
-        //console.log(respos);
-      } else {
-        wx.showToast({
-          icon: 'none',
-          title: '你已拒绝授权'
-        });
-      }
+      });
     },
     ontabClick(e) {
       this.currentPage = Number.parseInt(e.currentTarget.dataset.index);
@@ -393,7 +410,7 @@ export default class Index extends wepy.page {
             //巡检区域负责人
             wx.setStorageSync('login_user_info', user);
             wx.redirectTo({
-              url: '../pages/fuzeren/home'
+              url: '../pages/tousu/ts_xj_index'
             });
           } else if (user.roleId === 4) {
             //巡检员
@@ -411,9 +428,9 @@ export default class Index extends wepy.page {
             //投诉负责人
             wx.setStorageSync('login_user_info', user);
             wx.redirectTo({
-              url: '../pages/tousu/ts_home'
+              url: '../pages/tousu/ts_xj_index'
             });
-          }else{
+          } else {
             wx.showToast({
               title: '工作人员不存在',
               icon: 'none'
@@ -437,23 +454,12 @@ export default class Index extends wepy.page {
     // if (src.indexOf('https://wuye-service-landa.lz-cc.com/introduce') != -1) {
     //     let barCode = src.replace(/[^0-9]/gi, '');
     //     //console.log('barCode==', this.barCode);
-    //     // load introduce 
+    //     // load introduce
     //     wx.navigateTo({
     //       url: `./scan_introduce?barCode=${barCode}`
     //     })
-        
-    // }
-    //获取login_code
-    wx.login({
-      success: function(res) {
-        if (res.code) {
-          wx.setStorageSync('login_code', res.code);
-        } else {
-          console.log(res.errMsg);
-        }
-      }
-    });
 
+    // }
     // this.fromScan = options.fromScan;
     // let src = decodeURIComponent(options.q);
     // console.log('index scan code enter mini,params=', src);
@@ -461,10 +467,12 @@ export default class Index extends wepy.page {
     wx.getSystemInfo({
       success: res => {
         // console.log(res);
-        this.top = res.statusBarHeight+44;
+        this.top = res.statusBarHeight + 44;
         this.height = res.statusBarHeight;
       }
     });
   }
 }
+
+
 </script>
